@@ -151,6 +151,7 @@ const PoolDetailPage = () => {
           <Tabs defaultValue="overview">
             <TabsList className="w-full justify-start">
               <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="team">Team</TabsTrigger>
               <TabsTrigger value="terms">Terms</TabsTrigger>
               <TabsTrigger value="updates">Updates</TabsTrigger>
               <TabsTrigger value="documents">Documents</TabsTrigger>
@@ -167,39 +168,7 @@ const PoolDetailPage = () => {
                 </CardContent>
               </Card>
 
-              {/* Founders Section */}
-              {deal.founders && deal.founders.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Founding Team</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      {deal.founders.map((founder, i) => (
-                        <div key={i} className="flex items-center gap-3 rounded-lg border p-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">
-                            {founder.name.split(' ').map(n => n[0]).join('')}
-                          </div>
-                          <div className="flex-1">
-                            <p className="font-medium">{founder.name}</p>
-                            <p className="text-sm text-muted-foreground">{founder.role}</p>
-                          </div>
-                          {founder.linkedin_url && (
-                            <a 
-                              href={founder.linkedin_url} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="text-muted-foreground hover:text-primary"
-                            >
-                              <Linkedin className="h-5 w-5" />
-                            </a>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+              {/* Team moved to dedicated tab */}
               
               <Card>
                 <CardHeader>
@@ -238,6 +207,95 @@ const PoolDetailPage = () => {
                   </ul>
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            <TabsContent value="team" className="space-y-4">
+              {/* Company Links */}
+              {(deal.website_url || deal.founders?.some(f => f.linkedin_url)) && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Company Links</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {deal.website_url && (
+                      <Button variant="outline" className="w-full justify-start gap-2" asChild>
+                        <a href={deal.website_url} target="_blank" rel="noopener noreferrer">
+                          <ExternalLink className="h-4 w-4" />
+                          Website
+                          <ExternalLink className="ml-auto h-4 w-4" />
+                        </a>
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Founders */}
+              {deal.founders && deal.founders.length > 0 ? (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Team</CardTitle>
+                    <CardDescription>Founders & key roles</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {deal.founders.map((founder, i) => (
+                        <div key={i} className="rounded-lg border p-3">
+                          <div className="flex items-start gap-3">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">
+                              {founder.name
+                                .split(' ')
+                                .filter(Boolean)
+                                .map(n => n[0])
+                                .join('')}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center justify-between gap-2">
+                                <p className="truncate font-medium">{founder.name}</p>
+                                {founder.linkedin_url && (
+                                  <a
+                                    href={founder.linkedin_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-muted-foreground hover:text-primary"
+                                    aria-label={`Open ${founder.name} on LinkedIn`}
+                                  >
+                                    <Linkedin className="h-5 w-5" />
+                                  </a>
+                                )}
+                              </div>
+                              <p className="text-sm text-muted-foreground">{founder.role}</p>
+                            </div>
+                          </div>
+
+                          {(founder.education || founder.background) && (
+                            <div className="mt-3 space-y-1 text-sm">
+                              {founder.education && (
+                                <p>
+                                  <span className="text-muted-foreground">Education: </span>
+                                  <span className="text-foreground">{founder.education}</span>
+                                </p>
+                              )}
+                              {founder.background && (
+                                <p>
+                                  <span className="text-muted-foreground">Background: </span>
+                                  <span className="text-foreground">{founder.background}</span>
+                                </p>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card>
+                  <CardContent className="p-6 text-sm text-muted-foreground">
+                    Team information not available.
+                  </CardContent>
+                </Card>
+              )}
             </TabsContent>
             
             <TabsContent value="terms" className="space-y-4">

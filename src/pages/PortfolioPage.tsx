@@ -206,13 +206,22 @@ const PortfolioPage = () => {
                           <ExternalLink className="mr-1 h-4 w-4" /> View
                         </Link>
                       </Button>
+
                       {canList && (
-                        <Button 
-                          size="sm" 
+                        <Button
+                          size="sm"
                           variant="secondary"
                           onClick={() => openListingDialog(position.id, position.current_estimated_value_eur)}
                         >
                           <Store className="mr-1 h-4 w-4" /> List
+                        </Button>
+                      )}
+
+                      {canList && (
+                        <Button variant="outline" size="sm" asChild>
+                          <Link to={`/marketplace?tab=sell&positionId=${position.id}`}>
+                            <Store className="mr-1 h-4 w-4" /> Sell
+                          </Link>
                         </Button>
                       )}
                     </div>

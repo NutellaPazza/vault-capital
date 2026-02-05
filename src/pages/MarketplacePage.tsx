@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,12 +15,15 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const MarketplacePage = () => {
-  const { 
-    getListingsWithDetails, 
-    getPositionsWithPools, 
-    currentUser, 
-    buyListing, 
-    createListing, 
+  const location = useLocation();
+  const offersSectionRef = useRef<HTMLDivElement | null>(null);
+
+  const {
+    getListingsWithDetails,
+    getPositionsWithPools,
+    currentUser,
+    buyListing,
+    createListing,
     cancelListing,
     pools,
     listings,
@@ -31,10 +34,17 @@ const MarketplacePage = () => {
     updateListing,
     allUsers,
   } = useAppStore();
-  
+
   const allListings = getListingsWithDetails();
   const positions = getPositionsWithPools();
-  
+
+  const query = new URLSearchParams(location.search);
+  const queryTab = query.get('tab') === 'sell' ? 'sell' : 'buy';
+  const queryPositionId = query.get('positionId') || '';
+  const querySection = query.get('section') || '';
+
+  const [tab, setTab] = useState<'buy' | 'sell'>(queryTab);
+
   const [search, setSearch] = useState('');
   const [selectedListing, setSelectedListing] = useState<string | null>(null);
   const [isBuying, setIsBuying] = useState(false);
@@ -221,6 +231,35 @@ const MarketplacePage = () => {
     return (hash % 50) + 5;
   };
 
+  // Auto-switch tab when linked with ?tab=sell
+  useEffect(() => {
+    setTab(queryTab);
+  }, [queryTab]);
+
+  // Deep-link: open Sell dialog for a specific position
+  useEffect(() => {
+    if (queryTab !== 'sell') return;
+    if (!queryPositionId) return;
+
+    const pos = listablePositions.find(p => p.id === queryPositionId);
+    if (!pos) return;
+
+    setIsSellDialogOpen(true);
+    handlePositionSelect(pos.id);
+  }, [queryTab, queryPositionId, listablePositions]);
+
+  // Deep-link: scroll to offers section
+  useEffect(() => {
+    if (queryTab !== 'sell') return;
+    if (querySection !== 'offers') return;
+    if (!offersSectionRef.current) return;
+
+    // let the tab render first
+    requestAnimationFrame(() => {
+      offersSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }, [queryTab, querySection, myReceivedOffers.length]);
+
   return (
     <div className="container py-6">
       <div className="mb-6">
@@ -228,17 +267,7 @@ const MarketplacePage = () => {
         <p className="text-muted-foreground">Buy and sell startup positions</p>
       </div>
 
-      <Tabs defaultValue="buy" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2 max-w-sm">
-          <TabsTrigger value="buy" className="gap-2">
-            <ShoppingCart className="h-4 w-4" />
-            Buy
-          </TabsTrigger>
-          <TabsTrigger value="sell" className="gap-2">
-            <Store className="h-4 w-4" />
-            Sell
-          </TabsTrigger>
-        </TabsList>
+      <Tabs value={tab} onValueChange={(v) => setTab(v as 'buy' | 'sell')} className="space-y-6">
 
         {/* BUY TAB */}
         <TabsContent value="buy" className="space-y-6">
@@ -375,8 +404,9 @@ const MarketplacePage = () => {
             </Card>
           )}
 
-          {/* Pending Offers Section */}
-          {myReceivedOffers.length > 0 && (
+           {/* Pending Offers Section */}
+           <div ref={offersSectionRef} />
+           {myReceivedOffers.length > 0 && (
             <div className="space-y-4">
               <h2 className="text-lg font-semibold flex items-center gap-2">
                 <DollarSign className="h-5 w-5" />

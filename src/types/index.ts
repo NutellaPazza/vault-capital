@@ -31,6 +31,8 @@ export interface DealFounder {
   name: string;
   role: string;
   linkedin_url?: string;
+  education?: string;
+  background?: string;
 }
 
 export interface CompanyUpdate {
@@ -45,6 +47,7 @@ export interface StartupDeal {
   industry: string;
   sector_type: 'B2B' | 'B2C' | 'B2B2C';
   country: string;
+  website_url?: string;
   stage: DealStage;
   short_description: string;
   long_description: string;
