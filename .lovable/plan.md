@@ -1,268 +1,193 @@
 
+# UI Improvements & Feature Enhancements
 
-# Startup Application Feature - Implementation Plan
-
-Add a dedicated funnel for startups to apply for investment pools on VaultCapital. This includes a CTA section on the landing page and a complete multi-step application form.
-
----
-
-## Overview
-
-**What we're building:**
-1. A CTA section at the bottom of the Landing Page encouraging startups to apply
-2. A new `/apply` page with a multi-step form (no login required)
-3. Application management in the Admin panel
-
-**Key behaviors:**
-- No authentication required to submit an application
-- Form progress saved locally (draft mode)
-- Applications visible and manageable only in Admin mode
-- All data stored in localStorage
+This plan covers multiple improvements across the application based on your feedback.
 
 ---
 
-## Technical Implementation
+## Summary of Changes
 
-### 1. New Types
-
-Add to `src/types/index.ts`:
-
-```text
-StartupApplication type with:
-- id (application_id like "VC-APP-000123")
-- startup_name, website, country, industry, stage, founding_year, team_size
-- founders[] (name, role, linkedin_url)
-- pitch_summary, problem, solution, traction
-- deck_url, demo_url, data_room_url
-- fundraising_target_eur, offering_equity_percent, valuation_pre_money_eur
-- use_of_funds[]
-- contact_email (required)
-- status: draft | submitted | under_review | shortlisted | rejected | accepted
-- internal_notes[] (for admin)
-- rejection_reason (when rejected)
-- created_at, updated_at
-
-ApplicationStatus type
-InternalNote type (author, text, created_at)
-```
-
-### 2. Store Updates
-
-Extend `src/store/appStore.ts`:
-
-```text
-New state:
-- applications: StartupApplication[]
-
-New actions:
-- saveApplicationDraft(data) - saves partial application to localStorage
-- submitApplication(data) - generates ID, sets status to "submitted"
-- updateApplicationStatus(appId, status, reason?) - admin action
-- addApplicationNote(appId, note) - admin internal notes
-- getApplicationById(appId)
-- getApplications() - for admin list view
-```
-
-### 3. Landing Page CTA Section
-
-Add a new section before the footer in `src/pages/LandingPage.tsx`:
-
-```text
-Section design:
-- Card/banner style with light orange accent border
-- Icon: Rocket or Building2
-- Title: "Are you a startup opening a round?"
-- Subtitle: "Apply to collaborate with VaultCapital. If we're interested, we'll contact you to evaluate a potential offer and a Pool on our platform."
-
-Three bullet points:
-- "Submit your pitch and metrics"
-- "Internal team evaluation"
-- "If selected, we propose an offer and open a public Pool"
-
-CTA Button: "Apply Now" -> routes to /apply
-```
-
-### 4. Application Page (`/apply`)
-
-Create `src/pages/ApplyPage.tsx`:
-
-**Layout:**
-- Standalone page (uses AppLayout but accessible without login)
-- Header with VaultCapital branding
-- Progress stepper showing current step (1-6)
-- "Save Draft" button in header
-- Resume draft banner if draft exists
-
-**Multi-step Form (6 steps):**
-
-**Step 1: Basics**
-- startup_name* (required)
-- website
-- country* (dropdown)
-- industry* (dropdown: Fintech, B2B SaaS, AI/ML, E-commerce, HealthTech, CleanTech, Other)
-- stage* (pre-seed/seed/series-a)
-- founding_year
-- team_size (number)
-- contact_email* (required)
-
-**Step 2: Team**
-- Dynamic founder list (add/remove)
-- Per founder: name*, role*, linkedin_url
-
-**Step 3: Pitch**
-- pitch_summary* (textarea, max 500 chars)
-- problem* (what problem are you solving)
-- solution* (your solution)
-- traction (optional - current metrics, users, revenue)
-
-**Step 4: Materials**
-- deck_url* (required - pitch deck link)
-- demo_url (optional - live product/demo)
-- data_room_url (optional)
-
-**Step 5: Fundraising**
-- fundraising_target_eur* (how much raising)
-- offering_equity_percent* (equity offered)
-- valuation_pre_money_eur (optional)
-- use_of_funds (dynamic list - e.g., "40% Product", "30% Marketing")
-
-**Step 6: Review & Submit**
-- Read-only summary of all entered data
-- Confirmation checkbox: "I confirm this information is accurate"*
-- "Submit Application" button
-
-**Validation:**
-- Required fields: startup_name, country, industry, stage, contact_email, pitch_summary, problem, solution, deck_url, fundraising_target_eur, offering_equity_percent
-- Email format validation
-- URL format validation for links
-- At least one founder with name and role
-
-**Submit behavior:**
-- Generate application_id: `VC-APP-XXXXXX` (6 random digits)
-- Set status: "submitted"
-- Set created_at
-- Save to store/localStorage
-- Show success modal with:
-  - "Application Received"
-  - Application ID
-  - "Next steps: Our team will review within 5-7 business days"
-  - "Back to Home" button
-
-**Draft handling:**
-- "Save Draft" button saves current form state
-- On page load, check for existing draft
-- If draft exists, show banner: "You have a saved draft. Resume?" with Resume/Start Fresh options
-
-### 5. Admin Panel Updates
-
-Extend `src/pages/AdminPage.tsx`:
-
-**Add "Applications" tab** using Tabs component:
-- Tab 1: Pool Management (existing)
-- Tab 2: Applications (new)
-- Tab 3: Reset Demo (existing)
-
-**Applications Tab:**
-
-**List View:**
-- Filter by status (All, Submitted, Under Review, Shortlisted, Rejected, Accepted)
-- Search by startup_name
-- Table columns: Application ID, Startup Name, Industry, Stage, Target Amount, Status, Date
-- Click row to open detail view
-
-**Detail View (dialog/sheet):**
-- All submitted data in organized sections:
-  - Basics (name, website, country, industry, stage, team size)
-  - Team (founders list with LinkedIn links)
-  - Pitch (summary, problem, solution, traction)
-  - Materials (links as clickable)
-  - Fundraising (target, equity, valuation, use of funds)
-  - Contact: contact_email prominently displayed
-
-- Status change buttons:
-  - "Mark Under Review"
-  - "Shortlist"
-  - "Accept"
-  - "Reject" (opens dialog for rejection reason)
-
-- Internal Notes section:
-  - Display existing notes (author, date, text)
-  - Textarea + "Add Note" button
-
-### 6. Routing
-
-Update `src/App.tsx`:
-- Add route: `/apply` -> `ApplyPage`
-- This page should be accessible without authentication
-
-### 7. Component Files
-
-New files to create:
-- `src/pages/ApplyPage.tsx` - main application page
-- `src/components/apply/ApplicationForm.tsx` - form wrapper with step logic
-- `src/components/apply/FormStepBasics.tsx` - step 1
-- `src/components/apply/FormStepTeam.tsx` - step 2
-- `src/components/apply/FormStepPitch.tsx` - step 3
-- `src/components/apply/FormStepMaterials.tsx` - step 4
-- `src/components/apply/FormStepFundraising.tsx` - step 5
-- `src/components/apply/FormStepReview.tsx` - step 6
-- `src/components/apply/ApplicationSuccess.tsx` - success modal content
-- `src/components/apply/index.ts` - exports
-- `src/components/admin/ApplicationsList.tsx` - admin list view
-- `src/components/admin/ApplicationDetail.tsx` - admin detail view
+1. **Explore Page** - Consolidate filters into a single button with expanded filter panel (country, industry type/sector)
+2. **Portfolio Page** - Add latest valuation date and news section for each position
+3. **Marketplace Page** - Add "Sell" button with position selection flow and show equity % in listings
+4. **Pool Detail Page** - Add founder info with LinkedIn links, accelerator info, and enhanced Terms section with dividend policy
+5. **Landing Page** - Create Terms & Conditions page with detailed legal/fee information
 
 ---
 
-## Files to Modify
+## 1. Explore Page - Unified Filter Panel
 
-1. **src/types/index.ts** - Add new types
-2. **src/store/appStore.ts** - Add applications state and actions
-3. **src/pages/LandingPage.tsx** - Add startup CTA section
-4. **src/pages/AdminPage.tsx** - Add Applications tab
-5. **src/App.tsx** - Add /apply route
+**Current**: Two separate dropdown buttons for Stage and Status filters
 
-## Files to Create
+**Changes**:
+- Replace individual filter dropdowns with a single "Filters" button
+- When clicked, opens a Sheet (side panel) or expandable section showing all filters:
+  - **Status**: Live, Upcoming, Active, Filled
+  - **Stage**: Pre-seed, Seed, Series A
+  - **Country**: Italy, Germany, Netherlands, France, Spain, UK (common European countries)
+  - **Sector/Type**: B2B, B2C, Fintech, AI/ML, E-commerce, SaaS, HealthTech, CleanTech
+- Show active filter count on the button
+- "Clear All" and "Apply" buttons in the panel
+- Search bar remains separate
 
-1. **src/pages/ApplyPage.tsx** - Main application page
-2. **src/components/apply/** - All form step components (8 files)
-3. **src/components/admin/** - Application management components (2 files)
-
----
-
-## User Flow
-
-```text
-Landing Page
-     |
-     v
-[Apply Now Button]
-     |
-     v
-/apply (Step 1: Basics)
-     |
-     v
-Step 2: Team -> Step 3: Pitch -> Step 4: Materials -> Step 5: Fundraising
-     |
-     v
-Step 6: Review & Submit
-     |
-     v
-Success Modal (ID: VC-APP-000123)
-     |
-     v
-Back to Home
-```
-
-**Admin Flow:**
-```text
-/admin -> Applications Tab -> View List -> Click Application -> Detail View -> Change Status / Add Notes
-```
+**Files to modify**: `src/pages/ExplorePage.tsx`
 
 ---
 
-## Demo Data
+## 2. Portfolio Page - Valuation News
 
-Add 1-2 sample applications in different statuses for testing:
-- One "submitted" application from a mock startup
-- One "under_review" application with internal notes
+**Current**: Shows invested amount, ownership %, and estimated value
 
+**Changes**:
+- Add under each position card a "Latest Update" section showing:
+  - Last valuation date (e.g., "Valuation updated: Jan 15, 2025")
+  - Latest news headline (e.g., "GreenCommerce raises Series A at €15M valuation")
+- Add mock valuation history data to types and mock data
+
+**New data fields**:
+```
+Position will reference pool/deal which will have:
+- last_valuation_date: string
+- last_valuation_note: string
+- company_updates: { date, headline, summary }[]
+```
+
+**Files to modify**: 
+- `src/types/index.ts` - Add valuation/update fields to StartupDeal
+- `src/data/mockData.ts` - Add mock update data
+- `src/pages/PortfolioPage.tsx` - Display the updates section
+
+---
+
+## 3. Marketplace Page - Sell Flow & Equity Display
+
+**Current**: 
+- Shows listings but no "Sell" button to create a new one
+- Missing equity percentage in listing cards
+
+**Changes**:
+
+**A. Add "Sell Your Position" button** (top right of page):
+- Opens a dialog/sheet with:
+  1. Position selector dropdown (from your portfolio positions that are not already listed)
+  2. On selection, shows:
+     - Current position value
+     - Estimated value
+     - Your ownership %
+     - Unrealized gain/loss
+  3. Input fields:
+     - % of position to sell (1-100)
+     - Asking price in EUR
+  4. Preview of what equity % the buyer will receive
+  5. Fee notice (1% marketplace fee)
+  6. "Create Listing" button
+
+**B. Show equity % in listing cards**:
+- Calculate: `seller_ownership_percent * (percent_for_sale / 100)`
+- Display as "0.67% equity" under the position info
+
+**Files to modify**: 
+- `src/pages/MarketplacePage.tsx` - Add Sell button, dialog, and equity display
+
+---
+
+## 4. Pool Detail Page - Founders & Enhanced Terms
+
+**Current**: 
+- Overview tab shows description, highlights, risks
+- Terms tab shows target, equity, valuation, fees
+
+**Changes**:
+
+**A. Add Founders section to Overview tab**:
+- Display founder names, roles, and LinkedIn links (clickable)
+- Show accelerator/incubator badges (e.g., "Y Combinator W24", "Techstars")
+
+**B. Enhance Terms tab**:
+Add clear sections for:
+- Target Raise
+- Equity Offered  
+- Pre-money Valuation
+- Minimum Ticket
+- Fee Structure (Entry 2%, Carry 2%)
+- **Dividend Policy** (new): "Dividends corresponding to your equity stake are managed by VaultCapital as SPV manager. You acquire economic rights to equity only; dividends are reinvested or distributed at VaultCapital's discretion."
+- **Governance Note**: "Investors do not hold voting rights. All governance decisions are made by VaultCapital as nominee."
+
+**New data fields**:
+```
+StartupDeal:
+- founders: { name, role, linkedin_url }[]
+- accelerator?: string (e.g., "Y Combinator", "Techstars")
+```
+
+**Files to modify**:
+- `src/types/index.ts` - Add founders and accelerator fields
+- `src/data/mockData.ts` - Add mock founder data
+- `src/pages/PoolDetailPage.tsx` - Display founders and enhanced terms
+
+---
+
+## 5. Terms & Conditions Page
+
+**Current**: Footer has "Terms" link that goes nowhere (#)
+
+**Changes**:
+- Create new `/terms` route and `TermsPage.tsx`
+- Comprehensive legal-style page covering:
+  1. **Platform Overview** - What VaultCapital is and how it works
+  2. **Fee Structure**
+     - Entry fee: 2% on investment
+     - Carry fee: 2% on profits at exit
+     - Marketplace fee: 1% on secondary trades
+  3. **Dividend Policy**
+     - How dividends are handled by the SPV
+     - VaultCapital's discretion on distribution
+  4. **Exit Procedures**
+     - How exits are decided
+     - Distribution timeline and process
+     - Pro-rata allocation
+  5. **SPV/Nominee Structure**
+     - What investors own (economic rights, not voting rights)
+     - VaultCapital's role as manager
+  6. **Risks and Disclaimers**
+     - High-risk investment warning
+     - No guarantee of returns
+     - Illiquidity risk
+  7. **Marketplace Rules**
+     - Secondary trading terms
+     - Fees and settlement
+
+**Files to create**:
+- `src/pages/TermsPage.tsx`
+
+**Files to modify**:
+- `src/App.tsx` - Add route
+- `src/pages/LandingPage.tsx` - Update footer link
+
+---
+
+## Files Summary
+
+**Create**:
+- `src/pages/TermsPage.tsx` - Terms and conditions page
+
+**Modify**:
+- `src/types/index.ts` - Add founders, accelerator, company updates fields
+- `src/data/mockData.ts` - Add mock data for new fields
+- `src/pages/ExplorePage.tsx` - Unified filter panel
+- `src/pages/PortfolioPage.tsx` - Valuation updates section
+- `src/pages/MarketplacePage.tsx` - Sell button and equity display
+- `src/pages/PoolDetailPage.tsx` - Founders section and enhanced terms
+- `src/pages/LandingPage.tsx` - Link to terms page
+- `src/App.tsx` - Add /terms route
+
+---
+
+## Implementation Order
+
+1. Update types and mock data first (foundation for other changes)
+2. Explore page filter consolidation
+3. Portfolio page valuation updates
+4. Marketplace sell flow and equity display
+5. Pool detail founders and terms enhancements
+6. Terms & Conditions page and routing
