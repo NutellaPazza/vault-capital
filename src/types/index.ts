@@ -125,3 +125,48 @@ export interface ListingWithDetails extends MarketplaceListing {
   seller: User;
   position: Position;
 }
+
+// Startup Application Types
+export type ApplicationStatus = 'draft' | 'submitted' | 'under_review' | 'shortlisted' | 'rejected' | 'accepted';
+
+export interface Founder {
+  name: string;
+  role: string;
+  linkedin_url?: string;
+}
+
+export interface InternalNote {
+  id: string;
+  author: string;
+  text: string;
+  created_at: string;
+}
+
+export interface StartupApplication {
+  id: string;
+  startup_name: string;
+  website?: string;
+  country: string;
+  industry: string;
+  stage: DealStage;
+  founding_year?: number;
+  team_size?: number;
+  contact_email: string;
+  founders: Founder[];
+  pitch_summary: string;
+  problem: string;
+  solution: string;
+  traction?: string;
+  deck_url: string;
+  demo_url?: string;
+  data_room_url?: string;
+  fundraising_target_eur: number;
+  offering_equity_percent: number;
+  valuation_pre_money_eur?: number;
+  use_of_funds: string[];
+  status: ApplicationStatus;
+  internal_notes: InternalNote[];
+  rejection_reason?: string;
+  created_at: string;
+  updated_at: string;
+}

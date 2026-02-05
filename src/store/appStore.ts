@@ -11,6 +11,10 @@ import {
   PoolWithDeal,
   PositionWithPool,
   ListingWithDetails,
+  StartupApplication,
+  ApplicationStatus,
+  Founder,
+  InternalNote,
 } from '@/types';
 import {
   initialUser,
@@ -37,6 +41,7 @@ interface AppState {
   transactions: Transaction[];
   notifications: Notification[];
   allUsers: User[];
+  applications: StartupApplication[];
   
   // Actions - Auth
   login: (email: string, password: string) => boolean;
@@ -66,6 +71,11 @@ interface AppState {
   markNotificationRead: (notificationId: string) => void;
   markAllNotificationsRead: () => void;
   
+  // Actions - Applications
+  submitApplication: (data: Omit<StartupApplication, 'id' | 'status' | 'internal_notes' | 'created_at' | 'updated_at'>) => string;
+  updateApplicationStatus: (appId: string, status: ApplicationStatus, reason?: string) => void;
+  addApplicationNote: (appId: string, text: string) => void;
+  
   // Helpers
   getPoolWithDeal: (poolId: string) => PoolWithDeal | null;
   getPositionsWithPools: () => PositionWithPool[];
@@ -94,6 +104,7 @@ export const useAppStore = create<AppState>()(
       transactions: initialTransactions,
       notifications: initialNotifications,
       allUsers: [initialUser, mockSellerUser],
+      applications: [],
       
       // Auth actions
       login: (email, _password) => {
@@ -697,7 +708,66 @@ export const useAppStore = create<AppState>()(
           transactions: initialTransactions,
           notifications: initialNotifications,
           allUsers: [initialUser, mockSellerUser],
+          applications: [],
         });
+      },
+
+      // Application actions
+      submitApplication: (data) => {
+        const appId = `VC-APP-${String(Math.floor(100000 + Math.random() * 900000))}`;
+        const timestamp = new Date().toISOString();
+        
+        const newApp: StartupApplication = {
+          ...data,
+          id: appId,
+          status: 'submitted',
+          internal_notes: [],
+          created_at: timestamp,
+          updated_at: timestamp,
+        };
+        
+        set(state => ({
+          applications: [newApp, ...state.applications],
+        }));
+        
+        return appId;
+      },
+      
+      updateApplicationStatus: (appId, status, reason) => {
+        set(state => ({
+          applications: state.applications.map(app =>
+            app.id === appId
+              ? {
+                  ...app,
+                  status,
+                  rejection_reason: status === 'rejected' ? reason : app.rejection_reason,
+                  updated_at: new Date().toISOString(),
+                }
+              : app
+          ),
+        }));
+      },
+      
+      addApplicationNote: (appId, text) => {
+        const noteId = Math.random().toString(36).substring(2, 11);
+        const newNote: InternalNote = {
+          id: noteId,
+          author: 'Admin',
+          text,
+          created_at: new Date().toISOString(),
+        };
+        
+        set(state => ({
+          applications: state.applications.map(app =>
+            app.id === appId
+              ? {
+                  ...app,
+                  internal_notes: [...app.internal_notes, newNote],
+                  updated_at: new Date().toISOString(),
+                }
+              : app
+          ),
+        }));
       },
     }),
     {

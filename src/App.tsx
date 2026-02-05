@@ -15,6 +15,7 @@ import WalletPage from "./pages/WalletPage";
 import MarketplacePage from "./pages/MarketplacePage";
 import ProfilePage from "./pages/ProfilePage";
 import AdminPage from "./pages/AdminPage";
+import ApplyPage from "./pages/ApplyPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          <Route path="/apply" element={<ApplyPage />} />
           <Route element={<AppLayout />}>
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
