@@ -1,193 +1,226 @@
 
-# UI Improvements & Feature Enhancements
+# Marketplace Enhancement & UI Fixes
 
-This plan covers multiple improvements across the application based on your feedback.
+This plan addresses all the issues you've identified: fixing the sell dialog, centering the notification badge, and expanding the marketplace into a full Buy/Sell experience with offers.
 
 ---
 
 ## Summary of Changes
 
-1. **Explore Page** - Consolidate filters into a single button with expanded filter panel (country, industry type/sector)
-2. **Portfolio Page** - Add latest valuation date and news section for each position
-3. **Marketplace Page** - Add "Sell" button with position selection flow and show equity % in listings
-4. **Pool Detail Page** - Add founder info with LinkedIn links, accelerator info, and enhanced Terms section with dividend policy
-5. **Landing Page** - Create Terms & Conditions page with detailed legal/fee information
+1. **Fix Sell Dialog** - Position dropdown not showing user's positions
+2. **Fix Notification Badge** - Center the number inside the badge
+3. **Redesign Marketplace** - Split into Buy and Sell tabs with full seller management
+4. **Add Offer System** - Allow buyers to make offers, sellers to receive/manage offers
+5. **Link from Portfolio** - Quick access to marketplace listings from Portfolio page
 
 ---
 
-## 1. Explore Page - Unified Filter Panel
+## 1. Fix Sell Dialog - Positions Not Showing
 
-**Current**: Two separate dropdown buttons for Stage and Status filters
+**Problem**: The filter is looking for pools with `pool_status === 'active'` but the demo user (`user-1`) only has a position in pool-3 (GreenCommerce) which IS active. However, the issue is that when logging in with a different email, a NEW user is created with NO positions.
 
-**Changes**:
-- Replace individual filter dropdowns with a single "Filters" button
-- When clicked, opens a Sheet (side panel) or expandable section showing all filters:
-  - **Status**: Live, Upcoming, Active, Filled
-  - **Stage**: Pre-seed, Seed, Series A
-  - **Country**: Italy, Germany, Netherlands, France, Spain, UK (common European countries)
-  - **Sector/Type**: B2B, B2C, Fintech, AI/ML, E-commerce, SaaS, HealthTech, CleanTech
-- Show active filter count on the button
-- "Clear All" and "Apply" buttons in the panel
-- Search bar remains separate
+**Solution**: 
+- The demo user `alex@demo.com` has the position
+- Need to ensure the filter includes the position correctly
+- Also should show a message when no positions are available to list
 
-**Files to modify**: `src/pages/ExplorePage.tsx`
+**File**: `src/pages/MarketplacePage.tsx`
+- Add a fallback message when no listable positions exist
+- Verify the filter logic is correct for the current user
 
 ---
 
-## 2. Portfolio Page - Valuation News
+## 2. Fix Notification Badge Centering
 
-**Current**: Shows invested amount, ownership %, and estimated value
+**Problem**: The number inside the notification badge is off-center
 
-**Changes**:
-- Add under each position card a "Latest Update" section showing:
-  - Last valuation date (e.g., "Valuation updated: Jan 15, 2025")
-  - Latest news headline (e.g., "GreenCommerce raises Series A at €15M valuation")
-- Add mock valuation history data to types and mock data
-
-**New data fields**:
+**Current code** (TopBar.tsx line 72-77):
 ```
-Position will reference pool/deal which will have:
-- last_valuation_date: string
-- last_valuation_note: string
-- company_updates: { date, headline, summary }[]
+<Badge 
+  variant="destructive" 
+  className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 text-xs"
+>
+  {unreadCount}
+</Badge>
 ```
 
-**Files to modify**: 
-- `src/types/index.ts` - Add valuation/update fields to StartupDeal
-- `src/data/mockData.ts` - Add mock update data
-- `src/pages/PortfolioPage.tsx` - Display the updates section
+**Solution**: Add flex centering classes to ensure the number is centered
+
+**File**: `src/components/layout/TopBar.tsx`
+- Change className to include `flex items-center justify-center`
 
 ---
 
-## 3. Marketplace Page - Sell Flow & Equity Display
+## 3. Redesign Marketplace with Buy/Sell Tabs
 
-**Current**: 
-- Shows listings but no "Sell" button to create a new one
-- Missing equity percentage in listing cards
+**Current**: Single page showing all listings with a "Sell Position" button
 
-**Changes**:
-
-**A. Add "Sell Your Position" button** (top right of page):
-- Opens a dialog/sheet with:
-  1. Position selector dropdown (from your portfolio positions that are not already listed)
-  2. On selection, shows:
-     - Current position value
-     - Estimated value
-     - Your ownership %
-     - Unrealized gain/loss
-  3. Input fields:
-     - % of position to sell (1-100)
-     - Asking price in EUR
-  4. Preview of what equity % the buyer will receive
-  5. Fee notice (1% marketplace fee)
-  6. "Create Listing" button
-
-**B. Show equity % in listing cards**:
-- Calculate: `seller_ownership_percent * (percent_for_sale / 100)`
-- Display as "0.67% equity" under the position info
-
-**Files to modify**: 
-- `src/pages/MarketplacePage.tsx` - Add Sell button, dialog, and equity display
-
----
-
-## 4. Pool Detail Page - Founders & Enhanced Terms
-
-**Current**: 
-- Overview tab shows description, highlights, risks
-- Terms tab shows target, equity, valuation, fees
-
-**Changes**:
-
-**A. Add Founders section to Overview tab**:
-- Display founder names, roles, and LinkedIn links (clickable)
-- Show accelerator/incubator badges (e.g., "Y Combinator W24", "Techstars")
-
-**B. Enhance Terms tab**:
-Add clear sections for:
-- Target Raise
-- Equity Offered  
-- Pre-money Valuation
-- Minimum Ticket
-- Fee Structure (Entry 2%, Carry 2%)
-- **Dividend Policy** (new): "Dividends corresponding to your equity stake are managed by VaultCapital as SPV manager. You acquire economic rights to equity only; dividends are reinvested or distributed at VaultCapital's discretion."
-- **Governance Note**: "Investors do not hold voting rights. All governance decisions are made by VaultCapital as nominee."
-
-**New data fields**:
+**New Structure**:
 ```
-StartupDeal:
-- founders: { name, role, linkedin_url }[]
-- accelerator?: string (e.g., "Y Combinator", "Techstars")
+Marketplace
+├── Tab: Buy
+│   ├── Search/Filter
+│   ├── Listing Cards (from other sellers)
+│   └── Click -> Buy Dialog OR Make Offer Dialog
+│
+└── Tab: Sell
+    ├── "Create Listing" button
+    ├── Your Active Listings
+    │   ├── Views count (simulated)
+    │   ├── Edit price/equity button
+    │   ├── Cancel listing button
+    │   └── Offers received section
+    ├── Pending Offers (on your listings)
+    └── Sold History
 ```
 
-**Files to modify**:
-- `src/types/index.ts` - Add founders and accelerator fields
-- `src/data/mockData.ts` - Add mock founder data
-- `src/pages/PoolDetailPage.tsx` - Display founders and enhanced terms
+**New Types** (add to `src/types/index.ts`):
+```
+MarketplaceOffer:
+- id: string
+- listing_id: string
+- buyer_user_id: string
+- offer_price_eur: number
+- offer_message?: string
+- status: 'pending' | 'accepted' | 'rejected' | 'expired'
+- created_at: string
+```
+
+**New Store Actions** (add to `src/store/appStore.ts`):
+- `createOffer(listingId, offerPrice, message?)` - buyer makes offer
+- `acceptOffer(offerId)` - seller accepts offer
+- `rejectOffer(offerId)` - seller rejects offer
+- `updateListing(listingId, updates)` - edit price/percent
+- `getMyListings()` - listings where seller_user_id === currentUser.id
+- `getOffersForMyListings()` - offers on seller's listings
+- `getMyOffers()` - offers the user has made
+
+**File**: `src/pages/MarketplacePage.tsx` - Complete redesign with tabs
 
 ---
 
-## 5. Terms & Conditions Page
+## 4. Add Offer System
 
-**Current**: Footer has "Terms" link that goes nowhere (#)
+**Buy Tab Changes**:
+When clicking on a listing, show dialog with TWO buttons:
+1. **Confirm Purchase** - Buy at asking price (existing)
+2. **Make Offer** - Opens offer input:
+   - Input: Your offer price
+   - Optional: Message to seller
+   - Submit button
 
-**Changes**:
-- Create new `/terms` route and `TermsPage.tsx`
-- Comprehensive legal-style page covering:
-  1. **Platform Overview** - What VaultCapital is and how it works
-  2. **Fee Structure**
-     - Entry fee: 2% on investment
-     - Carry fee: 2% on profits at exit
-     - Marketplace fee: 1% on secondary trades
-  3. **Dividend Policy**
-     - How dividends are handled by the SPV
-     - VaultCapital's discretion on distribution
-  4. **Exit Procedures**
-     - How exits are decided
-     - Distribution timeline and process
-     - Pro-rata allocation
-  5. **SPV/Nominee Structure**
-     - What investors own (economic rights, not voting rights)
-     - VaultCapital's role as manager
-  6. **Risks and Disclaimers**
-     - High-risk investment warning
-     - No guarantee of returns
-     - Illiquidity risk
-  7. **Marketplace Rules**
-     - Secondary trading terms
-     - Fees and settlement
-
-**Files to create**:
-- `src/pages/TermsPage.tsx`
-
-**Files to modify**:
-- `src/App.tsx` - Add route
-- `src/pages/LandingPage.tsx` - Update footer link
+**Sell Tab - Offers Section**:
+- List of pending offers on your listings
+- Each offer shows: buyer name, offer amount, listing details
+- Actions: Accept / Reject buttons
+- When accepted: executes trade at offer price
 
 ---
 
-## Files Summary
+## 5. Portfolio Link to Marketplace
 
-**Create**:
-- `src/pages/TermsPage.tsx` - Terms and conditions page
+**Add to Portfolio Page**:
+- Under positions section, add link: "Manage Listings" -> goes to Marketplace Sell tab
+- If position is listed, show "Listed on Marketplace" badge with link
 
-**Modify**:
-- `src/types/index.ts` - Add founders, accelerator, company updates fields
-- `src/data/mockData.ts` - Add mock data for new fields
-- `src/pages/ExplorePage.tsx` - Unified filter panel
-- `src/pages/PortfolioPage.tsx` - Valuation updates section
-- `src/pages/MarketplacePage.tsx` - Sell button and equity display
-- `src/pages/PoolDetailPage.tsx` - Founders section and enhanced terms
-- `src/pages/LandingPage.tsx` - Link to terms page
-- `src/App.tsx` - Add /terms route
+**File**: `src/pages/PortfolioPage.tsx`
+
+---
+
+## Files to Modify
+
+1. **src/types/index.ts** - Add `MarketplaceOffer` type
+2. **src/store/appStore.ts** - Add offer actions and helpers
+3. **src/data/mockData.ts** - Add sample offers for demo
+4. **src/components/layout/TopBar.tsx** - Fix badge centering
+5. **src/pages/MarketplacePage.tsx** - Complete redesign with tabs, offers, seller management
+6. **src/pages/PortfolioPage.tsx** - Add marketplace links
+
+---
+
+## Technical Implementation Details
+
+### MarketplaceOffer Type
+```typescript
+export interface MarketplaceOffer {
+  id: string;
+  listing_id: string;
+  buyer_user_id: string;
+  offer_price_eur: number;
+  offer_message?: string;
+  status: 'pending' | 'accepted' | 'rejected' | 'expired';
+  created_at: string;
+}
+```
+
+### New Store State & Actions
+```typescript
+// State
+offers: MarketplaceOffer[];
+
+// Actions
+createOffer: (listingId: string, offerPrice: number, message?: string) => void;
+acceptOffer: (offerId: string) => boolean;
+rejectOffer: (offerId: string) => void;
+updateListing: (listingId: string, updates: { ask_price_eur?: number; percent_of_position_for_sale?: number }) => void;
+
+// Helpers
+getMyListings: () => ListingWithDetails[];
+getOffersForListing: (listingId: string) => MarketplaceOffer[];
+getMyPendingOffers: () => MarketplaceOffer[];
+```
+
+### Marketplace Page Structure
+```text
+<Tabs defaultValue="buy">
+  <TabsList>
+    <TabsTrigger value="buy">Buy</TabsTrigger>
+    <TabsTrigger value="sell">Sell</TabsTrigger>
+  </TabsList>
+
+  <TabsContent value="buy">
+    - Search bar
+    - Grid of listing cards (exclude own listings)
+    - Click opens: BuyOrOfferDialog
+  </TabsContent>
+
+  <TabsContent value="sell">
+    - Header with "Create Listing" button
+    - Section: Your Active Listings
+      - Cards with: startup name, equity %, price, views
+      - Actions: Edit, Cancel, View Offers
+    - Section: Pending Offers
+      - List of offers with Accept/Reject
+    - Section: Sold History
+      - Past sold listings
+  </TabsContent>
+</Tabs>
+```
+
+### Buy/Offer Dialog
+When clicking a listing in Buy tab:
+```text
+Dialog:
+- Header: startup name, equity for sale
+- Price info: ask price, equity %, fee, total
+- Your balance
+- Two buttons:
+  1. [Confirm Purchase] - existing flow
+  2. [Make Offer] - expands form:
+     - Input: Offer Amount (EUR)
+     - Textarea: Message (optional)
+     - [Submit Offer] button
+```
 
 ---
 
 ## Implementation Order
 
-1. Update types and mock data first (foundation for other changes)
-2. Explore page filter consolidation
-3. Portfolio page valuation updates
-4. Marketplace sell flow and equity display
-5. Pool detail founders and terms enhancements
-6. Terms & Conditions page and routing
+1. Fix TopBar badge centering (quick fix)
+2. Add MarketplaceOffer type and store actions
+3. Redesign MarketplacePage with tabs
+4. Add offer creation flow (Buy tab)
+5. Add offer management (Sell tab)
+6. Add listing edit/cancel functionality
+7. Update PortfolioPage with marketplace links
+8. Test the complete flow
