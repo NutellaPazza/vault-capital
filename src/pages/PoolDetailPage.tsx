@@ -13,13 +13,16 @@ import { toast } from '@/hooks/use-toast';
 import { 
   ArrowLeft, 
   Users, 
-  TrendingUp, 
-  FileText, 
-  AlertTriangle, 
-  CheckCircle, 
   Clock,
   ExternalLink,
-  Info
+  Info,
+  CheckCircle,
+  AlertTriangle,
+  FileText,
+  Linkedin,
+  Award,
+  Banknote,
+  Scale
 } from 'lucide-react';
 
 const PoolDetailPage = () => {
@@ -98,10 +101,16 @@ const PoolDetailPage = () => {
                   <div className="mb-2 flex flex-wrap items-center gap-2">
                     <StatusBadge status={pool.pool_status} />
                     <StatusBadge status={deal.stage} />
+                    {deal.accelerator && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
+                        <Award className="h-3 w-3" />
+                        {deal.accelerator}
+                      </span>
+                    )}
                   </div>
                   <CardTitle className="text-2xl">{deal.startup_name}</CardTitle>
                   <CardDescription className="text-base">
-                    {deal.industry} • {deal.country}
+                    {deal.industry} • {deal.sector_type} • {deal.country}
                   </CardDescription>
                 </div>
                 {isLive && (
@@ -157,6 +166,40 @@ const PoolDetailPage = () => {
                   <p className="text-muted-foreground">{deal.long_description}</p>
                 </CardContent>
               </Card>
+
+              {/* Founders Section */}
+              {deal.founders && deal.founders.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Founding Team</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {deal.founders.map((founder, i) => (
+                        <div key={i} className="flex items-center gap-3 rounded-lg border p-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">
+                            {founder.name.split(' ').map(n => n[0]).join('')}
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-medium">{founder.name}</p>
+                            <p className="text-sm text-muted-foreground">{founder.role}</p>
+                          </div>
+                          {founder.linkedin_url && (
+                            <a 
+                              href={founder.linkedin_url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-muted-foreground hover:text-primary"
+                            >
+                              <Linkedin className="h-5 w-5" />
+                            </a>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
               
               <Card>
                 <CardHeader>
@@ -197,12 +240,12 @@ const PoolDetailPage = () => {
               </Card>
             </TabsContent>
             
-            <TabsContent value="terms">
+            <TabsContent value="terms" className="space-y-4">
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">Investment Terms</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-6">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="rounded-lg bg-muted p-4">
                       <p className="text-sm text-muted-foreground">Target Raise</p>
@@ -223,7 +266,10 @@ const PoolDetailPage = () => {
                   </div>
                   
                   <div className="rounded-lg border p-4">
-                    <h4 className="mb-3 font-semibold">Fee Structure</h4>
+                    <h4 className="mb-3 flex items-center gap-2 font-semibold">
+                      <Banknote className="h-4 w-4" />
+                      Fee Structure
+                    </h4>
                     <div className="space-y-2">
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Entry Fee</span>
@@ -233,6 +279,31 @@ const PoolDetailPage = () => {
                         <span className="text-muted-foreground">Carry (on profit)</span>
                         <span className="font-medium">{pool.fee_carry_percent}%</span>
                       </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Marketplace Fee</span>
+                        <span className="font-medium">1%</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/50 dark:bg-amber-900/20">
+                    <h4 className="mb-3 flex items-center gap-2 font-semibold text-amber-800 dark:text-amber-400">
+                      <Scale className="h-4 w-4" />
+                      Dividend & Governance Policy
+                    </h4>
+                    <div className="space-y-2 text-sm text-amber-900/80 dark:text-amber-200/80">
+                      <p>
+                        <strong>Dividend Rights:</strong> Dividends corresponding to your equity stake are managed by VaultCapital as SPV manager. 
+                        You acquire economic rights to equity only; dividends are reinvested or distributed at VaultCapital's discretion.
+                      </p>
+                      <p>
+                        <strong>Governance:</strong> Investors do not hold direct voting rights. All governance decisions regarding the investment 
+                        are made by VaultCapital acting as nominee on behalf of all pool participants.
+                      </p>
+                      <p>
+                        <strong>Exit:</strong> Exit timing and execution are decided by VaultCapital. Proceeds are distributed pro-rata 
+                        based on your ownership percentage of the SPV.
+                      </p>
                     </div>
                   </div>
                 </CardContent>
@@ -406,8 +477,8 @@ const PoolDetailPage = () => {
                   </p>
                   <p className="text-sm">
                     {pool.pool_status === 'upcoming' 
-                      ? 'Check back when the pool opens for investment'
-                      : 'This pool is no longer accepting investments'}
+                      ? `Opens ${formatDate(pool.start_datetime)}` 
+                      : 'This investment pool has ended'}
                   </p>
                 </div>
               )}

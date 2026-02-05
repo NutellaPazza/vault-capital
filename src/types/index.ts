@@ -27,10 +27,23 @@ export interface User {
   };
 }
 
+export interface DealFounder {
+  name: string;
+  role: string;
+  linkedin_url?: string;
+}
+
+export interface CompanyUpdate {
+  date: string;
+  headline: string;
+  summary: string;
+}
+
 export interface StartupDeal {
   id: string;
   startup_name: string;
   industry: string;
+  sector_type: 'B2B' | 'B2C' | 'B2B2C';
   country: string;
   stage: DealStage;
   short_description: string;
@@ -47,6 +60,11 @@ export interface StartupDeal {
   };
   status: DealStatus;
   logo_url?: string;
+  founders: DealFounder[];
+  accelerator?: string;
+  last_valuation_date?: string;
+  last_valuation_note?: string;
+  company_updates: CompanyUpdate[];
 }
 
 export interface Pool {

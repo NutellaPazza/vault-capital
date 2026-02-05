@@ -1,11 +1,14 @@
 import { StartupDeal, Pool, User, Position, MarketplaceListing, Transaction, Notification } from '@/types';
 
+const now = new Date();
+
 // Demo startup deals
 export const initialDeals: StartupDeal[] = [
   {
     id: 'deal-1',
     startup_name: 'TechFlow SaaS',
     industry: 'Enterprise Software',
+    sector_type: 'B2B',
     country: 'Italy',
     stage: 'seed',
     short_description: 'AI-powered workflow automation for SMEs',
@@ -33,11 +36,26 @@ export const initialDeals: StartupDeal[] = [
     },
     status: 'live',
     logo_url: undefined,
+    founders: [
+      { name: 'Marco Rossi', role: 'CEO', linkedin_url: 'https://linkedin.com/in/marcorossi' },
+      { name: 'Elena Bianchi', role: 'CTO', linkedin_url: 'https://linkedin.com/in/elenabianchi' },
+    ],
+    accelerator: 'Techstars Milan 2023',
+    last_valuation_date: new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString(),
+    last_valuation_note: 'Pre-money valuation set at €10M based on 5x ARR multiple',
+    company_updates: [
+      {
+        date: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+        headline: 'TechFlow partners with SAP for integration',
+        summary: 'New partnership expands enterprise reach across DACH region',
+      },
+    ],
   },
   {
     id: 'deal-2',
     startup_name: 'NeuralAI',
     industry: 'Artificial Intelligence',
+    sector_type: 'B2B',
     country: 'Germany',
     stage: 'pre-seed',
     short_description: 'Next-gen computer vision for industrial quality control',
@@ -65,11 +83,20 @@ export const initialDeals: StartupDeal[] = [
     },
     status: 'upcoming',
     logo_url: undefined,
+    founders: [
+      { name: 'Dr. Hans Mueller', role: 'CEO', linkedin_url: 'https://linkedin.com/in/hansmueller' },
+      { name: 'Dr. Anna Schmidt', role: 'Chief Scientist', linkedin_url: 'https://linkedin.com/in/annaschmidt' },
+    ],
+    accelerator: undefined,
+    last_valuation_date: undefined,
+    last_valuation_note: undefined,
+    company_updates: [],
   },
   {
     id: 'deal-3',
     startup_name: 'GreenCommerce',
     industry: 'Sustainable E-commerce',
+    sector_type: 'B2C',
     country: 'Netherlands',
     stage: 'seed',
     short_description: 'Carbon-neutral marketplace for sustainable products',
@@ -97,11 +124,30 @@ export const initialDeals: StartupDeal[] = [
     },
     status: 'closed',
     logo_url: undefined,
+    founders: [
+      { name: 'Sophie van der Berg', role: 'CEO', linkedin_url: 'https://linkedin.com/in/sophievdberg' },
+      { name: 'Jan de Vries', role: 'COO', linkedin_url: 'https://linkedin.com/in/jandevries' },
+      { name: 'Lisa Jansen', role: 'CMO', linkedin_url: 'https://linkedin.com/in/lisajansen' },
+    ],
+    accelerator: 'Y Combinator W23',
+    last_valuation_date: new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    last_valuation_note: 'Valuation increased 25% following Series A interest at €15M',
+    company_updates: [
+      {
+        date: new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+        headline: 'GreenCommerce raises Series A interest at €15M valuation',
+        summary: 'Multiple VCs expressing interest, valuation up 25% from seed round',
+      },
+      {
+        date: new Date(now.getTime() - 20 * 24 * 60 * 60 * 1000).toISOString(),
+        headline: 'Marketplace hits 50K monthly active buyers',
+        summary: 'Growth accelerates as more consumers prioritize sustainable shopping',
+      },
+    ],
   },
 ];
 
 // Calculate pool end times dynamically
-const now = new Date();
 const pool1End = new Date(now.getTime() + 38 * 60 * 60 * 1000); // 38 hours from now
 const pool2Start = new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000); // 2 days from now
 const pool2End = new Date(pool2Start.getTime() + 72 * 60 * 60 * 1000); // 72 hours after start

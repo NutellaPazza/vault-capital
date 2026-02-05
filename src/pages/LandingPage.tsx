@@ -199,7 +199,7 @@ const LandingPage = () => {
             <span>•</span>
             <Link to="#" className="hover:text-foreground">Privacy</Link>
             <span>•</span>
-            <Link to="#" className="hover:text-foreground">Terms</Link>
+            <Link to="/terms" className="hover:text-foreground">Terms</Link>
           </div>
         </div>
       </footer>
