@@ -1,4 +1,4 @@
-import { StartupDeal, Pool, User, Position, MarketplaceListing, Transaction, Notification } from '@/types';
+import { StartupDeal, Pool, User, Position, MarketplaceListing, Transaction, Notification, MarketplaceOffer } from '@/types';
 
 const now = new Date();
 
@@ -330,3 +330,6 @@ export const initialNotifications: Notification[] = [
     type: 'marketplace',
   },
 ];
+
+// Demo offers
+export const initialOffers: MarketplaceOffer[] = [];

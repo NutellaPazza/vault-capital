@@ -144,6 +144,19 @@ export interface ListingWithDetails extends MarketplaceListing {
   position: Position;
 }
 
+// Marketplace Offer Types
+export type OfferStatus = 'pending' | 'accepted' | 'rejected' | 'expired';
+
+export interface MarketplaceOffer {
+  id: string;
+  listing_id: string;
+  buyer_user_id: string;
+  offer_price_eur: number;
+  offer_message?: string;
+  status: OfferStatus;
+  created_at: string;
+}
+
 // Startup Application Types
 export type ApplicationStatus = 'draft' | 'submitted' | 'under_review' | 'shortlisted' | 'rejected' | 'accepted';
 

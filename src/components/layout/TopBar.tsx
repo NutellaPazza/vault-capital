@@ -71,7 +71,7 @@ export const TopBar = () => {
                 {unreadCount > 0 && (
                   <Badge 
                     variant="destructive" 
-                    className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 text-xs"
+                    className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full p-0 text-xs"
                   >
                     {unreadCount}
                   </Badge>
