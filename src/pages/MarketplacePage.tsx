@@ -116,11 +116,9 @@ const MarketplacePage = () => {
           <h1 className="mb-2 text-2xl font-bold">Marketplace</h1>
           <p className="text-muted-foreground">Buy and sell startup positions</p>
         </div>
-        {listablePositions.length > 0 && (
-          <Button onClick={() => setIsSellDialogOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" /> Sell Position
-          </Button>
-        )}
+        <Button onClick={() => setIsSellDialogOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" /> Sell Position
+        </Button>
       </div>
 
       <Card className="mb-6">
@@ -151,7 +149,7 @@ const MarketplacePage = () => {
                     <div><span className="text-muted-foreground">Price:</span> <span className="font-medium">{formatCompactCurrency(listing.ask_price_eur)}</span></div>
                     <div className="col-span-2">
                       <span className="text-muted-foreground">Equity:</span>{' '}
-                      <span className="font-medium text-primary">{formatPercent(equityPercent, 3)}</span>
+                      <span className="font-medium text-primary">{equityPercent.toFixed(3)}%</span>
                     </div>
                   </div>
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
@@ -178,7 +176,7 @@ const MarketplacePage = () => {
             <div className="space-y-4 py-4">
               <div className="rounded-lg bg-muted p-3 text-sm space-y-2">
                 <div className="flex justify-between"><span>Price</span><span>{formatCurrency(listing.ask_price_eur)}</span></div>
-                <div className="flex justify-between"><span>Equity</span><span className="text-primary">{formatPercent(getListingEquity(listing), 3)}</span></div>
+                <div className="flex justify-between"><span>Equity</span><span className="text-primary">{getListingEquity(listing).toFixed(3)}%</span></div>
                 <div className="flex justify-between"><span>Fee (1%)</span><span>{formatCurrency(fee)}</span></div>
                 <div className="flex justify-between border-t pt-2 font-medium"><span>Total</span><span>{formatCurrency(total)}</span></div>
               </div>

@@ -83,12 +83,12 @@ const LandingPage = () => {
               },
             ].map((step, index) => (
               <Card key={step.title} className="relative overflow-hidden">
-                <CardContent className="p-6">
+                <CardContent className="p-6 pt-8">
+                  <div className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                    {index + 1}
+                  </div>
                   <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
                     <step.icon className="h-6 w-6 text-primary" />
-                  </div>
-                  <div className="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
-                    {index + 1}
                   </div>
                   <h3 className="mb-2 font-semibold">{step.title}</h3>
                   <p className="text-sm text-muted-foreground">{step.description}</p>

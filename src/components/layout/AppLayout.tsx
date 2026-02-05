@@ -7,7 +7,7 @@ export const AppLayout = () => {
   const location = useLocation();
   const { isAuthenticated } = useAppStore();
   
-  const isPublicPage = ['/', '/login', '/signup'].includes(location.pathname);
+  const isPublicPage = ['/', '/login', '/signup', '/terms'].includes(location.pathname);
   const showBottomNav = !isPublicPage && isAuthenticated;
 
   // Redirect unauthenticated users from protected pages
