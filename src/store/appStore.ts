@@ -123,18 +123,41 @@ export const useAppStore = create<AppState>()(
           set({ isAuthenticated: true, currentUser: user });
           return true;
         }
-        // Create new user for demo
+
+        // Create new user for demo (seed with a starter position so Marketplace/Portfolio work)
         const newUser: User = {
           ...initialUser,
           id: generateId(),
           email,
           name: email.split('@')[0],
         };
-        set(state => ({
-          isAuthenticated: true,
-          currentUser: newUser,
-          allUsers: [...state.allUsers, newUser],
-        }));
+
+        set(state => {
+          const seedPool = state.pools.find(p => p.pool_status === 'active') || state.pools[0];
+          const deal = seedPool ? state.deals.find(d => d.id === seedPool.deal_id) : null;
+          const invested = 1_000;
+          const ownershipPercent = seedPool && deal ? (invested / seedPool.target_eur) * (deal.offer_equity_percent || 10) : 0.01;
+
+          const seededPosition: Position = {
+            id: generateId(),
+            user_id: newUser.id,
+            pool_id: seedPool?.id || 'pool-3',
+            invested_eur: invested,
+            ownership_percent_of_spv: ownershipPercent,
+            current_estimated_value_eur: invested,
+            lockup: false,
+            is_listed_on_market: false,
+            created_at: new Date().toISOString(),
+          };
+
+          return {
+            isAuthenticated: true,
+            currentUser: newUser,
+            allUsers: [...state.allUsers, newUser],
+            positions: [...state.positions, seededPosition],
+          };
+        });
+
         return true;
       },
       
@@ -145,11 +168,33 @@ export const useAppStore = create<AppState>()(
           name,
           email,
         };
-        set(state => ({
-          isAuthenticated: true,
-          currentUser: newUser,
-          allUsers: [...state.allUsers, newUser],
-        }));
+
+        set(state => {
+          const seedPool = state.pools.find(p => p.pool_status === 'active') || state.pools[0];
+          const deal = seedPool ? state.deals.find(d => d.id === seedPool.deal_id) : null;
+          const invested = 1_000;
+          const ownershipPercent = seedPool && deal ? (invested / seedPool.target_eur) * (deal.offer_equity_percent || 10) : 0.01;
+
+          const seededPosition: Position = {
+            id: generateId(),
+            user_id: newUser.id,
+            pool_id: seedPool?.id || 'pool-3',
+            invested_eur: invested,
+            ownership_percent_of_spv: ownershipPercent,
+            current_estimated_value_eur: invested,
+            lockup: false,
+            is_listed_on_market: false,
+            created_at: new Date().toISOString(),
+          };
+
+          return {
+            isAuthenticated: true,
+            currentUser: newUser,
+            allUsers: [...state.allUsers, newUser],
+            positions: [...state.positions, seededPosition],
+          };
+        });
+
         return true;
       },
       
@@ -832,9 +877,16 @@ export const useAppStore = create<AppState>()(
       },
       
       markAllNotificationsRead: () => {
-        set(state => ({
-          notifications: state.notifications.map(n => ({ ...n, read: true })),
-        }));
+        set(state => {
+          const currentUserId = state.currentUser?.id;
+          if (!currentUserId) return state;
+
+          return {
+            notifications: state.notifications.map(n =>
+              n.user_id === currentUserId ? { ...n, read: true } : n
+            ),
+          };
+        });
       },
       
       // Helper functions

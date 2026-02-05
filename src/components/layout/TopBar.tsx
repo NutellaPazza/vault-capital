@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Bell, Settings, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,9 +13,20 @@ import {
 
 export const TopBar = () => {
   const location = useLocation();
-  const { currentUser, notifications, markNotificationRead, markAllNotificationsRead, isAdmin, toggleAdmin } = useAppStore();
-  
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const navigate = useNavigate();
+  const {
+    currentUser,
+    notifications,
+    markNotificationRead,
+    markAllNotificationsRead,
+    isAdmin,
+    toggleAdmin,
+  } = useAppStore();
+
+  const userNotifications = currentUser
+    ? notifications.filter(n => n.user_id === currentUser.id)
+    : [];
+  const unreadCount = userNotifications.filter(n => !n.read).length;
   const isPublicPage = ['/', '/login', '/signup'].includes(location.pathname);
 
   if (isPublicPage) {
@@ -93,27 +104,35 @@ export const TopBar = () => {
                 )}
               </div>
               <div className="max-h-64 overflow-y-auto">
-                {notifications.slice(0, 5).map(notification => (
-                  <DropdownMenuItem 
+                {userNotifications.slice(0, 5).map(notification => (
+                  <DropdownMenuItem
                     key={notification.id}
                     className="flex flex-col items-start gap-1 p-3"
-                    onClick={() => markNotificationRead(notification.id)}
+                    onClick={() => {
+                      markNotificationRead(notification.id);
+
+                      if (notification.type === 'marketplace') {
+                        navigate('/marketplace?tab=sell&section=offers');
+                      } else if (notification.type === 'portfolio') {
+                        navigate('/portfolio');
+                      } else if (notification.type === 'pool') {
+                        navigate('/explore');
+                      }
+                    }}
                   >
                     <div className="flex w-full items-center gap-2">
-                      <span className={`font-medium ${!notification.read ? 'text-foreground' : 'text-muted-foreground'}`}>
+                      <span
+                        className={`font-medium ${!notification.read ? 'text-foreground' : 'text-muted-foreground'}`}
+                      >
                         {notification.title}
                       </span>
-                      {!notification.read && (
-                        <span className="h-2 w-2 rounded-full bg-primary" />
-                      )}
+                      {!notification.read && <span className="h-2 w-2 rounded-full bg-primary" />}
                     </div>
                     <span className="text-xs text-muted-foreground">{notification.message}</span>
                   </DropdownMenuItem>
                 ))}
-                {notifications.length === 0 && (
-                  <div className="p-4 text-center text-sm text-muted-foreground">
-                    No notifications
-                  </div>
+                {userNotifications.length === 0 && (
+                  <div className="p-4 text-center text-sm text-muted-foreground">No notifications</div>
                 )}
               </div>
             </DropdownMenuContent>
