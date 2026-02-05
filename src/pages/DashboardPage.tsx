@@ -1,0 +1,170 @@
+import { Link } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { PoolCard } from '@/components/common';
+import { useAppStore } from '@/store/appStore';
+import { formatCurrency, formatCompactCurrency } from '@/lib/formatters';
+import { Wallet, TrendingUp, PieChart, ArrowRight, Clock } from 'lucide-react';
+
+const DashboardPage = () => {
+  const { currentUser, getLivePools, getUpcomingPools, getPositionsWithPools, notifications } = useAppStore();
+  
+  const livePools = getLivePools();
+  const upcomingPools = getUpcomingPools();
+  const positions = getPositionsWithPools();
+  const recentNotifications = notifications.filter(n => !n.read).slice(0, 3);
+  
+  const totalInvested = positions.reduce((sum, p) => sum + p.invested_eur, 0);
+  const totalValue = positions.reduce((sum, p) => sum + p.current_estimated_value_eur, 0);
+  const unrealizedGain = totalValue - totalInvested;
+
+  return (
+    <div className="container space-y-6 py-6">
+      {/* Stats Cards */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardContent className="flex items-center gap-4 p-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
+              <Wallet className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Wallet Balance</p>
+              <p className="text-xl font-bold">{formatCurrency(currentUser?.wallet_balance_eur || 0, false)}</p>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="flex items-center gap-4 p-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-accent">
+              <PieChart className="h-6 w-6 text-accent-foreground" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Active Investments</p>
+              <p className="text-xl font-bold">{positions.length}</p>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="flex items-center gap-4 p-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted">
+              <TrendingUp className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Total Invested</p>
+              <p className="text-xl font-bold">{formatCompactCurrency(totalInvested)}</p>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="flex items-center gap-4 p-4">
+            <div className={`flex h-12 w-12 items-center justify-center rounded-lg ${unrealizedGain >= 0 ? 'bg-success/10' : 'bg-destructive/10'}`}>
+              <TrendingUp className={`h-6 w-6 ${unrealizedGain >= 0 ? 'text-success' : 'text-destructive'}`} />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Unrealized Value</p>
+              <p className={`text-xl font-bold ${unrealizedGain >= 0 ? 'text-success' : 'text-destructive'}`}>
+                {unrealizedGain >= 0 ? '+' : ''}{formatCurrency(unrealizedGain, false)}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Featured Live Pool */}
+      {livePools.length > 0 && (
+        <section>
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-xl font-semibold">Live Pool</h2>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/explore">
+                View All <ArrowRight className="ml-1 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+          <PoolCard pool={livePools[0]} variant="featured" />
+        </section>
+      )}
+
+      {/* Upcoming Pools */}
+      {upcomingPools.length > 0 && (
+        <section>
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-xl font-semibold">Upcoming Pools</h2>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/explore">
+                View All <ArrowRight className="ml-1 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+          <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+            {upcomingPools.map(pool => (
+              <div key={pool.id} className="w-72 flex-shrink-0">
+                <PoolCard pool={pool} variant="compact" />
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Recent Notifications */}
+      {recentNotifications.length > 0 && (
+        <section>
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg">Recent Updates</CardTitle>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/profile">View All</Link>
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {recentNotifications.map(notification => (
+                <div key={notification.id} className="flex items-start gap-3 rounded-lg border p-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+                    <Clock className="h-4 w-4 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium">{notification.title}</p>
+                    <p className="text-sm text-muted-foreground">{notification.message}</p>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </section>
+      )}
+
+      {/* Quick Actions */}
+      <section className="grid gap-4 sm:grid-cols-2">
+        <Card className="bg-gradient-to-br from-card to-accent/20">
+          <CardContent className="flex items-center justify-between p-6">
+            <div>
+              <h3 className="font-semibold">Deposit Funds</h3>
+              <p className="text-sm text-muted-foreground">Add money to your wallet</p>
+            </div>
+            <Button asChild>
+              <Link to="/wallet">Deposit</Link>
+            </Button>
+          </CardContent>
+        </Card>
+        <Card className="bg-gradient-to-br from-card to-muted">
+          <CardContent className="flex items-center justify-between p-6">
+            <div>
+              <h3 className="font-semibold">Browse Marketplace</h3>
+              <p className="text-sm text-muted-foreground">Buy shares from other investors</p>
+            </div>
+            <Button variant="outline" asChild>
+              <Link to="/marketplace">Explore</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </section>
+    </div>
+  );
+};
+
+export default DashboardPage;
