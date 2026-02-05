@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/common';
 import { useAppStore } from '@/store/appStore';
 import { formatCurrency, formatCompactCurrency, formatPercent, formatDate } from '@/lib/formatters';
-import { TrendingUp, TrendingDown, ExternalLink, Store, PieChart } from 'lucide-react';
+import { TrendingUp, TrendingDown, ExternalLink, Store, PieChart, Newspaper, Calendar } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -13,20 +13,21 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 const PortfolioPage = () => {
-  const { getPositionsWithPools, createListing, pools } = useAppStore();
+  const { getPositionsWithPools, createListing, pools, deals } = useAppStore();
   const positions = getPositionsWithPools();
   
   const [listingPosition, setListingPosition] = useState<string | null>(null);
   const [listingPercent, setListingPercent] = useState('100');
   const [listingPrice, setListingPrice] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [expandedUpdates, setExpandedUpdates] = useState<string[]>([]);
 
   const totalInvested = positions.reduce((sum, p) => sum + p.invested_eur, 0);
   const totalValue = positions.reduce((sum, p) => sum + p.current_estimated_value_eur, 0);
@@ -63,6 +64,14 @@ const PortfolioPage = () => {
     setListingPosition(positionId);
     setListingPrice(estimatedValue.toString());
     setIsDialogOpen(true);
+  };
+
+  const toggleUpdates = (positionId: string) => {
+    setExpandedUpdates(prev => 
+      prev.includes(positionId) 
+        ? prev.filter(id => id !== positionId) 
+        : [...prev, positionId]
+    );
   };
 
   return (
@@ -130,7 +139,10 @@ const PortfolioPage = () => {
             const gain = position.current_estimated_value_eur - position.invested_eur;
             const gainPercent = (gain / position.invested_eur) * 100;
             const pool = pools.find(p => p.id === position.pool_id);
+            const deal = deals.find(d => d.id === pool?.deal_id);
             const canList = pool?.pool_status === 'active' && !position.is_listed_on_market;
+            const hasUpdates = deal?.company_updates && deal.company_updates.length > 0;
+            const isExpanded = expandedUpdates.includes(position.id);
             
             return (
               <Card key={position.id}>
@@ -190,6 +202,51 @@ const PortfolioPage = () => {
                       )}
                     </div>
                   </div>
+
+                  {/* Valuation & Updates Section */}
+                  {deal && (deal.last_valuation_date || hasUpdates) && (
+                    <Collapsible open={isExpanded} onOpenChange={() => toggleUpdates(position.id)}>
+                      <div className="mt-4 border-t pt-4">
+                        <CollapsibleTrigger className="flex w-full items-center justify-between text-sm">
+                          <div className="flex items-center gap-4 text-muted-foreground">
+                            {deal.last_valuation_date && (
+                              <span className="flex items-center gap-1">
+                                <Calendar className="h-3.5 w-3.5" />
+                                Valuation: {formatDate(deal.last_valuation_date)}
+                              </span>
+                            )}
+                            {hasUpdates && (
+                              <span className="flex items-center gap-1">
+                                <Newspaper className="h-3.5 w-3.5" />
+                                {deal.company_updates.length} update{deal.company_updates.length > 1 ? 's' : ''}
+                              </span>
+                            )}
+                          </div>
+                          <Button variant="ghost" size="sm" className="h-auto p-1">
+                            {isExpanded ? 'Hide' : 'Show'}
+                          </Button>
+                        </CollapsibleTrigger>
+
+                        <CollapsibleContent className="mt-3 space-y-3">
+                          {deal.last_valuation_note && (
+                            <div className="rounded-lg bg-muted/50 p-3 text-sm">
+                              <p className="font-medium">{deal.last_valuation_note}</p>
+                            </div>
+                          )}
+                          
+                          {deal.company_updates.map((update, idx) => (
+                            <div key={idx} className="rounded-lg border p-3">
+                              <div className="mb-1 flex items-center justify-between">
+                                <p className="font-medium text-sm">{update.headline}</p>
+                                <span className="text-xs text-muted-foreground">{formatDate(update.date)}</span>
+                              </div>
+                              <p className="text-sm text-muted-foreground">{update.summary}</p>
+                            </div>
+                          ))}
+                        </CollapsibleContent>
+                      </div>
+                    </Collapsible>
+                  )}
                 </CardContent>
               </Card>
             );
