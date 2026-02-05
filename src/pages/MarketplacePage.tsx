@@ -268,6 +268,16 @@ const MarketplacePage = () => {
       </div>
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as 'buy' | 'sell')} className="space-y-6">
+        <TabsList className="grid w-full max-w-sm grid-cols-2">
+          <TabsTrigger value="buy" className="gap-2">
+            <ShoppingCart className="h-4 w-4" />
+            Buy
+          </TabsTrigger>
+          <TabsTrigger value="sell" className="gap-2">
+            <Store className="h-4 w-4" />
+            Sell
+          </TabsTrigger>
+        </TabsList>
 
         {/* BUY TAB */}
         <TabsContent value="buy" className="space-y-6">
