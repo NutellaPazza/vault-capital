@@ -1,191 +1,268 @@
 
 
-# VaultCapital - Investment Platform MVP
+# Startup Application Feature - Implementation Plan
 
-A clickable demo showcasing a retail startup investment platform with pooled investments and secondary marketplace.
-
----
-
-## 🎨 Design System
-
-**Style**: Minimal, clean fintech aesthetic
-**Colors**: Light gray backgrounds, white cards, light orange accents for CTAs and highlights
-**Typography**: Clean, modern sans-serif
-**Language**: English throughout
+Add a dedicated funnel for startups to apply for investment pools on VaultCapital. This includes a CTA section on the landing page and a complete multi-step application form.
 
 ---
 
-## 📱 Navigation Structure
+## Overview
 
-**Top Bar (all pages)**:
-- VaultCapital logo (left)
-- Notification bell icon
-- Settings icon
-- Wallet balance display
+**What we're building:**
+1. A CTA section at the bottom of the Landing Page encouraging startups to apply
+2. A new `/apply` page with a multi-step form (no login required)
+3. Application management in the Admin panel
 
-**Bottom Navigation Bar**:
-- Home (current pool)
-- Explore (all pools)
-- Portfolio (your positions)
-- Marketplace (buy/sell shares)
-- Profile (account & settings)
+**Key behaviors:**
+- No authentication required to submit an application
+- Form progress saved locally (draft mode)
+- Applications visible and manageable only in Admin mode
+- All data stored in localStorage
 
 ---
 
-## 📄 Pages & Features
+## Technical Implementation
 
-### 1. Landing Page (Public)
-- Hero section: "Invest in private startups from €100"
-- How it works: 4-step visual flow (Deal Sourcing → Pool Live 72h → SPV Ownership → Exit Distribution)
-- Featured live pool preview
-- CTA: "Get Started" / "Explore Pools"
-- Footer with disclaimer: "Demo. Not financial advice."
+### 1. New Types
 
-### 2. Authentication (Mock)
-- Login / Sign up forms
-- Simple email + password flow
-- Saves user to localStorage
-- Risk profile selection (Conservative/Balanced/Aggressive)
+Add to `src/types/index.ts`:
 
-### 3. Home Dashboard
-- **Hero Card**: Current live pool with countdown timer, progress bar, key stats
-- Quick stats cards: Wallet balance, Active investments, Total invested, Unrealized value
-- "Upcoming Pools" section (horizontal scroll)
-- Recent notifications/updates feed
+```text
+StartupApplication type with:
+- id (application_id like "VC-APP-000123")
+- startup_name, website, country, industry, stage, founding_year, team_size
+- founders[] (name, role, linkedin_url)
+- pitch_summary, problem, solution, traction
+- deck_url, demo_url, data_room_url
+- fundraising_target_eur, offering_equity_percent, valuation_pre_money_eur
+- use_of_funds[]
+- contact_email (required)
+- status: draft | submitted | under_review | shortlisted | rejected | accepted
+- internal_notes[] (for admin)
+- rejection_reason (when rejected)
+- created_at, updated_at
 
-### 4. Explore Pools
-- Filterable list: Stage (Pre-seed/Seed/Series A), Industry, Status (Live/Upcoming/Closed)
-- Pool cards showing: Startup name, industry, target amount, raised %, time remaining, status badge
-- Quick invest button on each card
+ApplicationStatus type
+InternalNote type (author, text, created_at)
+```
 
-### 5. Pool Detail Page
-**Layout**: Main content left, sticky invest widget right
+### 2. Store Updates
 
-**Tabs**:
-- Overview: Startup description, highlights, risks
-- Terms: Target, equity %, valuation, fee breakdown (2% entry, 2% carry)
-- Updates: Timeline of pool news (mock)
-- Documents: Pitch deck, data room (placeholder links)
-- FAQ: Common questions
+Extend `src/store/appStore.ts`:
 
-**Invest Widget**:
-- Input amount (min €100)
-- Real-time breakdown: Investment + 2% fee = Total
-- Wallet balance check
-- "Invest Now" button
-- SPV/nominee disclaimer note
+```text
+New state:
+- applications: StartupApplication[]
 
-### 6. Portfolio
-**Overview Tab**:
-- Total portfolio value
-- Performance chart (mock)
-- Positions list with: Startup name, invested amount, ownership %, estimated value, status badge, "List on Marketplace" action
+New actions:
+- saveApplicationDraft(data) - saves partial application to localStorage
+- submitApplication(data) - generates ID, sets status to "submitted"
+- updateApplicationStatus(appId, status, reason?) - admin action
+- addApplicationNote(appId, note) - admin internal notes
+- getApplicationById(appId)
+- getApplications() - for admin list view
+```
 
-**Position Detail**:
-- Investment summary
-- Value chart over time (mock)
-- Related pool info
-- Recent company updates
-- Action: List on Marketplace
+### 3. Landing Page CTA Section
 
-### 7. Marketplace
-**Browse Listings**:
-- Filters: Startup, stage, price range
-- Listing cards: Startup, % of position for sale, asking price, implied valuation, seller rating (mock)
-- "Buy" button
+Add a new section before the footer in `src/pages/LandingPage.tsx`:
 
-**Sell Flow**:
-- Select position to sell
-- Set % to sell (partial allowed)
-- Set asking price
-- Fee preview (1% marketplace fee)
-- Confirm listing
+```text
+Section design:
+- Card/banner style with light orange accent border
+- Icon: Rocket or Building2
+- Title: "Are you a startup opening a round?"
+- Subtitle: "Apply to collaborate with VaultCapital. If we're interested, we'll contact you to evaluate a potential offer and a Pool on our platform."
 
-**Buy Flow**:
-- Listing detail modal
-- Price breakdown with 1% fee
-- Wallet balance check
-- Confirm purchase
-- Position transfer simulation
+Three bullet points:
+- "Submit your pitch and metrics"
+- "Internal team evaluation"
+- "If selected, we propose an offer and open a public Pool"
 
-### 8. Wallet
-- Current balance (large display)
-- Quick actions: Deposit / Withdraw buttons
-- Transaction history table: Date, Type, Amount, Description
-- Filter by transaction type
+CTA Button: "Apply Now" -> routes to /apply
+```
 
-**Deposit/Withdraw Modals**:
-- Amount input
-- Simulated processing
-- Balance update
-- Toast confirmation
+### 4. Application Page (`/apply`)
 
-### 9. Settings & Profile
-- Profile info (name, email, risk profile)
-- Notification preferences
-- Pool interest filters (industry, stage preferences)
-- KYC status display (mock: Verified/Pending/Not Started)
-- Logout
+Create `src/pages/ApplyPage.tsx`:
 
-### 10. Admin Panel (Demo Only)
-- Toggle admin mode (visible only when enabled)
-- Pool management: Force status (Filled/Failed/Active)
-- Exit simulation: Select pool, input exit multiple (e.g., 3x), calculate and distribute proceeds
-- Create new pool form
-- View all users and their positions
+**Layout:**
+- Standalone page (uses AppLayout but accessible without login)
+- Header with VaultCapital branding
+- Progress stepper showing current step (1-6)
+- "Save Draft" button in header
+- Resume draft banner if draft exists
+
+**Multi-step Form (6 steps):**
+
+**Step 1: Basics**
+- startup_name* (required)
+- website
+- country* (dropdown)
+- industry* (dropdown: Fintech, B2B SaaS, AI/ML, E-commerce, HealthTech, CleanTech, Other)
+- stage* (pre-seed/seed/series-a)
+- founding_year
+- team_size (number)
+- contact_email* (required)
+
+**Step 2: Team**
+- Dynamic founder list (add/remove)
+- Per founder: name*, role*, linkedin_url
+
+**Step 3: Pitch**
+- pitch_summary* (textarea, max 500 chars)
+- problem* (what problem are you solving)
+- solution* (your solution)
+- traction (optional - current metrics, users, revenue)
+
+**Step 4: Materials**
+- deck_url* (required - pitch deck link)
+- demo_url (optional - live product/demo)
+- data_room_url (optional)
+
+**Step 5: Fundraising**
+- fundraising_target_eur* (how much raising)
+- offering_equity_percent* (equity offered)
+- valuation_pre_money_eur (optional)
+- use_of_funds (dynamic list - e.g., "40% Product", "30% Marketing")
+
+**Step 6: Review & Submit**
+- Read-only summary of all entered data
+- Confirmation checkbox: "I confirm this information is accurate"*
+- "Submit Application" button
+
+**Validation:**
+- Required fields: startup_name, country, industry, stage, contact_email, pitch_summary, problem, solution, deck_url, fundraising_target_eur, offering_equity_percent
+- Email format validation
+- URL format validation for links
+- At least one founder with name and role
+
+**Submit behavior:**
+- Generate application_id: `VC-APP-XXXXXX` (6 random digits)
+- Set status: "submitted"
+- Set created_at
+- Save to store/localStorage
+- Show success modal with:
+  - "Application Received"
+  - Application ID
+  - "Next steps: Our team will review within 5-7 business days"
+  - "Back to Home" button
+
+**Draft handling:**
+- "Save Draft" button saves current form state
+- On page load, check for existing draft
+- If draft exists, show banner: "You have a saved draft. Resume?" with Resume/Start Fresh options
+
+### 5. Admin Panel Updates
+
+Extend `src/pages/AdminPage.tsx`:
+
+**Add "Applications" tab** using Tabs component:
+- Tab 1: Pool Management (existing)
+- Tab 2: Applications (new)
+- Tab 3: Reset Demo (existing)
+
+**Applications Tab:**
+
+**List View:**
+- Filter by status (All, Submitted, Under Review, Shortlisted, Rejected, Accepted)
+- Search by startup_name
+- Table columns: Application ID, Startup Name, Industry, Stage, Target Amount, Status, Date
+- Click row to open detail view
+
+**Detail View (dialog/sheet):**
+- All submitted data in organized sections:
+  - Basics (name, website, country, industry, stage, team size)
+  - Team (founders list with LinkedIn links)
+  - Pitch (summary, problem, solution, traction)
+  - Materials (links as clickable)
+  - Fundraising (target, equity, valuation, use of funds)
+  - Contact: contact_email prominently displayed
+
+- Status change buttons:
+  - "Mark Under Review"
+  - "Shortlist"
+  - "Accept"
+  - "Reject" (opens dialog for rejection reason)
+
+- Internal Notes section:
+  - Display existing notes (author, date, text)
+  - Textarea + "Add Note" button
+
+### 6. Routing
+
+Update `src/App.tsx`:
+- Add route: `/apply` -> `ApplyPage`
+- This page should be accessible without authentication
+
+### 7. Component Files
+
+New files to create:
+- `src/pages/ApplyPage.tsx` - main application page
+- `src/components/apply/ApplicationForm.tsx` - form wrapper with step logic
+- `src/components/apply/FormStepBasics.tsx` - step 1
+- `src/components/apply/FormStepTeam.tsx` - step 2
+- `src/components/apply/FormStepPitch.tsx` - step 3
+- `src/components/apply/FormStepMaterials.tsx` - step 4
+- `src/components/apply/FormStepFundraising.tsx` - step 5
+- `src/components/apply/FormStepReview.tsx` - step 6
+- `src/components/apply/ApplicationSuccess.tsx` - success modal content
+- `src/components/apply/index.ts` - exports
+- `src/components/admin/ApplicationsList.tsx` - admin list view
+- `src/components/admin/ApplicationDetail.tsx` - admin detail view
 
 ---
 
-## 🔄 Core Flows
+## Files to Modify
 
-### Invest in Pool
-1. User views live pool → Enters amount
-2. System calculates: Amount + 2% fee = Total deducted
-3. Wallet debited → Position created → Pool raised amount updated
-4. Success toast + redirect to portfolio
+1. **src/types/index.ts** - Add new types
+2. **src/store/appStore.ts** - Add applications state and actions
+3. **src/pages/LandingPage.tsx** - Add startup CTA section
+4. **src/pages/AdminPage.tsx** - Add Applications tab
+5. **src/App.tsx** - Add /apply route
 
-### Pool Completion
-- **Filled**: Target reached → Status becomes "Active" → Positions locked
-- **Failed**: Time expires + under target → Auto-refund to wallets
+## Files to Create
 
-### Marketplace Trade
-1. Seller lists position (full or partial) with asking price
-2. Buyer purchases → 1% fee added to buyer's cost
-3. Seller receives proceeds → Buyer gets position
-4. Both see transactions in wallet history
-
-### Exit Distribution (Admin)
-1. Admin triggers exit on active pool
-2. Input exit multiple or total proceeds
-3. Calculate: Profit → 2% carry fee → Net distribution
-4. Pro-rata distribution to all position holders
-5. Summary shown with breakdown
+1. **src/pages/ApplyPage.tsx** - Main application page
+2. **src/components/apply/** - All form step components (8 files)
+3. **src/components/admin/** - Application management components (2 files)
 
 ---
 
-## 📊 Demo Data
+## User Flow
 
-**3 Startup Deals & Pools**:
-1. **TechFlow SaaS** (Italy) - LIVE: €620K/€1M raised, 38h remaining, Seed stage
-2. **NeuralAI** (Europe) - UPCOMING: €500K target, starts in 2 days, Pre-seed AI
-3. **GreenCommerce** - CLOSED/ACTIVE: €750K fully raised, marketplace enabled
+```text
+Landing Page
+     |
+     v
+[Apply Now Button]
+     |
+     v
+/apply (Step 1: Basics)
+     |
+     v
+Step 2: Team -> Step 3: Pitch -> Step 4: Materials -> Step 5: Fundraising
+     |
+     v
+Step 6: Review & Submit
+     |
+     v
+Success Modal (ID: VC-APP-000123)
+     |
+     v
+Back to Home
+```
 
-**Demo User**:
-- Wallet: €25,000
-- Position in GreenCommerce: €10,000 invested
-- One marketplace listing from another mock user
+**Admin Flow:**
+```text
+/admin -> Applications Tab -> View List -> Click Application -> Detail View -> Change Status / Add Notes
+```
 
 ---
 
-## ✨ UI Components
+## Demo Data
 
-- Progress bars (pool funding)
-- Countdown timers (pool end time)
-- Status badges (LIVE, UPCOMING, FILLED, FAILED, ACTIVE, EXITED)
-- Modal dialogs (invest, deposit, buy)
-- Toast notifications (success/error)
-- Data tables (transactions, positions)
-- Charts (portfolio value - mock)
-- Form validation with error messages
-- EUR formatting (European style: €1.000,00)
+Add 1-2 sample applications in different statuses for testing:
+- One "submitted" application from a mock startup
+- One "under_review" application with internal notes
 
