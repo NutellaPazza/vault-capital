@@ -15,6 +15,7 @@ import {
   ApplicationStatus,
   Founder,
   InternalNote,
+  MarketplaceOffer,
 } from '@/types';
 import {
   initialUser,
@@ -25,6 +26,7 @@ import {
   initialTransactions,
   initialNotifications,
   mockSellerUser,
+  initialOffers,
 } from '@/data/mockData';
 
 interface AppState {
@@ -42,6 +44,7 @@ interface AppState {
   notifications: Notification[];
   allUsers: User[];
   applications: StartupApplication[];
+  offers: MarketplaceOffer[];
   
   // Actions - Auth
   login: (email: string, password: string) => boolean;
@@ -66,6 +69,12 @@ interface AppState {
   createListing: (positionId: string, percentForSale: number, askPrice: number) => void;
   cancelListing: (listingId: string) => void;
   buyListing: (listingId: string) => boolean;
+  updateListing: (listingId: string, updates: { ask_price_eur?: number; percent_of_position_for_sale?: number }) => void;
+  
+  // Actions - Offers
+  createOffer: (listingId: string, offerPrice: number, message?: string) => void;
+  acceptOffer: (offerId: string) => boolean;
+  rejectOffer: (offerId: string) => void;
   
   // Actions - Notifications
   markNotificationRead: (notificationId: string) => void;
@@ -105,6 +114,7 @@ export const useAppStore = create<AppState>()(
       notifications: initialNotifications,
       allUsers: [initialUser, mockSellerUser],
       applications: [],
+      offers: initialOffers,
       
       // Auth actions
       login: (email, _password) => {
@@ -455,6 +465,214 @@ export const useAppStore = create<AppState>()(
           };
         });
       },
+
+      updateListing: (listingId, updates) => {
+        set(state => ({
+          listings: state.listings.map(l =>
+            l.id === listingId ? { ...l, ...updates } : l
+          ),
+        }));
+      },
+
+      // Offer actions
+      createOffer: (listingId, offerPrice, message) => {
+        const state = get();
+        if (!state.currentUser) return;
+
+        const newOffer: MarketplaceOffer = {
+          id: generateId(),
+          listing_id: listingId,
+          buyer_user_id: state.currentUser.id,
+          offer_price_eur: offerPrice,
+          offer_message: message,
+          status: 'pending',
+          created_at: new Date().toISOString(),
+        };
+
+        // Add notification for seller
+        const listing = state.listings.find(l => l.id === listingId);
+        const pool = listing ? state.pools.find(p => p.id === listing.pool_id) : null;
+        const deal = pool ? state.deals.find(d => d.id === pool.deal_id) : null;
+
+        const notification: Notification = {
+          id: generateId(),
+          user_id: listing?.seller_user_id || '',
+          title: 'New Offer Received',
+          message: `${state.currentUser.name} offered €${offerPrice.toLocaleString()} for your ${deal?.startup_name} listing`,
+          read: false,
+          created_at: new Date().toISOString(),
+          type: 'marketplace',
+        };
+
+        set(state => ({
+          offers: [...state.offers, newOffer],
+          notifications: [notification, ...state.notifications],
+        }));
+      },
+
+      acceptOffer: (offerId) => {
+        const state = get();
+        const offer = state.offers.find(o => o.id === offerId);
+        if (!offer) return false;
+
+        const listing = state.listings.find(l => l.id === offer.listing_id);
+        if (!listing || listing.status !== 'active') return false;
+
+        const buyer = state.allUsers.find(u => u.id === offer.buyer_user_id);
+        if (!buyer) return false;
+
+        const fee = offer.offer_price_eur * (listing.fee_marketplace_percent / 100);
+        const total = offer.offer_price_eur + fee;
+
+        if (buyer.wallet_balance_eur < total) return false;
+
+        const timestamp = new Date().toISOString();
+        const position = state.positions.find(p => p.id === listing.position_id);
+        if (!position) return false;
+
+        const pool = state.pools.find(p => p.id === listing.pool_id);
+        const deal = pool ? state.deals.find(d => d.id === pool.deal_id) : null;
+
+        const transferAmount = position.invested_eur * (listing.percent_of_position_for_sale / 100);
+        const transferOwnership = position.ownership_percent_of_spv * (listing.percent_of_position_for_sale / 100);
+        const transferValue = position.current_estimated_value_eur * (listing.percent_of_position_for_sale / 100);
+
+        // Buyer transactions
+        const buyTx: Transaction = {
+          id: generateId(),
+          user_id: offer.buyer_user_id,
+          type: 'market_buy',
+          amount_eur: -offer.offer_price_eur,
+          timestamp,
+          meta: { listing_id: listing.id, notes: `Bought ${listing.percent_of_position_for_sale}% of ${deal?.startup_name} position (via offer)` },
+        };
+
+        const buyFeeTx: Transaction = {
+          id: generateId(),
+          user_id: offer.buyer_user_id,
+          type: 'fee',
+          amount_eur: -fee,
+          timestamp,
+          meta: { listing_id: listing.id, notes: '1% marketplace fee' },
+        };
+
+        // Seller transaction
+        const sellTx: Transaction = {
+          id: generateId(),
+          user_id: listing.seller_user_id,
+          type: 'market_sell',
+          amount_eur: offer.offer_price_eur,
+          timestamp,
+          meta: { listing_id: listing.id, notes: `Sold ${listing.percent_of_position_for_sale}% of position (via offer)` },
+        };
+
+        // Update users wallets
+        let updatedUsers = state.allUsers.map(u => {
+          if (u.id === offer.buyer_user_id) {
+            return { ...u, wallet_balance_eur: u.wallet_balance_eur - total };
+          }
+          if (u.id === listing.seller_user_id) {
+            return { ...u, wallet_balance_eur: u.wallet_balance_eur + offer.offer_price_eur };
+          }
+          return u;
+        });
+
+        // Handle position transfer
+        const existingBuyerPosition = state.positions.find(
+          p => p.pool_id === listing.pool_id && p.user_id === offer.buyer_user_id
+        );
+
+        let newPositions = state.positions;
+
+        if (listing.percent_of_position_for_sale === 100) {
+          if (existingBuyerPosition) {
+            newPositions = state.positions
+              .filter(p => p.id !== listing.position_id)
+              .map(p =>
+                p.id === existingBuyerPosition.id
+                  ? {
+                      ...p,
+                      invested_eur: p.invested_eur + transferAmount,
+                      ownership_percent_of_spv: p.ownership_percent_of_spv + transferOwnership,
+                      current_estimated_value_eur: p.current_estimated_value_eur + transferValue,
+                    }
+                  : p
+              );
+          } else {
+            newPositions = state.positions.map(p =>
+              p.id === listing.position_id
+                ? { ...p, user_id: offer.buyer_user_id, is_listed_on_market: false }
+                : p
+            );
+          }
+        } else {
+          newPositions = state.positions.map(p =>
+            p.id === listing.position_id
+              ? {
+                  ...p,
+                  invested_eur: p.invested_eur - transferAmount,
+                  ownership_percent_of_spv: p.ownership_percent_of_spv - transferOwnership,
+                  current_estimated_value_eur: p.current_estimated_value_eur - transferValue,
+                  is_listed_on_market: false,
+                }
+              : p
+          );
+
+          if (existingBuyerPosition) {
+            newPositions = newPositions.map(p =>
+              p.id === existingBuyerPosition.id
+                ? {
+                    ...p,
+                    invested_eur: p.invested_eur + transferAmount,
+                    ownership_percent_of_spv: p.ownership_percent_of_spv + transferOwnership,
+                    current_estimated_value_eur: p.current_estimated_value_eur + transferValue,
+                  }
+                : p
+            );
+          } else {
+            const newPosition: Position = {
+              id: generateId(),
+              user_id: offer.buyer_user_id,
+              pool_id: listing.pool_id,
+              invested_eur: transferAmount,
+              ownership_percent_of_spv: transferOwnership,
+              current_estimated_value_eur: transferValue,
+              lockup: false,
+              is_listed_on_market: false,
+              created_at: timestamp,
+            };
+            newPositions = [...newPositions, newPosition];
+          }
+        }
+
+        // Update current user if they are involved
+        const currentUser = state.currentUser
+          ? updatedUsers.find(u => u.id === state.currentUser!.id) || state.currentUser
+          : null;
+
+        set({
+          offers: state.offers.map(o =>
+            o.id === offerId ? { ...o, status: 'accepted' as const } : o
+          ),
+          listings: state.listings.map(l =>
+            l.id === listing.id ? { ...l, status: 'sold' as const } : l
+          ),
+          positions: newPositions,
+          transactions: [buyFeeTx, buyTx, sellTx, ...state.transactions],
+          allUsers: updatedUsers,
+          currentUser,
+        });
+
+        return true;
+      },
+
+      rejectOffer: (offerId) => {
+        set(state => ({
+          offers: state.offers.map(o =>
+            o.id === offerId ? { ...o, status: 'rejected' as const } : o
+          ),
+        }));
+      },
       
       buyListing: (listingId) => {
         const state = get();
@@ -709,6 +927,7 @@ export const useAppStore = create<AppState>()(
           notifications: initialNotifications,
           allUsers: [initialUser, mockSellerUser],
           applications: [],
+          offers: initialOffers,
         });
       },
 

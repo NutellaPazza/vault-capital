@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/common';
 import { useAppStore } from '@/store/appStore';
 import { formatCurrency, formatCompactCurrency, formatPercent, formatDate } from '@/lib/formatters';
-import { TrendingUp, TrendingDown, ExternalLink, Store, PieChart, Newspaper, Calendar } from 'lucide-react';
+import { TrendingUp, TrendingDown, ExternalLink, Store, PieChart, Newspaper, Calendar, ShoppingBag } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -20,7 +20,7 @@ import { toast } from '@/hooks/use-toast';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 const PortfolioPage = () => {
-  const { getPositionsWithPools, createListing, pools, deals } = useAppStore();
+  const { getPositionsWithPools, createListing, pools, deals, listings } = useAppStore();
   const positions = getPositionsWithPools();
   
   const [listingPosition, setListingPosition] = useState<string | null>(null);
@@ -74,11 +74,26 @@ const PortfolioPage = () => {
     );
   };
 
+  // Get user's active listings
+  const myActiveListings = listings.filter(l => 
+    l.seller_user_id === positions[0]?.user_id && l.status === 'active'
+  );
+
   return (
     <div className="container py-6">
-      <div className="mb-6">
-        <h1 className="mb-2 text-2xl font-bold">Portfolio</h1>
-        <p className="text-muted-foreground">Track your startup investments</p>
+      <div className="mb-6 flex items-start justify-between">
+        <div>
+          <h1 className="mb-2 text-2xl font-bold">Portfolio</h1>
+          <p className="text-muted-foreground">Track your startup investments</p>
+        </div>
+        {myActiveListings.length > 0 && (
+          <Button variant="outline" asChild>
+            <Link to="/marketplace">
+              <ShoppingBag className="mr-2 h-4 w-4" />
+              Manage Listings ({myActiveListings.length})
+            </Link>
+          </Button>
+        )}
       </div>
 
       {/* Summary Cards */}
@@ -155,9 +170,9 @@ const PortfolioPage = () => {
                         </Link>
                         <StatusBadge status={position.pool.pool_status} />
                         {position.is_listed_on_market && (
-                          <span className="rounded bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground">
+                          <Link to="/marketplace" className="rounded bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground hover:bg-accent/80">
                             Listed
-                          </span>
+                          </Link>
                         )}
                       </div>
                       <p className="text-sm text-muted-foreground">
