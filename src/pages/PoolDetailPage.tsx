@@ -371,8 +371,8 @@ const PoolDetailPage = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {deal.company_updates.length > 0 ? (
-                      deal.company_updates.map((update, i) => (
+                    {(deal.company_updates || []).length > 0 ? (
+                      (deal.company_updates || []).map((update, i) => (
                         <div key={i} className="flex gap-4 border-l-2 border-primary pl-4">
                           <div className="flex-1">
                             <p className="font-medium">{update.headline}</p>
