@@ -6,23 +6,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { StatusBadge, CountdownTimer } from '@/components/common';
 import { useAppStore } from '@/store/appStore';
 import { formatCurrency, formatCompactCurrency, formatPercent, formatDate } from '@/lib/formatters';
 import { toast } from '@/hooks/use-toast';
 import { 
-  ArrowLeft, 
-  Users, 
-  Clock,
-  ExternalLink,
-  Info,
-  CheckCircle,
-  AlertTriangle,
-  FileText,
-  Linkedin,
-  Award,
-  Banknote,
-  Scale
+  ArrowLeft, Users, Clock, ExternalLink, Info, CheckCircle,
+  AlertTriangle, FileText, Linkedin, Award, Banknote, Scale,
+  Download, BarChart3, TrendingUp
 } from 'lucide-react';
 
 const PoolDetailPage = () => {
@@ -82,6 +74,14 @@ const PoolDetailPage = () => {
     
     setIsInvesting(false);
   };
+
+  // Extract key metrics from highlights
+  const keyMetrics = [
+    { label: 'Valuation', value: formatCompactCurrency(deal.valuation_pre_money), icon: BarChart3 },
+    { label: 'Equity Offered', value: `${deal.offer_equity_percent}%`, icon: TrendingUp },
+    { label: 'Stage', value: deal.stage.toUpperCase(), icon: Award },
+    { label: 'Min. Ticket', value: `€${deal.min_ticket_eur}`, icon: Banknote },
+  ];
 
   return (
     <div className="container py-6">
@@ -147,6 +147,23 @@ const PoolDetailPage = () => {
             </CardContent>
           </Card>
 
+          {/* Key Metrics Card */}
+          <Card className="mb-6">
+            <CardContent className="p-4">
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                {keyMetrics.map(m => (
+                  <div key={m.label} className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
+                    <m.icon className="h-5 w-5 text-primary" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">{m.label}</p>
+                      <p className="font-semibold">{m.value}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Tabs */}
           <Tabs defaultValue="overview">
             <TabsList className="w-full justify-start">
@@ -167,8 +184,6 @@ const PoolDetailPage = () => {
                   <p className="text-muted-foreground">{deal.long_description}</p>
                 </CardContent>
               </Card>
-
-              {/* Team moved to dedicated tab */}
               
               <Card>
                 <CardHeader>
@@ -210,7 +225,6 @@ const PoolDetailPage = () => {
             </TabsContent>
 
             <TabsContent value="team" className="space-y-4">
-              {/* Company Links */}
               {(deal.website_url || deal.founders?.some(f => f.linkedin_url)) && (
                 <Card>
                   <CardHeader>
@@ -230,7 +244,6 @@ const PoolDetailPage = () => {
                 </Card>
               )}
 
-              {/* Founders */}
               {deal.founders && deal.founders.length > 0 ? (
                 <Card>
                   <CardHeader>
@@ -243,23 +256,13 @@ const PoolDetailPage = () => {
                         <div key={i} className="rounded-lg border p-3">
                           <div className="flex items-start gap-3">
                             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">
-                              {founder.name
-                                .split(' ')
-                                .filter(Boolean)
-                                .map(n => n[0])
-                                .join('')}
+                              {founder.name.split(' ').filter(Boolean).map(n => n[0]).join('')}
                             </div>
                             <div className="min-w-0 flex-1">
                               <div className="flex items-center justify-between gap-2">
                                 <p className="truncate font-medium">{founder.name}</p>
                                 {founder.linkedin_url && (
-                                  <a
-                                    href={founder.linkedin_url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-muted-foreground hover:text-primary"
-                                    aria-label={`Open ${founder.name} on LinkedIn`}
-                                  >
+                                  <a href={founder.linkedin_url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary">
                                     <Linkedin className="h-5 w-5" />
                                   </a>
                                 )}
@@ -267,20 +270,13 @@ const PoolDetailPage = () => {
                               <p className="text-sm text-muted-foreground">{founder.role}</p>
                             </div>
                           </div>
-
                           {(founder.education || founder.background) && (
                             <div className="mt-3 space-y-1 text-sm">
                               {founder.education && (
-                                <p>
-                                  <span className="text-muted-foreground">Education: </span>
-                                  <span className="text-foreground">{founder.education}</span>
-                                </p>
+                                <p><span className="text-muted-foreground">Education: </span><span>{founder.education}</span></p>
                               )}
                               {founder.background && (
-                                <p>
-                                  <span className="text-muted-foreground">Background: </span>
-                                  <span className="text-foreground">{founder.background}</span>
-                                </p>
+                                <p><span className="text-muted-foreground">Background: </span><span>{founder.background}</span></p>
                               )}
                             </div>
                           )}
@@ -371,10 +367,21 @@ const PoolDetailPage = () => {
             <TabsContent value="updates">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Pool Updates</CardTitle>
+                  <CardTitle className="text-lg">Company Updates</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
+                    {deal.company_updates.length > 0 ? (
+                      deal.company_updates.map((update, i) => (
+                        <div key={i} className="flex gap-4 border-l-2 border-primary pl-4">
+                          <div className="flex-1">
+                            <p className="font-medium">{update.headline}</p>
+                            <p className="text-sm text-muted-foreground">{update.summary}</p>
+                            <p className="mt-1 text-xs text-muted-foreground">{formatDate(update.date)}</p>
+                          </div>
+                        </div>
+                      ))
+                    ) : null}
                     <div className="flex gap-4 border-l-2 border-primary pl-4">
                       <div className="flex-1">
                         <p className="font-medium">Pool Launched</p>
@@ -399,23 +406,40 @@ const PoolDetailPage = () => {
             <TabsContent value="documents">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Documents</CardTitle>
+                  <CardTitle className="text-lg">Documents & Resources</CardTitle>
+                  <CardDescription>Review all materials before investing</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <Button variant="outline" className="w-full justify-start gap-2" asChild>
-                    <a href={deal.docs.pitch_deck_url} target="_blank" rel="noopener noreferrer">
-                      <FileText className="h-4 w-4" />
-                      Pitch Deck
-                      <ExternalLink className="ml-auto h-4 w-4" />
-                    </a>
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start gap-2" asChild>
-                    <a href={deal.docs.data_room_url} target="_blank" rel="noopener noreferrer">
-                      <FileText className="h-4 w-4" />
-                      Data Room
-                      <ExternalLink className="ml-auto h-4 w-4" />
-                    </a>
-                  </Button>
+                  <a 
+                    href={deal.docs.pitch_deck_url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-4 rounded-lg border p-4 transition-colors hover:bg-muted/50"
+                  >
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
+                      <FileText className="h-6 w-6 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold">Pitch Deck</p>
+                      <p className="text-sm text-muted-foreground">Company presentation and business plan</p>
+                    </div>
+                    <Download className="h-5 w-5 text-muted-foreground" />
+                  </a>
+                  <a 
+                    href={deal.docs.data_room_url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-4 rounded-lg border p-4 transition-colors hover:bg-muted/50"
+                  >
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
+                      <FileText className="h-6 w-6 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold">Data Room</p>
+                      <p className="text-sm text-muted-foreground">Financial statements, contracts, and legal documents</p>
+                    </div>
+                    <Download className="h-5 w-5 text-muted-foreground" />
+                  </a>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -457,91 +481,102 @@ const PoolDetailPage = () => {
 
         {/* Invest Widget */}
         <div className="lg:col-span-1">
-          <Card className="sticky top-20">
-            <CardHeader>
-              <CardTitle>Invest in {deal.startup_name}</CardTitle>
-              <CardDescription>
-                Minimum investment: €{deal.min_ticket_eur}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {isLive ? (
-                <>
-                  <div className="space-y-2">
-                    <Label htmlFor="amount">Investment Amount (EUR)</Label>
-                    <Input
-                      id="amount"
-                      type="number"
-                      placeholder={`Min. €${deal.min_ticket_eur}`}
-                      value={investAmount}
-                      onChange={(e) => setInvestAmount(e.target.value)}
-                      min={deal.min_ticket_eur}
-                      step={100}
-                    />
-                    {amount > 0 && !meetsMinimum && (
-                      <p className="text-sm text-destructive">
-                        Minimum investment is €{deal.min_ticket_eur}
-                      </p>
+          <div className="sticky top-20 space-y-4">
+            {/* Risk Banner */}
+            <Alert className="border-warning/30 bg-warning/5">
+              <AlertTriangle className="h-4 w-4 text-warning" />
+              <AlertTitle className="text-sm text-warning">High Risk Investment</AlertTitle>
+              <AlertDescription className="text-xs text-muted-foreground">
+                Startup investments are speculative. You may lose your entire capital.
+              </AlertDescription>
+            </Alert>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Invest in {deal.startup_name}</CardTitle>
+                <CardDescription>
+                  Minimum investment: €{deal.min_ticket_eur}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {isLive ? (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="amount">Investment Amount (EUR)</Label>
+                      <Input
+                        id="amount"
+                        type="number"
+                        placeholder={`Min. €${deal.min_ticket_eur}`}
+                        value={investAmount}
+                        onChange={(e) => setInvestAmount(e.target.value)}
+                        min={deal.min_ticket_eur}
+                        step={100}
+                      />
+                      {amount > 0 && !meetsMinimum && (
+                        <p className="text-sm text-destructive">
+                          Minimum investment is €{deal.min_ticket_eur}
+                        </p>
+                      )}
+                    </div>
+
+                    {amount > 0 && meetsMinimum && (
+                      <div className="space-y-2 rounded-lg bg-muted p-3 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Investment</span>
+                          <span>{formatCurrency(amount)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Entry Fee ({pool.fee_entry_percent}%)</span>
+                          <span>{formatCurrency(fee)}</span>
+                        </div>
+                        <div className="flex justify-between border-t pt-2 font-medium">
+                          <span>Total</span>
+                          <span>{formatCurrency(total)}</span>
+                        </div>
+                      </div>
                     )}
-                  </div>
 
-                  {amount > 0 && meetsMinimum && (
-                    <div className="space-y-2 rounded-lg bg-muted p-3 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Investment</span>
-                        <span>{formatCurrency(amount)}</span>
+                    {currentUser && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Your Balance</span>
+                        <span className={!canAfford && amount > 0 ? 'text-destructive' : ''}>
+                          {formatCurrency(currentUser.wallet_balance_eur)}
+                        </span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Entry Fee ({pool.fee_entry_percent}%)</span>
-                        <span>{formatCurrency(fee)}</span>
-                      </div>
-                      <div className="flex justify-between border-t pt-2 font-medium">
-                        <span>Total</span>
-                        <span>{formatCurrency(total)}</span>
-                      </div>
+                    )}
+
+                    <Button 
+                      className="w-full" 
+                      size="lg" 
+                      disabled={!canInvest || isInvesting}
+                      onClick={handleInvest}
+                    >
+                      {isInvesting ? 'Processing...' : 'Invest Now'}
+                    </Button>
+
+                    <div className="flex items-start gap-2 rounded-lg bg-accent/50 p-3 text-xs text-muted-foreground">
+                      <Info className="mt-0.5 h-4 w-4 shrink-0" />
+                      <p>
+                        VaultCapital acts as nominee/SPV manager. Investors do not hold direct voting rights. 
+                        Exit timing decided by VaultCapital.
+                      </p>
                     </div>
-                  )}
-
-                  {currentUser && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Your Balance</span>
-                      <span className={!canAfford && amount > 0 ? 'text-destructive' : ''}>
-                        {formatCurrency(currentUser.wallet_balance_eur)}
-                      </span>
-                    </div>
-                  )}
-
-                  <Button 
-                    className="w-full" 
-                    size="lg" 
-                    disabled={!canInvest || isInvesting}
-                    onClick={handleInvest}
-                  >
-                    {isInvesting ? 'Processing...' : 'Invest Now'}
-                  </Button>
-
-                  <div className="flex items-start gap-2 rounded-lg bg-accent/50 p-3 text-xs text-muted-foreground">
-                    <Info className="mt-0.5 h-4 w-4 shrink-0" />
-                    <p>
-                      VaultCapital acts as nominee/SPV manager. Investors do not hold direct voting rights. 
-                      Exit timing decided by VaultCapital.
+                  </>
+                ) : (
+                  <div className="text-center text-muted-foreground">
+                    <p className="mb-2 font-medium">
+                      {pool.pool_status === 'upcoming' ? 'Pool not yet live' : 'Pool closed'}
+                    </p>
+                    <p className="text-sm">
+                      {pool.pool_status === 'upcoming' 
+                        ? `Opens ${formatDate(pool.start_datetime)}` 
+                        : 'This investment pool has ended'}
                     </p>
                   </div>
-                </>
-              ) : (
-                <div className="text-center text-muted-foreground">
-                  <p className="mb-2 font-medium">
-                    {pool.pool_status === 'upcoming' ? 'Pool not yet live' : 'Pool closed'}
-                  </p>
-                  <p className="text-sm">
-                    {pool.pool_status === 'upcoming' 
-                      ? `Opens ${formatDate(pool.start_datetime)}` 
-                      : 'This investment pool has ended'}
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>
