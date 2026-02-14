@@ -175,20 +175,23 @@ const DashboardPage = () => {
                   const pnl = pos.current_estimated_value_eur - pos.invested_eur;
                   const pnlPercent = (pnl / pos.invested_eur) * 100;
                   return (
-                    <div key={pos.id} className="flex items-center justify-between rounded-lg border p-3">
-                      <div>
-                        <p className="font-medium">{pos.deal.startup_name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          Invested {formatCurrency(pos.invested_eur, false)}
-                        </p>
+                    <Link key={pos.id} to={`/pool/${pos.pool_id}`} className="block">
+                      <div className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-muted/50">
+                        <div>
+                          <p className="font-medium">{pos.deal.startup_name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {pos.deal.industry} • {pos.deal.country} • {pos.deal.sector_type}
+                          </p>
+                          <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">{pos.deal.short_description}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-medium">{formatCurrency(pos.current_estimated_value_eur, false)}</p>
+                          <p className={`text-xs font-medium ${pnl >= 0 ? 'text-success' : 'text-destructive'}`}>
+                            {pnl >= 0 ? '+' : ''}{formatCurrency(pnl, false)} ({pnl >= 0 ? '+' : ''}{formatPercent(pnlPercent, 1)})
+                          </p>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <p className="font-medium">{formatCurrency(pos.current_estimated_value_eur, false)}</p>
-                        <p className={`text-xs font-medium ${pnl >= 0 ? 'text-success' : 'text-destructive'}`}>
-                          {pnl >= 0 ? '+' : ''}{formatCurrency(pnl, false)} ({pnl >= 0 ? '+' : ''}{formatPercent(pnlPercent, 1)})
-                        </p>
-                      </div>
-                    </div>
+                    </Link>
                   );
                 })}
               </CardContent>

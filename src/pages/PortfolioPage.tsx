@@ -176,8 +176,11 @@ const PortfolioPage = () => {
                         )}
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        {position.deal.industry} • Invested {formatDate(position.created_at)}
+                        {position.deal.industry} • {position.deal.sector_type} • {position.deal.country} • Invested {formatDate(position.created_at)}
                       </p>
+                      {position.deal.short_description && (
+                        <p className="mt-1 line-clamp-1 text-xs text-muted-foreground">{position.deal.short_description}</p>
+                      )}
                     </div>
                     
                     <div className="grid grid-cols-3 gap-4 text-center sm:gap-8">
@@ -213,15 +216,7 @@ const PortfolioPage = () => {
                           variant="secondary"
                           onClick={() => openListingDialog(position.id, position.current_estimated_value_eur)}
                         >
-                          <Store className="mr-1 h-4 w-4" /> List
-                        </Button>
-                      )}
-
-                      {canList && (
-                        <Button variant="outline" size="sm" asChild>
-                          <Link to={`/marketplace?tab=sell&positionId=${position.id}`}>
-                            <Store className="mr-1 h-4 w-4" /> Sell
-                          </Link>
+                          <Store className="mr-1 h-4 w-4" /> Sell
                         </Button>
                       )}
                     </div>
