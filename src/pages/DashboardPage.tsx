@@ -29,7 +29,7 @@ const DashboardPage = () => {
   // Company updates from invested deals
   const companyUpdates = positions
     .flatMap(p => 
-      p.deal.company_updates.map(u => ({ ...u, startup_name: p.deal.startup_name }))
+      (p.deal?.company_updates || []).map(u => ({ ...u, startup_name: p.deal.startup_name }))
     )
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .slice(0, 5);
