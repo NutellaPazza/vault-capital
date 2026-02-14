@@ -10,7 +10,7 @@ import { StatusBadge } from '@/components/common';
 import { useAppStore } from '@/store/appStore';
 import { formatCurrency, formatCompactCurrency, formatPercent, getTimeSince } from '@/lib/formatters';
 import { toast } from '@/hooks/use-toast';
-import { Store, Search, Plus, Eye, Edit, Trash2, Check, X, MessageSquare, DollarSign, ShoppingCart } from 'lucide-react';
+import { Store, Search, Plus, Eye, Edit, Trash2, Check, X, MessageSquare, DollarSign, ShoppingCart, HelpCircle } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -260,12 +260,68 @@ const MarketplacePage = () => {
     });
   }, [queryTab, querySection, myReceivedOffers.length]);
 
+  const [showHowItWorks, setShowHowItWorks] = useState(false);
+
   return (
     <div className="container py-6">
-      <div className="mb-6">
-        <h1 className="mb-2 text-2xl font-bold">Marketplace</h1>
-        <p className="text-muted-foreground">Buy and sell startup positions</p>
+      <div className="mb-6 flex items-start justify-between">
+        <div>
+          <h1 className="mb-2 text-2xl font-bold">Marketplace</h1>
+          <p className="text-muted-foreground">Buy and sell startup positions</p>
+        </div>
+        <Button variant="outline" size="sm" onClick={() => setShowHowItWorks(true)} className="gap-2">
+          <HelpCircle className="h-4 w-4" />
+          How It Works
+        </Button>
       </div>
+
+      {/* How It Works Dialog */}
+      <Dialog open={showHowItWorks} onOpenChange={setShowHowItWorks}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>How the Marketplace Works</DialogTitle>
+            <DialogDescription>Everything you need to know about buying and selling positions</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-5 py-2 text-sm">
+            <div>
+              <h4 className="mb-2 font-semibold flex items-center gap-2">
+                <ShoppingCart className="h-4 w-4 text-primary" /> Buying
+              </h4>
+              <p className="text-muted-foreground">
+                Browse available listings from other investors. You can buy at the asking price instantly, 
+                or make a custom offer with your preferred price and a message to the seller.
+              </p>
+            </div>
+            <div>
+              <h4 className="mb-2 font-semibold flex items-center gap-2">
+                <Store className="h-4 w-4 text-primary" /> Selling
+              </h4>
+              <p className="text-muted-foreground">
+                List positions from your portfolio. Choose what percentage to sell, set your price, 
+                and manage incoming offers. You can edit or cancel listings anytime.
+              </p>
+            </div>
+            <div>
+              <h4 className="mb-2 font-semibold flex items-center gap-2">
+                <DollarSign className="h-4 w-4 text-primary" /> Fees & Settlement
+              </h4>
+              <p className="text-muted-foreground">
+                A <strong>1% marketplace fee</strong> is charged to the buyer on every transaction. 
+                Settlement is instant: the position transfers to the buyer and the seller's wallet is credited immediately.
+              </p>
+            </div>
+            <div>
+              <h4 className="mb-2 font-semibold flex items-center gap-2">
+                <MessageSquare className="h-4 w-4 text-primary" /> Offers
+              </h4>
+              <p className="text-muted-foreground">
+                When you make an offer, the seller receives a notification and can accept or reject it. 
+                If accepted, the trade executes at your offered price (+ 1% fee). Offers remain pending until acted upon.
+              </p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as 'buy' | 'sell')} className="space-y-6">
         <TabsList className="grid w-full max-w-sm grid-cols-2">
