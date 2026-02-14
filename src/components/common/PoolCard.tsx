@@ -6,7 +6,7 @@ import { StatusBadge } from './StatusBadge';
 import { CountdownTimer } from './CountdownTimer';
 import { PoolWithDeal } from '@/types';
 import { formatCompactCurrency, formatPercent } from '@/lib/formatters';
-import { Users, TrendingUp } from 'lucide-react';
+import { Users, TrendingUp, MapPin, Briefcase, Globe } from 'lucide-react';
 
 interface PoolCardProps {
   pool: PoolWithDeal;
@@ -30,12 +30,28 @@ export const PoolCard = ({ pool, variant = 'default' }: PoolCardProps) => {
               </div>
               <StatusBadge status={pool.pool_status} />
             </div>
+            <p className="mb-3 line-clamp-2 text-xs text-muted-foreground">{pool.deal.short_description}</p>
+            <div className="mb-3 flex flex-wrap gap-1.5 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1 rounded bg-muted px-1.5 py-0.5">
+                <MapPin className="h-3 w-3" /> {pool.deal.country}
+              </span>
+              <span className="flex items-center gap-1 rounded bg-muted px-1.5 py-0.5">
+                <Briefcase className="h-3 w-3" /> {pool.deal.stage}
+              </span>
+              <span className="flex items-center gap-1 rounded bg-muted px-1.5 py-0.5">
+                {pool.deal.sector_type}
+              </span>
+            </div>
             <div className="space-y-2">
               <Progress value={progress} className="h-1.5" />
               <div className="flex justify-between text-xs text-muted-foreground">
                 <span>{formatCompactCurrency(pool.raised_eur)} raised</span>
                 <span>{formatPercent(progress, 0)}</span>
               </div>
+            </div>
+            <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
+              <span>{formatPercent(pool.deal.offer_equity_percent)} equity</span>
+              <span>Min €{pool.deal.min_ticket_eur}</span>
             </div>
           </CardContent>
         </Card>
@@ -107,7 +123,7 @@ export const PoolCard = ({ pool, variant = 'default' }: PoolCardProps) => {
     );
   }
 
-  // Default variant
+  // Default variant — enriched with more startup info
   return (
     <Link to={`/pool/${pool.id}`}>
       <Card className="h-full transition-shadow hover:shadow-md">
@@ -129,6 +145,27 @@ export const PoolCard = ({ pool, variant = 'default' }: PoolCardProps) => {
           <p className="line-clamp-2 text-sm text-muted-foreground">
             {pool.deal.short_description}
           </p>
+
+          {/* Key highlights */}
+          {pool.deal.highlights.length > 0 && (
+            <div className="space-y-1">
+              {pool.deal.highlights.slice(0, 2).map((h, i) => (
+                <p key={i} className="flex items-start gap-1.5 text-xs text-muted-foreground">
+                  <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                  <span className="line-clamp-1">{h}</span>
+                </p>
+              ))}
+            </div>
+          )}
+
+          {/* Tags */}
+          <div className="flex flex-wrap gap-1.5">
+            <span className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">{pool.deal.sector_type}</span>
+            <span className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">{pool.deal.country}</span>
+            {pool.deal.accelerator && (
+              <span className="rounded bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">{pool.deal.accelerator}</span>
+            )}
+          </div>
           
           <div className="space-y-1.5">
             <div className="flex justify-between text-sm">
@@ -155,7 +192,7 @@ export const PoolCard = ({ pool, variant = 'default' }: PoolCardProps) => {
           </div>
 
           <div className="flex items-center justify-between border-t pt-3 text-xs text-muted-foreground">
-            <span>{formatPercent(pool.deal.offer_equity_percent)} equity</span>
+            <span>{formatPercent(pool.deal.offer_equity_percent)} equity • Min €{pool.deal.min_ticket_eur}</span>
             <span className="flex items-center gap-1">
               <TrendingUp className="h-3 w-3" />
               {formatCompactCurrency(pool.deal.valuation_pre_money)} valuation
