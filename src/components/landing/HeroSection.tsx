@@ -8,10 +8,10 @@ const HeroSection = () =>
       Invest in Private Startups{' '}
       <span className="text-primary">from €100</span>
     </h1>
-    <p className="mb-8 max-w-2xl text-lg text-muted-foreground md:text-xl">
-      Access exclusive startup deals through pooled investments. 
-      Join a community of retail investors building tomorrow's success stories.
-    </p>
+    <p className="mb-8 max-w-2xl text-lg text-muted-foreground md:text-xl">Access exclusive startup deals through pooled investments. 
+Join a community of retail investors building tomorrow's success stories.
+
+  </p>
     <div className="flex flex-col gap-3 sm:flex-row">
       <Button size="lg" asChild>
         <Link to="/signup">
