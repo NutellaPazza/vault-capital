@@ -1,146 +1,150 @@
-# Comprehensive Platform Enhancement
 
-This plan covers all the improvements discussed: Landing Page overhaul, Dashboard dynamics, Pool Detail enhancements, and Marketplace explainer.  
-Allora, facciamo così: partiamo da quelle che sono le priorità alte. Tu mi dici che la landing page è troppo generica, sono d'accordo, però come possiamo migliorarla? Ok. Perché attualmente noi non abbiamo ancora effettivamente investito in startup, questa è un'idea, è un'idea di una startup che vorremmo andare ad un incubatore, quindi non abbiamo startup reali in cui abbiamo investito, ok? Quindi come possiamo farlo senza queste cose? Per la parte trust and compliance, tu mi dici che non c'è una sezione "chi siamo". Bene, aggiungiamola. Aggiungi una sezione nella landing page su chi siamo, dove mettiamo, eh, il, il nostro team, info sulla nostraaa struttura legale, su come gestiamo, eh, le, mmh, i pool, come gestiamo gli investimenti, le exit, le percentuali, eh, i rischi, eeeh, quali sono i benefici che ti dà investire con noi e tutte queste cose. Una sezione FAQ, ok? Che vada a rispondere a domande serie. Aaa, sempre-- questa la aggiungiamo sempre nella landing page. Aggiungiamo questo disclaimer su rischi, eeeh, e, eh, anche nella parte di onboarding o se sono nella landing page, facciamo capire che comunque è un investimento, è rischioso, però noi lo rendiamo bello, praticamente. Eh, poi per quanto riguarda quelli, i miglioramenti importanti, tu mi hai detto come migliorarlo e sono d'accordo, eh, quindi i documenti scaricabili, metriche chiave, la sezione del team, eeeh, il-- la progress bar del funding e tutte queste cose che devono portare sicurezza all'utente che sta andando ad investire, in modo tale che abbia quante più informazioni possibili su quello che effettivamente sta facendo, il-- così che sia spinto a farlo, quindi vai a fare queste migliorie. Ehm, anche per la parte di dashboard troppo statica, vai a fare queste migliorie, eh, mi piacciono i consigli che hai dato, valli ad applicare. Per quanto riguarda la pla-- la parte di marte- marketplace, dal punto di vista della user experience, eeeh, è giusto. È giusto, ma secondo me non serve tanto una sezione educativa, ma più che altro, eh, una sezione, eh, magari con un-- da accedere con un button, dove si spiega come funziona la sezione, eh, del marketplace, come funziona il pricing, le commissioni che prendiamo noi, ehm, cosa succede quando uno vende, cosa succede quando uno compra, in modo tale che abbiano, mmh, perfetta consapevolezza di quello che stanno andando a fare. Per quanto riguarda invece le idee che hai dato, ehm, mi piace molto quella dei company updates. E sì, eh, che, eh, ci sta che le startup in cui hai investito ti mandino dei report, quindi sarebbe una cosa da aggiungere, eh, e anche nella landing page, una cosa su cui spingere, sul fatto che comunque c'è trasparenza e tutte queste cose qua. Ci sta anche la simula-- il simulatore di rendimento, e questo sarebbe da mettere all'interno della landing page, dove a un certo punto tu dici: perché avresti dovuto investire con noi? E perché non è tardi neanche oggi. E poi gli fai vedere che, ehm, avessi investito cinquecento euro in una qualunque startup delle nostre, ad oggi avresti questo. Quindi, che ne so, una average delle nostre-- delle performance delle nostre startup si fa vedere, ok? Eeehm, ci sta il fatto di sp-- della struttura sul profilo utente e anche sulle notifiche, sarebbe da fare. La sezione learn, mmmh, per il momento lasciamola stare, mi va bene mettere, eh, quelle che sono, oh, le risorse sulle startup in cui stai investendo, però non è che ti devo fare la scuola sulla startup, ok?
+# Landing Page Overhaul v2
 
----
+Integro i tuoi commenti nel piano. Ecco le modifiche rispetto alla versione precedente:
 
-## 1. Landing Page Overhaul (`src/pages/LandingPage.tsx`)
-
-The landing page gets a major expansion with new sections. Since there are no real startups yet, stats will be reframed as aspirational/platform capabilities rather than fake numbers.
-
-### Changes:
-
-- **Return Simulator**: Interactive section with a slider. "If you had invested EUR 500 in a startup that grew 5x, today you'd have..." using average exit multiples. Uses `useState` + `Slider` component already available
-- **About Us / Chi Siamo**: New section with team placeholders (founders of VaultCapital), legal structure explanation (SPV/nominee model), how pools work, how exits work
-- **Fee Transparency**: Clear breakdown of 2% entry, 2% carry, 1% marketplace e non solo 
-- **FAQ Section**: Using the existing `Accordion` component. Questions like:
-  - What is VaultCapital?
-  - How does pooled investment work?
-  - What are the risks?
-  - How does the SPV structure work?
-  - Can I sell my position?
-  - What fees do you charge?
-  - How are exits handled?
-  - What is the minimum investment?
-- **Transparency Section**: Highlight company updates, investor reporting, full visibility on portfolio performance
-- **Risk Disclaimer**: Professional disclaimer about startup investment risks, not financial advice, potential total loss of capital
-- **Footer**: Update copyright to 2025, keep Privacy/Terms links
-
-### New imports needed:
-
-- `Slider` from `@/components/ui/slider`
-- `Accordion, AccordionItem, AccordionTrigger, AccordionContent` from `@/components/ui/accordion`
-- Additional Lucide icons: `Calculator, HelpCircle, Eye, FileCheck, Briefcase`
+**Tue note applicate:**
+- La subheadline unisce il concetto community con i dettagli concreti (curated deals, vaults, SPV)
+- Il risk disclaimer resta completo e chiaro, non viene accorciato ma viene riscritto meglio (senza dash)
+- Nessun dash nei testi
+- "Pool" diventa "Vault" ovunque nella landing
 
 ---
 
-## 2. Dashboard Improvements (`src/pages/DashboardPage.tsx`)
+## Fase 1: Hero Section (`src/components/landing/HeroSection.tsx`)
 
-Make the dashboard feel like a real command center.
+Riscrittura completa con layout a due colonne (desktop) e visual delle vault card.
 
-### Changes:
+**Copy:**
+- Headline: "Invest in Private Startups **from €100**"
+- Wow line: "Venture investing for the rest of us."
+- Subheadline: "Curated deals, 72 hour vaults, SPV backed ownership. Join a community of retail investors building tomorrow's success stories."
+- 3 micro bullet con icone: "72h vault window" | "From €100" | "Full refund if vault doesn't fill"
+- CTA primario: "Explore Vaults" -> /explore
+- CTA secondario ghost: "How It Works" -> /how-it-works
 
-- **Live Pool with Countdown**: Featured pool card gets a prominent countdown timer and progress bar showing funding %
-- **Portfolio Performance Chart**: Simple bar or summary showing each position's P&L with color coding (green/red)
-- **Company Updates Feed**: Pull `company_updates` from deals the user has invested in and show the latest ones as a timeline
-- **Recent Marketplace Activity**: Show user's active listings and any pending offers received
-- **Quick Stats Enhancement**: Add "Portfolio Performance" stat showing total % gain/loss
+**Visual (lato destro desktop, sotto su mobile):**
+- Stack di 3 card vault mock flottanti con ombra, bordi arrotondati, accento arancione solo su numeri/badge
+- Ogni card mostra: nome startup fittizio, badge stage (Seed/Series A), progress bar verso target, tempo rimanente (es. "48h left"), min ticket €100
+- Etichetta "Illustrative example" sopra le card
+- Animazione CSS float leggera (2px su/giù)
 
----
+**Social proof strip** (sotto i CTA):
+- Striscia sottile con 3 item: "Built for EU retail investors" | "Transparent fees" | "SPV structure"
+- Icone piccole + testo muted
 
-## 3. Pool Detail Page Improvements (`src/pages/PoolDetailPage.tsx`)
-
-The Team tab already exists. Enhance the overall page.
-
-### Changes:
-
-- **Key Metrics Card**: Add a new card in Overview showing structured metrics (ARR, growth rate, team size, etc.) extracted from deal highlights in a grid format
-- **Documents Tab Enhancement**: Make pitch deck and data room links more prominent with download-style buttons and file type indicators
-- **Company Updates Tab**: Already exists but enhance with timeline styling and icons per update type
-- **Risk Disclaimer Banner**: Add a small alert banner at top of invest sidebar reminding this is high-risk
-
----
-
-## 4. Marketplace "How It Works" Explainer
-
-### Changes in `src/pages/MarketplacePage.tsx`:
-
-- Add an info button/banner at top of marketplace that opens a Dialog or collapsible section explaining:
-  - How buying works (click listing, confirm purchase or make offer)
-  - How selling works (list position, set price, manage offers)
-  - Fee structure (1% marketplace fee on buyer)
-  - What happens after a sale (position transfers, wallet credited)
-  - Offer system explanation
+**Sfondo:** gradiente leggero con tinta arancione in alto a destra, opacità molto bassa
 
 ---
 
-## Files to Modify
+## Fase 2: "Why VaultCapital?" Cards (`src/pages/LandingPage.tsx`)
 
+Riscrittura contenuti delle 4 card:
 
-| File                            | Changes                                                                       |
-| ------------------------------- | ----------------------------------------------------------------------------- |
-| `src/pages/LandingPage.tsx`     | Major rewrite: About Us, FAQ, Return Simulator, Transparency, Risk Disclaimer |
-| `src/pages/DashboardPage.tsx`   | Add portfolio performance summary, company updates feed, marketplace activity |
-| `src/pages/PoolDetailPage.tsx`  | Add key metrics card, enhance documents tab, risk banner                      |
-| `src/pages/MarketplacePage.tsx` | Add "How it works" explainer dialog/section                                   |
+| Attuale | Nuovo Titolo | Nuovo Testo |
+|---------|-------------|-------------|
+| Curated Deals | Pre negotiated deals | We negotiate terms first. You decide if you want in. |
+| SPV Protected | SPV structure | One SPV on the cap table. Investors get economic exposure, not voting rights. |
+| Secondary Market | Resale board | List your position for sale. Liquidity is not guaranteed. |
+| Full Transparency | Transparent fees | Fees are shown before you invest and after an exit. No hidden charges. |
 
+**Visual per card:**
+- Icona mini grafica nell'header (term sheet, nodo cap table, listing tag, ricevuta)
+- Griglia più stretta, area contenuto leggermente più grande
+- Animazione hover lift (translateY di 2px)
 
-No new files needed. No new dependencies needed -- Slider, Accordion, Alert components are already installed and available.
+**Anche:** rimuovere dash dalla descrizione delle sezioni di navigazione (About, How It Works, FAQ)
 
 ---
 
-## Technical Details
+## Fase 3: Mini "How It Works" (`src/components/landing/HowItWorks.tsx`)
 
-### Return Simulator (Landing Page)
+Semplificazione da 4 step a 3, con timeline connessa:
+
+- Step 1: "We source and negotiate a deal" (icona Handshake)
+- Step 2: "A 72 hour vault opens" + sotto testo "Invest while the vault is live. If it doesn't fill, you're refunded." + badge "refund" (icona Clock)
+- Step 3: "SPV holds the investment" + sotto testo "The SPV owns the stake. VaultCapital manages admin and provides updates." (icona Briefcase)
+
+Linea sottile verticale (mobile) / orizzontale (desktop) che connette gli step.
+
+Link button: "Read the full process" -> /how-it-works
+
+Inserito nella landing tra "Why VaultCapital?" e Return Simulator.
+
+---
+
+## Fase 4: Return Simulator (`src/components/landing/ReturnSimulator.tsx`)
+
+- Disclaimer sotto il titolo: "This is a simulation. Returns are not guaranteed."
+- Modello fee corretto: entry fee ON TOP (l'importo investito resta intero)
+  - Investment: €500
+  - Entry fee (2%): €10
+  - Total paid: €510
+  - Gross return: €500 × multiple
+  - Carry fee: 2% solo sul profitto
+  - Net return mostrato chiaramente
+- Aggiungere riga "Total paid" nel riepilogo
+- Rimuovere dash dal testo descrittivo
+
+---
+
+## Fase 5: Startup CTA (`src/components/landing/StartupCta.tsx`)
+
+- Titolo: "Raising a round?"
+- Testo: "Apply to be considered for a VaultCapital vault. If selected, we may propose terms and open a public vault."
+- Bullet aggiornati: "Submit deck + metrics" | "Team review" | "If selected, we open a 72h vault"
+- Button: "Apply" -> /apply
+
+---
+
+## Fase 6: Risk Disclaimer (`src/components/landing/RiskDisclaimer.tsx`)
+
+Manteniamo la completezza ma riscriviamo senza dash e con linguaggio più diretto:
+
+- Titolo: "Risk Warning"
+- Paragrafo 1: "Investing in startups involves **significant risk**, including the potential **total loss of your invested capital**. Startup investments are illiquid, speculative, and not suitable for all investors."
+- Paragrafo 2: "VaultCapital does not provide financial advice. Past performance is not indicative of future results. You should carefully consider your financial situation and risk tolerance before investing."
+- Paragrafo 3: "Resale listings on the resale board may not find a buyer. Liquidity is not guaranteed."
+- Link: "Read full risk disclosure" -> /terms
+
+---
+
+## Fase 7: Final CTA e Footer (`src/pages/LandingPage.tsx`)
+
+- Titolo: "Ready to start?"
+- Testo: "Browse live vaults and invest starting from €100."
+- Button: "Explore Vaults" -> /explore
+- Footer: aggiungere riga "Fees shown upfront. No hidden charges."
+
+---
+
+## Fase 8: Visual Polish (`src/index.css`)
+
+Aggiungere CSS per:
 
 ```text
-State: investmentAmount (slider 100-10000), exitMultiple (slider 2x-10x)
-Output: investmentAmount * exitMultiple displayed dynamically
-Shows: "If you invested EUR {amount} and the startup exits at {multiple}x,
-        your return would be EUR {result} (before fees)"
-Fee note: "After 2% entry + 2% carry on profit, net return: EUR {net}"
-```
-
-### FAQ Data Structure
-
-```text
-Array of { question: string, answer: string }
-Rendered with Accordion component
-8-10 serious questions covering:
-- Platform mechanics
-- Legal structure
-- Risks
-- Fees
-- Liquidity (marketplace)
-- Exit process
-```
-
-### Dashboard Company Updates
-
-```text
-Pull from: deals where user has positions -> deal.company_updates
-Sort by date descending
-Show latest 5
-Each update: startup name, headline, summary, date
-```
-
-### Marketplace Explainer
-
-```text
-Triggered by info button next to page title
-Opens Dialog with sections:
-- Buying: browse, purchase at ask price or make an offer
-- Selling: list from portfolio, set price/%, manage offers
-- Fees: 1% on buyer
-- Settlement: instant wallet transfer
+1. @keyframes float: translateY 0 -> -2px -> 0 (3s ease-in-out infinite)
+2. Dot grid background: radial-gradient molto sottile, solo su schermi grandi
+3. Hover lift: transition transform, hover translateY(-2px)
+4. Progress bar animate: width da 0 a valore finale su load
 ```
 
 ---
 
-## Implementation Order
+## File da modificare
 
-1. Landing Page (biggest change, most impactful for pitch/incubator)
-2. Dashboard improvements
-3. Pool Detail enhancements
-4. Marketplace explainer
+| File | Modifiche |
+|------|-----------|
+| `src/components/landing/HeroSection.tsx` | Riscrittura completa: copy, vault card stack, social proof, gradiente |
+| `src/pages/LandingPage.tsx` | Card "Why VaultCapital", final CTA, footer trust line, inserire HowItWorks |
+| `src/components/landing/HowItWorks.tsx` | Da 4 a 3 step con timeline connessa |
+| `src/components/landing/ReturnSimulator.tsx` | Disclaimer, fee model on top |
+| `src/components/landing/StartupCta.tsx` | Copy aggiornato |
+| `src/components/landing/RiskDisclaimer.tsx` | Riscritto senza dash, completo ma più diretto |
+| `src/index.css` | Keyframes float, dot grid, hover lift |
+
+Nessuna nuova dipendenza. Tutto CSS puro.
+
+## Nota importante
+
+Il rename "Pool" -> "Vault" viene applicato solo nella landing page. Il resto dell'app (dashboard, explore, portfolio) può essere rinominato come task separato.
