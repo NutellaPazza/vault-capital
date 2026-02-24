@@ -120,3 +120,30 @@
     display: none;
   }
 }
+
+/* Vault card float animation */
+@keyframes vault-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+.vault-float {
+  animation: vault-float 3s ease-in-out infinite;
+}
+
+/* Hover lift */
+.hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -8px hsl(var(--foreground) / 0.1);
+}
+
+/* Dot grid background (large screens only) */
+@media (min-width: 1024px) {
+  .dot-grid-bg {
+    background-image: radial-gradient(circle, hsl(var(--foreground) / 0.04) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+}
