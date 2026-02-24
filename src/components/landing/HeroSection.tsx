@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Clock, Users, Shield } from 'lucide-react';
+import { ArrowRight, Clock, Shield, BanknoteArrowDown } from 'lucide-react';
 
-const HeroSection = () => (
-  <section className="container flex flex-col items-center py-16 text-center md:py-24">
+const HeroSection = () =>
+<section className="container flex flex-col items-center py-16 text-center md:py-24">
     <h1 className="mb-4 max-w-3xl text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">
       Invest in Private Startups{' '}
       <span className="text-primary">from €100</span>
@@ -34,7 +34,7 @@ const HeroSection = () => (
       </div>
       <div className="flex flex-col items-center gap-2">
         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-          <Users className="h-6 w-6 text-primary" />
+          <BanknoteArrowDown className="h-6 w-6 text-primary" />
         </div>
         <p className="text-lg font-bold">From €100</p>
         <p className="text-sm text-muted-foreground">Low minimum ticket</p>
@@ -47,7 +47,7 @@ const HeroSection = () => (
         <p className="text-sm text-muted-foreground">Professional legal structure</p>
       </div>
     </div>
-  </section>
-);
+  </section>;
+
 
 export default HeroSection;

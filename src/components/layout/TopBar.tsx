@@ -8,8 +8,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+  DropdownMenuTrigger } from
+'@/components/ui/dropdown-menu';
 
 export const TopBar = () => {
   const location = useLocation();
@@ -20,13 +20,13 @@ export const TopBar = () => {
     markNotificationRead,
     markAllNotificationsRead,
     isAdmin,
-    toggleAdmin,
+    toggleAdmin
   } = useAppStore();
 
-  const userNotifications = currentUser
-    ? notifications.filter(n => n.user_id === currentUser.id)
-    : [];
-  const unreadCount = userNotifications.filter(n => !n.read).length;
+  const userNotifications = currentUser ?
+  notifications.filter((n) => n.user_id === currentUser.id) :
+  [];
+  const unreadCount = userNotifications.filter((n) => !n.read).length;
   const isPublicPage = ['/', '/login', '/signup'].includes(location.pathname);
 
   if (isPublicPage) {
@@ -35,7 +35,7 @@ export const TopBar = () => {
         <div className="container flex h-14 items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-              <span className="text-sm font-bold text-primary-foreground">V</span>
+              <span className="text-sm font-bold text-primary-foreground">VC</span>
             </div>
             <span className="text-lg font-semibold">VaultCapital</span>
           </Link>
@@ -49,8 +49,8 @@ export const TopBar = () => {
             </Button>
           </div>
         </div>
-      </header>
-    );
+      </header>);
+
   }
 
   return (
@@ -65,75 +65,75 @@ export const TopBar = () => {
         
         <div className="flex items-center gap-1">
           {/* Wallet Balance */}
-          {currentUser && (
-            <Link to="/wallet">
+          {currentUser &&
+          <Link to="/wallet">
               <Button variant="ghost" size="sm" className="gap-1.5">
                 <Wallet className="h-4 w-4" />
                 <span className="font-medium">{formatCompactCurrency(currentUser.wallet_balance_eur)}</span>
               </Button>
             </Link>
-          )}
+          }
           
           {/* Notifications */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="relative">
                 <Bell className="h-5 w-5" />
-                {unreadCount > 0 && (
-                  <Badge 
-                    variant="destructive" 
-                    className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full p-0 text-xs"
-                  >
+                {unreadCount > 0 &&
+                <Badge
+                  variant="destructive"
+                  className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full p-0 text-xs">
+
                     {unreadCount}
                   </Badge>
-                )}
+                }
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-80">
               <div className="flex items-center justify-between border-b px-3 py-2">
                 <span className="font-medium">Notifications</span>
-                {unreadCount > 0 && (
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="h-auto p-0 text-xs text-primary"
-                    onClick={markAllNotificationsRead}
-                  >
+                {unreadCount > 0 &&
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-auto p-0 text-xs text-primary"
+                  onClick={markAllNotificationsRead}>
+
                     Mark all read
                   </Button>
-                )}
+                }
               </div>
               <div className="max-h-64 overflow-y-auto">
-                {userNotifications.slice(0, 5).map(notification => (
-                  <DropdownMenuItem
-                    key={notification.id}
-                    className="flex flex-col items-start gap-1 p-3"
-                    onClick={() => {
-                      markNotificationRead(notification.id);
+                {userNotifications.slice(0, 5).map((notification) =>
+                <DropdownMenuItem
+                  key={notification.id}
+                  className="flex flex-col items-start gap-1 p-3"
+                  onClick={() => {
+                    markNotificationRead(notification.id);
 
-                      if (notification.type === 'marketplace') {
-                        navigate('/marketplace?tab=sell&section=offers');
-                      } else if (notification.type === 'portfolio') {
-                        navigate('/portfolio');
-                      } else if (notification.type === 'pool') {
-                        navigate('/explore');
-                      }
-                    }}
-                  >
+                    if (notification.type === 'marketplace') {
+                      navigate('/marketplace?tab=sell&section=offers');
+                    } else if (notification.type === 'portfolio') {
+                      navigate('/portfolio');
+                    } else if (notification.type === 'pool') {
+                      navigate('/explore');
+                    }
+                  }}>
+
                     <div className="flex w-full items-center gap-2">
                       <span
-                        className={`font-medium ${!notification.read ? 'text-foreground' : 'text-muted-foreground'}`}
-                      >
+                      className={`font-medium ${!notification.read ? 'text-foreground' : 'text-muted-foreground'}`}>
+
                         {notification.title}
                       </span>
                       {!notification.read && <span className="h-2 w-2 rounded-full bg-primary" />}
                     </div>
                     <span className="text-xs text-muted-foreground">{notification.message}</span>
                   </DropdownMenuItem>
-                ))}
-                {userNotifications.length === 0 && (
-                  <div className="p-4 text-center text-sm text-muted-foreground">No notifications</div>
                 )}
+                {userNotifications.length === 0 &&
+                <div className="p-4 text-center text-sm text-muted-foreground">No notifications</div>
+                }
               </div>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -155,15 +155,15 @@ export const TopBar = () => {
               <DropdownMenuItem onClick={toggleAdmin}>
                 {isAdmin ? 'Exit Admin Mode' : 'Enable Admin Mode'}
               </DropdownMenuItem>
-              {isAdmin && (
-                <DropdownMenuItem asChild>
+              {isAdmin &&
+              <DropdownMenuItem asChild>
                   <Link to="/admin">Admin Panel</Link>
                 </DropdownMenuItem>
-              )}
+              }
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </div>
-    </header>
-  );
+    </header>);
+
 };
