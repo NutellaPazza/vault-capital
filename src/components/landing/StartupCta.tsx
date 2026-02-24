@@ -12,28 +12,28 @@ const StartupCta = () => (
             <Rocket className="h-8 w-8 text-primary" />
           </div>
           <div className="flex-1">
-            <h3 className="mb-2 text-xl font-bold">Are you a startup opening a round?</h3>
+            <h3 className="mb-2 text-xl font-bold">Raising a round?</h3>
             <p className="mb-4 text-muted-foreground">
-              Apply to collaborate with VaultCapital. If we're interested, we'll contact you to evaluate a potential offer and open a Pool on our platform.
+              Apply to be considered for a VaultCapital vault. If selected, we may propose terms and open a public vault.
             </p>
             <div className="mb-4 flex flex-wrap justify-center gap-4 text-sm text-muted-foreground md:justify-start">
               <span className="flex items-center gap-1">
                 <CheckCircle className="h-4 w-4 text-primary" />
-                Submit your pitch and metrics
+                Submit deck + metrics
               </span>
               <span className="flex items-center gap-1">
                 <CheckCircle className="h-4 w-4 text-primary" />
-                Internal team evaluation
+                Team review
               </span>
               <span className="flex items-center gap-1">
                 <CheckCircle className="h-4 w-4 text-primary" />
-                If selected, we open a public Pool
+                If selected, we open a 72h vault
               </span>
             </div>
           </div>
           <Button size="lg" asChild>
             <Link to="/apply">
-              Apply Now <ArrowRight className="ml-2 h-4 w-4" />
+              Apply <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
         </div>
