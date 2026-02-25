@@ -25,8 +25,7 @@ const HeroSection = () => (
           <span className="text-primary">from €100</span>
         </h1>
         <p className="mb-8 max-w-xl text-lg text-muted-foreground md:text-xl">
-          Curated deals, 72 hour vaults, SPV backed ownership.
-          Join a community of retail investors building tomorrow's success stories.
+          Curated deals. 72 hour vaults. SPV held positions.
         </p>
 
         {/* Micro bullets */}
@@ -67,7 +66,7 @@ const HeroSection = () => (
         <div className="mt-10 flex flex-wrap justify-center gap-6 border-t pt-6 md:justify-start">
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <Shield className="h-3.5 w-3.5" />
-            <span>Built for EU retail investors</span>
+            <span>Designed for EU investors</span>
           </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <Banknote className="h-3.5 w-3.5" />
@@ -82,7 +81,7 @@ const HeroSection = () => (
 
       {/* Right: Vault Card Stack */}
       <div className="relative mx-auto w-full max-w-sm md:mx-0 md:flex-1">
-        <p className="mb-3 text-center text-xs text-muted-foreground">Illustrative example</p>
+        <p className="mb-3 text-center text-[11px] text-muted-foreground">Example vaults</p>
         <div className="relative h-[320px]">
           {mockVaults.map((vault, i) => (
             <div

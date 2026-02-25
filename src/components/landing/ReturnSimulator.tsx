@@ -9,9 +9,9 @@ const ReturnSimulator = () => {
   const [multiple, setMultiple] = useState(5);
 
   const entryFee = investment * 0.02;
-  const totalPaid = investment + entryFee;
-  const grossReturn = investment * multiple;
-  const profit = grossReturn - investment;
+  const amountInVault = investment - entryFee;
+  const grossReturn = amountInVault * multiple;
+  const profit = grossReturn - amountInVault;
   const carryFee = profit > 0 ? profit * 0.02 : 0;
   const netReturn = grossReturn - carryFee;
   const netProfit = netReturn - investment;
@@ -27,7 +27,7 @@ const ReturnSimulator = () => {
           See what your investment could become. Startup investing is high risk, but when it works, the returns speak for themselves.
         </p>
         <p className="mb-8 text-sm font-medium text-warning">
-          This is a simulation. Returns are not guaranteed.
+          Illustration only. Returns are not guaranteed.
         </p>
       </div>
 
@@ -78,12 +78,12 @@ const ReturnSimulator = () => {
               <span className="font-medium">{formatCurrency(investment, false)}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Entry fee (2%, charged on top)</span>
-              <span className="font-medium">+{formatCurrency(entryFee, false)}</span>
+              <span className="text-muted-foreground">Entry fee (2%, deducted)</span>
+              <span className="font-medium">{formatCurrency(entryFee, false)}</span>
             </div>
             <div className="flex justify-between text-sm border-b pb-3">
-              <span className="font-medium">Total paid</span>
-              <span className="font-semibold">{formatCurrency(totalPaid, false)}</span>
+              <span className="font-medium">Amount in vault</span>
+              <span className="font-semibold">{formatCurrency(amountInVault, false)}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Gross return ({multiple}x)</span>
