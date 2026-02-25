@@ -1,150 +1,71 @@
 
-# Landing Page Overhaul v2
 
-Integro i tuoi commenti nel piano. Ecco le modifiche rispetto alla versione precedente:
+# Refinamento Copy e Coerenza Legale
 
-**Tue note applicate:**
-- La subheadline unisce il concetto community con i dettagli concreti (curated deals, vaults, SPV)
-- Il risk disclaimer resta completo e chiaro, non viene accorciato ma viene riscritto meglio (senza dash)
-- Nessun dash nei testi
-- "Pool" diventa "Vault" ovunque nella landing
+Il feedback è molto preciso e individua problemi reali di coerenza. Ecco le modifiche necessarie:
 
----
+## Problema principale: Incoerenza fee
 
-## Fase 1: Hero Section (`src/components/landing/HeroSection.tsx`)
-
-Riscrittura completa con layout a due colonne (desktop) e visual delle vault card.
-
-**Copy:**
-- Headline: "Invest in Private Startups **from €100**"
-- Wow line: "Venture investing for the rest of us."
-- Subheadline: "Curated deals, 72 hour vaults, SPV backed ownership. Join a community of retail investors building tomorrow's success stories."
-- 3 micro bullet con icone: "72h vault window" | "From €100" | "Full refund if vault doesn't fill"
-- CTA primario: "Explore Vaults" -> /explore
-- CTA secondario ghost: "How It Works" -> /how-it-works
-
-**Visual (lato destro desktop, sotto su mobile):**
-- Stack di 3 card vault mock flottanti con ombra, bordi arrotondati, accento arancione solo su numeri/badge
-- Ogni card mostra: nome startup fittizio, badge stage (Seed/Series A), progress bar verso target, tempo rimanente (es. "48h left"), min ticket €100
-- Etichetta "Illustrative example" sopra le card
-- Animazione CSS float leggera (2px su/giù)
-
-**Social proof strip** (sotto i CTA):
-- Striscia sottile con 3 item: "Built for EU retail investors" | "Transparent fees" | "SPV structure"
-- Icone piccole + testo muted
-
-**Sfondo:** gradiente leggero con tinta arancione in alto a destra, opacità molto bassa
+Attualmente c'è una **contraddizione critica**: la pagina /how-it-works dice che la entry fee è "deducted from your invested amount" (€1,000 → €980 nel pool), ma il Return Simulator la calcola "on top" (€500 + €10 = €510). Bisogna allineare tutto al modello "deducted from" come descritto nel /how-it-works.
 
 ---
 
-## Fase 2: "Why VaultCapital?" Cards (`src/pages/LandingPage.tsx`)
+## Modifiche per file
 
-Riscrittura contenuti delle 4 card:
+### 1. `src/components/landing/HeroSection.tsx`
 
-| Attuale | Nuovo Titolo | Nuovo Testo |
-|---------|-------------|-------------|
-| Curated Deals | Pre negotiated deals | We negotiate terms first. You decide if you want in. |
-| SPV Protected | SPV structure | One SPV on the cap table. Investors get economic exposure, not voting rights. |
-| Secondary Market | Resale board | List your position for sale. Liquidity is not guaranteed. |
-| Full Transparency | Transparent fees | Fees are shown before you invest and after an exit. No hidden charges. |
+**A) Subheadline** (riga 27-29): rimuovere "Join a community..." e rendere più secca:
+- Da: "Curated deals, 72 hour vaults, SPV backed ownership. Join a community of retail investors building tomorrow's success stories."
+- A: "Curated deals. 72 hour vaults. SPV held positions."
 
-**Visual per card:**
-- Icona mini grafica nell'header (term sheet, nodo cap table, listing tag, ricevuta)
-- Griglia più stretta, area contenuto leggermente più grande
-- Animazione hover lift (translateY di 2px)
+**E) Trust strip** (riga 70): cambiare "Built for EU retail investors" in "Designed for EU investors"
 
-**Anche:** rimuovere dash dalla descrizione delle sezioni di navigazione (About, How It Works, FAQ)
+**Label vault card** (riga 85): cambiare "Illustrative example" in "Example vaults" con testo più piccolo e chiaro
 
----
+### 2. `src/components/landing/ReturnSimulator.tsx`
 
-## Fase 3: Mini "How It Works" (`src/components/landing/HowItWorks.tsx`)
+**B) Allineamento fee** (righe 11-17): ricalcolare con fee deducted from investment:
+- `amountInVault = investment * 0.98` (la fee viene sottratta)
+- `entryFee = investment * 0.02`
+- Rimuovere "Total paid" e "charged on top"
+- Il gross return si calcola su `amountInVault`, non su `investment`
+- Esempio: Investment €500, Entry fee €10, Amount in vault €490, Gross return = €490 × multiple
 
-Semplificazione da 4 step a 3, con timeline connessa:
+**G) Disclaimer** (riga 29-30): cambiare in "Illustration only. Returns are not guaranteed."
 
-- Step 1: "We source and negotiate a deal" (icona Handshake)
-- Step 2: "A 72 hour vault opens" + sotto testo "Invest while the vault is live. If it doesn't fill, you're refunded." + badge "refund" (icona Clock)
-- Step 3: "SPV holds the investment" + sotto testo "The SPV owns the stake. VaultCapital manages admin and provides updates." (icona Briefcase)
+### 3. `src/pages/HowItWorksPage.tsx`
 
-Linea sottile verticale (mobile) / orizzontale (desktop) che connette gli step.
+**C) Rimuovere "maximizing returns"** (riga 116): sostituire la frase sulle major decisions:
+- Da: "Major decisions... always with the goal of maximizing returns for all investors."
+- A: "Major decisions (e.g., whether to accept an acquisition offer, participate in follow on rounds, or exit) are handled by VaultCapital's investment committee under a documented policy. Investors receive updates before and after major actions when possible."
 
-Link button: "Read the full process" -> /how-it-works
+**D) Conflict of interest** (riga 120): aggiungere sotto la frase esistente:
+- Aggiungere: "Any potential conflicts are disclosed deal by deal."
 
-Inserito nella landing tra "Why VaultCapital?" e Return Simulator.
+### 4. `src/components/landing/RiskDisclaimer.tsx`
 
----
+**F) Resale wording** (riga 21): rendere più diretto:
+- Da: "Resale listings on the resale board may not find a buyer. Liquidity is not guaranteed."
+- A: "Resale listings on the resale board may not find a buyer. Liquidity is not guaranteed. Listings may not sell."
 
-## Fase 4: Return Simulator (`src/components/landing/ReturnSimulator.tsx`)
+### 5. `src/index.css`
 
-- Disclaimer sotto il titolo: "This is a simulation. Returns are not guaranteed."
-- Modello fee corretto: entry fee ON TOP (l'importo investito resta intero)
-  - Investment: €500
-  - Entry fee (2%): €10
-  - Total paid: €510
-  - Gross return: €500 × multiple
-  - Carry fee: 2% solo sul profitto
-  - Net return mostrato chiaramente
-- Aggiungere riga "Total paid" nel riepilogo
-- Rimuovere dash dal testo descrittivo
+**H) Dot grid opacity** (riga 146): ridurre da 0.04 a 0.03 (~20% in meno)
 
 ---
 
-## Fase 5: Startup CTA (`src/components/landing/StartupCta.tsx`)
+## Riepilogo impatto
 
-- Titolo: "Raising a round?"
-- Testo: "Apply to be considered for a VaultCapital vault. If selected, we may propose terms and open a public vault."
-- Bullet aggiornati: "Submit deck + metrics" | "Team review" | "If selected, we open a 72h vault"
-- Button: "Apply" -> /apply
+| Cosa | Stato attuale | Dopo |
+|------|--------------|------|
+| Fee model | Contraddittorio (on top vs deducted) | Coerente: deducted from investment |
+| Hero subheadline | Contiene "community" fluff | Secca e specifica |
+| Trust strip | "Built for EU retail investors" | "Designed for EU investors" |
+| "maximizing returns" | Promessa implicita | Language neutro e policy based |
+| Conflict of interest | Manca disclosure | Aggiunta riga disclosure |
+| Resale wording | Generico | Aggiunto "Listings may not sell." |
+| Vault card label | "Illustrative example" | "Example vaults" |
+| Dot grid | Opacity 0.04 | Opacity 0.03 |
+| Simulator disclaimer | "This is a simulation..." | "Illustration only. Returns are not guaranteed." |
 
----
-
-## Fase 6: Risk Disclaimer (`src/components/landing/RiskDisclaimer.tsx`)
-
-Manteniamo la completezza ma riscriviamo senza dash e con linguaggio più diretto:
-
-- Titolo: "Risk Warning"
-- Paragrafo 1: "Investing in startups involves **significant risk**, including the potential **total loss of your invested capital**. Startup investments are illiquid, speculative, and not suitable for all investors."
-- Paragrafo 2: "VaultCapital does not provide financial advice. Past performance is not indicative of future results. You should carefully consider your financial situation and risk tolerance before investing."
-- Paragrafo 3: "Resale listings on the resale board may not find a buyer. Liquidity is not guaranteed."
-- Link: "Read full risk disclosure" -> /terms
-
----
-
-## Fase 7: Final CTA e Footer (`src/pages/LandingPage.tsx`)
-
-- Titolo: "Ready to start?"
-- Testo: "Browse live vaults and invest starting from €100."
-- Button: "Explore Vaults" -> /explore
-- Footer: aggiungere riga "Fees shown upfront. No hidden charges."
-
----
-
-## Fase 8: Visual Polish (`src/index.css`)
-
-Aggiungere CSS per:
-
-```text
-1. @keyframes float: translateY 0 -> -2px -> 0 (3s ease-in-out infinite)
-2. Dot grid background: radial-gradient molto sottile, solo su schermi grandi
-3. Hover lift: transition transform, hover translateY(-2px)
-4. Progress bar animate: width da 0 a valore finale su load
-```
-
----
-
-## File da modificare
-
-| File | Modifiche |
-|------|-----------|
-| `src/components/landing/HeroSection.tsx` | Riscrittura completa: copy, vault card stack, social proof, gradiente |
-| `src/pages/LandingPage.tsx` | Card "Why VaultCapital", final CTA, footer trust line, inserire HowItWorks |
-| `src/components/landing/HowItWorks.tsx` | Da 4 a 3 step con timeline connessa |
-| `src/components/landing/ReturnSimulator.tsx` | Disclaimer, fee model on top |
-| `src/components/landing/StartupCta.tsx` | Copy aggiornato |
-| `src/components/landing/RiskDisclaimer.tsx` | Riscritto senza dash, completo ma più diretto |
-| `src/index.css` | Keyframes float, dot grid, hover lift |
-
-Nessuna nuova dipendenza. Tutto CSS puro.
-
-## Nota importante
-
-Il rename "Pool" -> "Vault" viene applicato solo nella landing page. Il resto dell'app (dashboard, explore, portfolio) può essere rinominato come task separato.
+Nessuna nuova dipendenza. Nessun cambio di UI/layout, solo copy e logica fee.
