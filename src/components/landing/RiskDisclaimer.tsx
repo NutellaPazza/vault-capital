@@ -18,7 +18,7 @@ const RiskDisclaimer = () => (
           You should carefully consider your financial situation and risk tolerance before investing.
         </p>
         <p>
-          Resale listings on the resale board may not find a buyer. Liquidity is not guaranteed.{' '}
+          Resale listings on the resale board may not find a buyer. Liquidity is not guaranteed. Listings may not sell.{' '}
           <Link to="/terms" className="font-medium text-primary hover:underline">Read full risk disclosure</Link>.
         </p>
       </AlertDescription>

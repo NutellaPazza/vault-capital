@@ -113,11 +113,11 @@ const HowItWorksPage = () => (
               </li>
               <li className="flex items-start gap-3 text-muted-foreground">
                 <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                <span><strong>Major decisions</strong> (e.g., whether to accept an acquisition offer, participate in follow-on rounds, or exit) are made by VaultCapital's investment committee, always with the goal of maximizing returns for all investors.</span>
+                <span><strong>Major decisions</strong> (e.g., whether to accept an acquisition offer, participate in follow on rounds, or exit) are handled by VaultCapital's investment committee under a documented policy. Investors receive updates before and after major actions when possible.</span>
               </li>
               <li className="flex items-start gap-3 text-muted-foreground">
                 <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                <span><strong>Conflict of interest policy:</strong> VaultCapital does not invest its own capital alongside pool investors to avoid conflicts. Our revenue comes exclusively from fees.</span>
+                <span><strong>Conflict of interest policy:</strong> VaultCapital does not invest its own capital alongside pool investors to avoid conflicts. Our revenue comes exclusively from fees. Any potential conflicts are disclosed deal by deal.</span>
               </li>
             </ul>
           </CardContent>
