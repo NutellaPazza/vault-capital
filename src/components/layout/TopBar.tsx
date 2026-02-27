@@ -60,10 +60,11 @@ export const TopBar = () => {
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
             <span className="text-sm font-bold text-primary-foreground">V</span>
           </div>
-          <span className="text-lg font-semibold">VaultCapital</span>
-        </Link>
-        
-        <div className="flex items-center gap-1">
+            <span className="text-lg font-semibold">VaultCapital</span>
+            <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0">Demo</Badge>
+          </Link>
+          
+          <div className="flex items-center gap-1">
           {/* Wallet Balance */}
           {currentUser &&
           <Link to="/wallet">

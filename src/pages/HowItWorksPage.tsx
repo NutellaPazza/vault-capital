@@ -17,12 +17,12 @@ const steps = [
   {
     icon: Clock,
     title: '2. Pool Opens (72 Hours)',
-    description: 'When a deal is approved, we open an investment pool for exactly 72 hours. During this window, investors can commit capital starting from just €100. The pool has a target raise amount and a minimum that must be met for the deal to proceed.',
+    description: 'When a deal is approved, we open an investment vault for exactly 72 hours. During this window, investors can commit capital starting from just €100. The vault has a target raise amount and a minimum that must be met for the deal to proceed.',
   },
   {
     icon: Shield,
     title: '3. SPV Formation & Investment',
-    description: 'Once the pool closes successfully, VaultCapital creates a Special Purpose Vehicle (SPV) — a separate legal entity that pools all investor capital. The SPV then invests directly in the startup on behalf of all participants under pre-negotiated terms.',
+    description: 'Once the vault closes successfully, VaultCapital creates a Special Purpose Vehicle (SPV) that pools all investor capital. The SPV then invests directly in the startup on behalf of all participants under pre-negotiated terms.',
   },
   {
     icon: TrendingUp,
@@ -93,8 +93,8 @@ const HowItWorksPage = () => (
             </div>
             <p className="mb-4 text-muted-foreground">
               A Special Purpose Vehicle (SPV) is an independent legal entity created specifically to hold a single investment. 
-              When you invest through VaultCapital, your capital is pooled into an SPV alongside other investors. 
-              This SPV — not VaultCapital directly — makes the investment in the startup.
+               When you invest through VaultCapital, your capital is pooled into an SPV alongside other investors. 
+               This SPV, not VaultCapital directly, makes the investment in the startup.
             </p>
             <p className="text-muted-foreground">
               This means your investment is legally separated from VaultCapital's operating business. 
@@ -110,13 +110,14 @@ const HowItWorksPage = () => (
               <Scale className="h-6 w-6 text-primary" />
               <h3 className="text-xl font-semibold">Governance & Voting Rights</h3>
             </div>
-            <p className="mb-4 text-muted-foreground">
-              VaultCapital acts as the <strong>nominee and manager</strong> of each SPV. This means:
-            </p>
+             <p className="mb-4 text-muted-foreground">
+               VaultCapital acts as the <strong>nominee and manager</strong> of each SPV. This means:
+             </p>
+
             <ul className="space-y-3">
               <li className="flex items-start gap-3 text-muted-foreground">
                 <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                <span><strong>Voting rights</strong> are exercised by VaultCapital on behalf of all pool participants. This simplifies governance and ensures a single, coherent voice at the cap table.</span>
+                <span><strong>Voting rights</strong> are exercised by VaultCapital on behalf of all vault participants. This simplifies governance and ensures a single, coherent voice at the cap table.</span>
               </li>
               <li className="flex items-start gap-3 text-muted-foreground">
                 <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
@@ -124,11 +125,11 @@ const HowItWorksPage = () => (
               </li>
               <li className="flex items-start gap-3 text-muted-foreground">
                 <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                <span><strong>Major decisions</strong> (e.g., whether to accept an acquisition offer, participate in follow on rounds, or exit) are handled by VaultCapital's investment committee under a documented policy. Investors receive updates before and after major actions when possible.</span>
+                <span><strong>Major decisions</strong> (whether to accept an acquisition offer, participate in follow on rounds, or exit) are handled by VaultCapital's investment committee under a documented policy. Investors receive updates before and after major actions when possible.</span>
               </li>
               <li className="flex items-start gap-3 text-muted-foreground">
                 <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                <span><strong>Conflict of interest policy:</strong> VaultCapital does not invest its own capital alongside pool investors to avoid conflicts. Our revenue comes exclusively from fees. Any potential conflicts are disclosed deal by deal.</span>
+                <span><strong>Conflict of interest policy:</strong> VaultCapital does not invest its own capital alongside vault investors to avoid conflicts. Our revenue comes exclusively from fees. Any potential conflicts are disclosed deal by deal.</span>
               </li>
             </ul>
           </CardContent>
@@ -212,11 +213,11 @@ const HowItWorksPage = () => (
           <CardContent className="p-6">
             <div className="mb-4 flex items-center gap-3">
               <AlertTriangle className="h-6 w-6 text-primary" />
-              <h3 className="text-xl font-semibold">What Happens If the Pool Doesn't Reach Its Target?</h3>
+              <h3 className="text-xl font-semibold">What Happens If the Vault Doesn't Reach Its Target?</h3>
             </div>
             <p className="text-muted-foreground">
-              If a pool doesn't reach its minimum funding target within the 72-hour window, <strong>the pool fails</strong> and 
-              all committed capital is automatically refunded to investors' wallets. No fees are charged on failed pools. 
+              If a vault doesn't reach its minimum funding target within the 72-hour window, <strong>the vault fails</strong> and 
+              all committed capital is automatically refunded to investors' wallets. No fees are charged on failed vaults. 
               You'll receive a notification and the full amount will appear back in your wallet within 24 hours.
             </p>
           </CardContent>
@@ -246,7 +247,7 @@ const HowItWorksPage = () => (
                 <li>• Applied at the time of investment</li>
                 <li>• Deducted from your invested amount</li>
                 <li>• Covers deal sourcing, due diligence, SPV formation, and legal costs</li>
-                <li>• Example: Invest €1,000 → €980 goes into the pool, €20 entry fee</li>
+                <li>• Example: Invest €1,000 → €980 goes into the vault, €20 entry fee</li>
               </ul>
             </CardContent>
           </Card>
@@ -270,7 +271,7 @@ const HowItWorksPage = () => (
             <CardContent className="p-6 text-center">
               <PieChart className="mx-auto mb-3 h-8 w-8 text-primary" />
               <p className="text-4xl font-bold text-primary">1%</p>
-              <h3 className="mt-2 text-lg font-semibold">Marketplace Fee</h3>
+              <h3 className="mt-2 text-lg font-semibold">Resale Fee</h3>
               <Separator className="my-4" />
               <ul className="space-y-2 text-left text-sm text-muted-foreground">
                 <li>• Applied on resale board transactions</li>
@@ -295,8 +296,8 @@ const HowItWorksPage = () => (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <CheckCircle className="h-4 w-4 text-primary" /> No withdrawal fees
               </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <CheckCircle className="h-4 w-4 text-primary" /> No fees on failed pools (full refund)
+               <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <CheckCircle className="h-4 w-4 text-primary" /> No fees on failed vaults (full refund)
               </div>
             </div>
           </CardContent>

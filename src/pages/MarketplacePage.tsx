@@ -161,7 +161,7 @@ const MarketplacePage = () => {
     }
     
     createListing(selectedPositionId, percent, price);
-    toast({ title: 'Listing Created!', description: 'Your position is now listed on the marketplace.' });
+    toast({ title: 'Listing Created!', description: 'Your position is now listed on the resale board.' });
     
     setIsSellDialogOpen(false);
     setSelectedPositionId('');
@@ -266,8 +266,8 @@ const MarketplacePage = () => {
     <div className="container py-6">
       <div className="mb-6 flex items-start justify-between">
         <div>
-          <h1 className="mb-2 text-2xl font-bold">Marketplace</h1>
-          <p className="text-muted-foreground">Buy and sell startup positions</p>
+          <h1 className="mb-2 text-2xl font-bold">Resale Board</h1>
+          <p className="text-muted-foreground">List or buy positions. Listings may not sell.</p>
         </div>
         <Button variant="outline" size="sm" onClick={() => setShowHowItWorks(true)} className="gap-2">
           <HelpCircle className="h-4 w-4" />
@@ -279,7 +279,7 @@ const MarketplacePage = () => {
       <Dialog open={showHowItWorks} onOpenChange={setShowHowItWorks}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>How the Marketplace Works</DialogTitle>
+            <DialogTitle>How the Resale Board Works</DialogTitle>
             <DialogDescription>Everything you need to know about buying and selling positions</DialogDescription>
           </DialogHeader>
           <div className="space-y-5 py-2 text-sm">
@@ -306,7 +306,7 @@ const MarketplacePage = () => {
                 <DollarSign className="h-4 w-4 text-primary" /> Fees & Settlement
               </h4>
               <p className="text-muted-foreground">
-                A <strong>1% marketplace fee</strong> is charged to the buyer on every transaction. 
+                A <strong>1% resale fee</strong> is charged to the buyer on every transaction. 
                 Settlement is instant: the position transfers to the buyer and the seller's wallet is credited immediately.
               </p>
             </div>
@@ -327,11 +327,11 @@ const MarketplacePage = () => {
         <TabsList className="grid w-full max-w-sm grid-cols-2">
           <TabsTrigger value="buy" className="gap-2">
             <ShoppingCart className="h-4 w-4" />
-            Buy
+            Buy Listings
           </TabsTrigger>
           <TabsTrigger value="sell" className="gap-2">
             <Store className="h-4 w-4" />
-            Sell
+            Your Listings
           </TabsTrigger>
         </TabsList>
 
@@ -629,7 +629,7 @@ const MarketplacePage = () => {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Sell Your Position</DialogTitle>
-            <DialogDescription>Create a listing on the marketplace</DialogDescription>
+            <DialogDescription>Create a listing on the resale board</DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4 py-4">
@@ -655,8 +655,8 @@ const MarketplacePage = () => {
               </Select>
               {listablePositions.length === 0 && (
                 <p className="text-sm text-muted-foreground">
-                  You need positions in active pools to create listings. 
-                  <Link to="/explore" className="text-primary ml-1 hover:underline">Explore pools</Link>
+                  You need positions in active vaults to create listings. 
+                  <Link to="/explore" className="text-primary ml-1 hover:underline">Explore vaults</Link>
                 </p>
               )}
             </div>
@@ -707,7 +707,7 @@ const MarketplacePage = () => {
                 <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm">
                   <p className="text-muted-foreground mb-1">Buyer will receive:</p>
                   <p className="font-semibold text-primary">{formatPercent(sellPreviewEquity, 3)} equity</p>
-                  <p className="text-xs text-muted-foreground mt-2">Marketplace fee: 1% (paid by buyer)</p>
+                  <p className="text-xs text-muted-foreground mt-2">Resale fee: 1% (paid by buyer)</p>
                 </div>
               </>
             )}

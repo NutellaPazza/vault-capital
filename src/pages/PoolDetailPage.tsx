@@ -30,7 +30,7 @@ const PoolDetailPage = () => {
   if (!poolWithDeal) {
     return (
       <div className="container flex flex-col items-center justify-center py-16">
-        <h2 className="mb-4 text-xl font-semibold">Pool not found</h2>
+        <h2 className="mb-4 text-xl font-semibold">Vault not found</h2>
         <Button asChild>
           <Link to="/explore">Back to Explore</Link>
         </Button>
@@ -334,7 +334,7 @@ const PoolDetailPage = () => {
                         <span className="font-medium">{pool.fee_carry_percent}%</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">Marketplace Fee</span>
+                        <span className="text-muted-foreground">Resale Fee</span>
                         <span className="font-medium">1%</span>
                       </div>
                     </div>
@@ -352,7 +352,7 @@ const PoolDetailPage = () => {
                       </p>
                       <p>
                         <strong>Governance:</strong> Investors do not hold direct voting rights. All governance decisions regarding the investment 
-                        are made by VaultCapital acting as nominee on behalf of all pool participants.
+                        are made by VaultCapital acting as nominee on behalf of all vault participants.
                       </p>
                       <p>
                         <strong>Exit:</strong> Exit timing and execution follow the vault's exit objectives. VaultCapital may deviate if market conditions change. Proceeds are distributed pro rata based on your ownership percentage of the SPV.
@@ -404,8 +404,8 @@ const PoolDetailPage = () => {
                     ) : null}
                     <div className="flex gap-4 border-l-2 border-primary pl-4">
                       <div className="flex-1">
-                        <p className="font-medium">Pool Launched</p>
-                        <p className="text-sm text-muted-foreground">Investment pool is now live for 72 hours</p>
+                       <p className="font-medium">Vault Launched</p>
+                        <p className="text-sm text-muted-foreground">Investment vault is now live for 72 hours</p>
                         <p className="mt-1 text-xs text-muted-foreground">{formatDate(pool.start_datetime)}</p>
                       </div>
                     </div>
@@ -473,15 +473,15 @@ const PoolDetailPage = () => {
                   {[
                     {
                       q: 'What happens if the target is not reached?',
-                      a: 'If the pool fails to reach its target within the 72-hour window, all investments are automatically refunded to investors\' wallets.'
+                      a: 'If the vault fails to reach its target within the 72-hour window, all investments are automatically refunded to investors\' wallets.'
                     },
                     {
                       q: 'How does the SPV structure work?',
-                      a: 'VaultCapital creates a Special Purpose Vehicle (SPV) that holds the investment on behalf of all pool participants. Investors own economic rights proportional to their investment.'
+                      a: 'VaultCapital creates a Special Purpose Vehicle (SPV) that holds the investment on behalf of all vault participants. Investors own economic rights proportional to their investment.'
                     },
                     {
                       q: 'Can I sell my position before an exit?',
-                      a: 'Yes, once the pool is active, you can list your position on the resale board. Liquidity is not guaranteed — listings may not sell.'
+                      a: 'Yes, once the vault is active, you can list your position on the resale board. Liquidity is not guaranteed. Listings may not sell.'
                     },
                     {
                       q: 'What are the fees?',
@@ -585,13 +585,23 @@ const PoolDetailPage = () => {
                 ) : (
                   <div className="text-center text-muted-foreground">
                     <p className="mb-2 font-medium">
-                      {pool.pool_status === 'upcoming' ? 'Pool not yet live' : 'Pool closed'}
+                      {pool.pool_status === 'upcoming' ? 'Vault not yet live' : 'Vault closed'}
                     </p>
                     <p className="text-sm">
                       {pool.pool_status === 'upcoming' 
                         ? `Opens ${formatDate(pool.start_datetime)}` 
-                        : 'This investment pool has ended'}
+                        : 'This vault has ended'}
                     </p>
+                    {pool.pool_status !== 'upcoming' && (
+                      <div className="mt-4 space-y-2">
+                        <Button variant="outline" className="w-full" asChild>
+                          <Link to="/portfolio">View your position</Link>
+                        </Button>
+                        <Button variant="ghost" className="w-full" asChild>
+                          <Link to="/marketplace">Browse resale board</Link>
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 )}
               </CardContent>

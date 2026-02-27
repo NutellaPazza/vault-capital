@@ -51,7 +51,7 @@ const PortfolioPage = () => {
     
     toast({
       title: 'Listing Created!',
-      description: 'Your position is now listed on the marketplace.',
+      description: 'Your position is now listed on the resale board.',
     });
     
     setIsDialogOpen(false);
@@ -277,10 +277,10 @@ const PortfolioPage = () => {
             <PieChart className="mb-4 h-12 w-12 text-muted-foreground" />
             <h3 className="mb-2 font-semibold">No positions yet</h3>
             <p className="mb-4 text-center text-sm text-muted-foreground">
-              Start investing in startup pools to build your portfolio
+              Start investing in startup vaults to build your portfolio
             </p>
             <Button asChild>
-              <Link to="/explore">Explore Pools</Link>
+              <Link to="/explore">Explore Vaults</Link>
             </Button>
           </CardContent>
         </Card>
@@ -290,9 +290,9 @@ const PortfolioPage = () => {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>List Position on Marketplace</DialogTitle>
+            <DialogTitle>List Position on Resale Board</DialogTitle>
             <DialogDescription>
-              Set your asking price and percentage to sell. A 1% marketplace fee applies.
+              Set your asking price and percentage to sell. A 1% resale fee applies.
             </DialogDescription>
           </DialogHeader>
           
@@ -328,7 +328,7 @@ const PortfolioPage = () => {
             
             <div className="rounded-lg bg-muted p-3 text-sm">
               <p className="text-muted-foreground">
-                Marketplace fee: <span className="font-medium text-foreground">1%</span> (paid by buyer)
+                Resale fee: <span className="font-medium text-foreground">1%</span> (paid by buyer)
               </p>
             </div>
           </div>
