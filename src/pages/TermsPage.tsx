@@ -63,9 +63,9 @@ const TermsPage = () => {
                     <p className="text-xs text-muted-foreground">On profits at exit</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Marketplace Fee</p>
+                    <p className="text-sm text-muted-foreground">Resale Board Fee</p>
                     <p className="text-2xl font-bold">1%</p>
-                    <p className="text-xs text-muted-foreground">On secondary trades</p>
+                    <p className="text-xs text-muted-foreground">On resale trades</p>
                   </div>
                 </div>
               </div>
@@ -79,7 +79,7 @@ const TermsPage = () => {
                   receive €2,000 at exit (€1,000 profit), the carry fee would be €20 (2% of €1,000 profit).
                 </p>
                 <p>
-                  <strong>Marketplace Fee (1%):</strong> Charged to buyers on secondary market transactions. Sellers 
+                  <strong>Resale Board Fee (1%):</strong> Charged to buyers on resale transactions. Sellers 
                   receive the full asking price; buyers pay an additional 1% on top.
                 </p>
               </div>
@@ -178,7 +178,7 @@ const TermsPage = () => {
                     <ul className="text-xs space-y-1 mt-1">
                       <li>✓ Economic rights to equity</li>
                       <li>✓ Pro-rata share of exit proceeds</li>
-                      <li>✓ Right to sell on secondary market</li>
+                      <li>✓ Right to sell on the Resale Board</li>
                       <li>✓ Access to company updates</li>
                     </ul>
                   </div>
@@ -213,8 +213,8 @@ const TermsPage = () => {
                 </p>
               </div>
               <div className="text-muted-foreground space-y-2">
-                <p><strong>Illiquidity Risk:</strong> Startup investments are highly illiquid. While our secondary 
-                marketplace provides some liquidity, there is no guarantee you will find a buyer for your position.</p>
+                <p><strong>Illiquidity Risk:</strong> Startup investments are highly illiquid. While our Resale Board 
+                provides some liquidity, there is no guarantee you will find a buyer for your position.</p>
                 <p><strong>Valuation Risk:</strong> Estimated values shown on the platform are indicative only and 
                 based on the most recent funding round or internal assessment. Actual exit values may differ significantly.</p>
                 <p><strong>Dilution Risk:</strong> Your ownership percentage may be reduced in future funding rounds 
@@ -227,23 +227,23 @@ const TermsPage = () => {
             </CardContent>
           </Card>
 
-          {/* Marketplace Rules */}
+          {/* Resale Board Rules */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Store className="h-5 w-5" />
-                7. Marketplace Rules
+                7. Resale Board Rules
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 text-sm text-muted-foreground">
               <p>
-                Our secondary marketplace allows investors to trade positions before a company exit. 
+                Our Resale Board allows investors to trade positions before a company exit. 
                 The following rules apply:
               </p>
               <ul className="list-disc pl-5 space-y-1">
-                <li>Positions can only be listed after the pool has successfully closed and transitioned to "active" status</li>
+                <li>Positions can only be listed after the vault has successfully closed and transitioned to "active" status</li>
                 <li>Sellers set their own asking price; there is no price regulation</li>
-                <li>A 1% marketplace fee is charged to buyers on each transaction</li>
+                <li>A 1% Resale Board fee is charged to buyers on each transaction</li>
                 <li>Ownership transfer is processed within 24-48 hours of purchase</li>
                 <li>Sellers receive funds in their wallet upon successful transfer</li>
                 <li>Listings can be cancelled at any time before a purchase is made</li>
