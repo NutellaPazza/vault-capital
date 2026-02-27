@@ -9,6 +9,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetFooter
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DealStage, PoolStatus } from '@/types';
 
 const STAGES: { value: DealStage; label: string }[] = [
@@ -28,6 +30,21 @@ const COUNTRIES = ['Italy', 'Germany', 'Netherlands', 'France', 'Spain', 'UK'];
 
 const SECTORS = ['B2B', 'B2C', 'B2B2C', 'Fintech', 'AI/ML', 'SaaS', 'E-commerce', 'HealthTech', 'CleanTech'];
 
+const TICKET_RANGES = [
+  { label: 'Up to €250', min: 0, max: 250 },
+  { label: '€250 – €500', min: 250, max: 500 },
+  { label: '€500 – €1 000', min: 500, max: 1000 },
+  { label: '€1 000+', min: 1000, max: Infinity },
+];
+
+const TARGET_RANGES = [
+  { label: 'Less than €250k', min: 0, max: 250_000 },
+  { label: '€250k – €1M', min: 250_000, max: 1_000_000 },
+  { label: 'More than €1M', min: 1_000_000, max: Infinity },
+];
+
+type SortOption = 'most_funded' | 'ending_soon' | 'newest' | 'lowest_ticket';
+
 const ExplorePage = () => {
   const { pools, deals } = useAppStore();
   const [search, setSearch] = useState('');
@@ -35,12 +52,17 @@ const ExplorePage = () => {
   const [statusFilters, setStatusFilters] = useState<PoolStatus[]>([]);
   const [countryFilters, setCountryFilters] = useState<string[]>([]);
   const [sectorFilters, setSectorFilters] = useState<string[]>([]);
+  const [ticketRange, setTicketRange] = useState<number | null>(null);
+  const [targetRange, setTargetRange] = useState<number | null>(null);
+  const [acceleratorOnly, setAcceleratorOnly] = useState(false);
+  const [sortBy, setSortBy] = useState<SortOption | ''>('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  const activeFilterCount = stageFilters.length + statusFilters.length + countryFilters.length + sectorFilters.length;
+  const activeFilterCount = stageFilters.length + statusFilters.length + countryFilters.length + sectorFilters.length
+    + (ticketRange !== null ? 1 : 0) + (targetRange !== null ? 1 : 0) + (acceleratorOnly ? 1 : 0);
 
   const poolsWithDeals = useMemo(() => {
-    return pools
+    const filtered = pools
       .map(pool => {
         const deal = deals.find(d => d.id === pool.deal_id);
         if (!deal) return null;
@@ -50,7 +72,6 @@ const ExplorePage = () => {
       .filter(pool => {
         if (!pool) return false;
         
-        // Search filter
         if (search) {
           const searchLower = search.toLowerCase();
           const matchesSearch = 
@@ -60,22 +81,10 @@ const ExplorePage = () => {
           if (!matchesSearch) return false;
         }
         
-        // Stage filter
-        if (stageFilters.length > 0 && !stageFilters.includes(pool.deal.stage)) {
-          return false;
-        }
-        
-        // Status filter
-        if (statusFilters.length > 0 && !statusFilters.includes(pool.pool_status)) {
-          return false;
-        }
+        if (stageFilters.length > 0 && !stageFilters.includes(pool.deal.stage)) return false;
+        if (statusFilters.length > 0 && !statusFilters.includes(pool.pool_status)) return false;
+        if (countryFilters.length > 0 && !countryFilters.includes(pool.deal.country)) return false;
 
-        // Country filter
-        if (countryFilters.length > 0 && !countryFilters.includes(pool.deal.country)) {
-          return false;
-        }
-
-        // Sector filter
         if (sectorFilters.length > 0) {
           const matchesSector = sectorFilters.some(sector => 
             pool.deal.sector_type === sector || 
@@ -83,10 +92,42 @@ const ExplorePage = () => {
           );
           if (!matchesSector) return false;
         }
+
+        if (ticketRange !== null) {
+          const range = TICKET_RANGES[ticketRange];
+          if (pool.deal.min_ticket_eur < range.min || pool.deal.min_ticket_eur > range.max) return false;
+        }
+
+        if (targetRange !== null) {
+          const range = TARGET_RANGES[targetRange];
+          if (pool.target_eur < range.min || pool.target_eur > range.max) return false;
+        }
+
+        if (acceleratorOnly && !pool.deal.accelerator) return false;
         
         return true;
       });
-  }, [pools, deals, search, stageFilters, statusFilters, countryFilters, sectorFilters]);
+
+    if (sortBy) {
+      filtered.sort((a, b) => {
+        if (!a || !b) return 0;
+        switch (sortBy) {
+          case 'most_funded': return b.raised_eur - a.raised_eur;
+          case 'ending_soon': {
+            const aLive = a.pool_status === 'live' ? 0 : 1;
+            const bLive = b.pool_status === 'live' ? 0 : 1;
+            if (aLive !== bLive) return aLive - bLive;
+            return new Date(a.end_datetime).getTime() - new Date(b.end_datetime).getTime();
+          }
+          case 'newest': return new Date(b.start_datetime).getTime() - new Date(a.start_datetime).getTime();
+          case 'lowest_ticket': return a.deal.min_ticket_eur - b.deal.min_ticket_eur;
+          default: return 0;
+        }
+      });
+    }
+
+    return filtered;
+  }, [pools, deals, search, stageFilters, statusFilters, countryFilters, sectorFilters, ticketRange, targetRange, acceleratorOnly, sortBy]);
 
   const toggleFilter = <T extends string>(value: T, current: T[], setter: React.Dispatch<React.SetStateAction<T[]>>) => {
     setter(prev => prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]);
@@ -97,7 +138,11 @@ const ExplorePage = () => {
     setStatusFilters([]);
     setCountryFilters([]);
     setSectorFilters([]);
+    setTicketRange(null);
+    setTargetRange(null);
+    setAcceleratorOnly(false);
     setSearch('');
+    setSortBy('');
   };
 
   const hasFilters = activeFilterCount > 0 || search;
@@ -123,6 +168,18 @@ const ExplorePage = () => {
           </div>
           
           <div className="flex gap-2">
+            <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
+              <SelectTrigger className="w-[160px]">
+                <SelectValue placeholder="Sort by..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="most_funded">Most funded</SelectItem>
+                <SelectItem value="ending_soon">Ending soon</SelectItem>
+                <SelectItem value="newest">Newest</SelectItem>
+                <SelectItem value="lowest_ticket">Lowest min ticket</SelectItem>
+              </SelectContent>
+            </Select>
+
             <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
               <SheetTrigger asChild>
                 <Button variant="outline" className="gap-2">
@@ -221,6 +278,59 @@ const ExplorePage = () => {
                         </div>
                       ))}
                     </div>
+                  </div>
+
+                  <Separator className="mb-6" />
+
+                  {/* Min Ticket Range */}
+                  <div className="mb-6">
+                    <h4 className="mb-3 text-sm font-semibold">Min Ticket</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {TICKET_RANGES.map((range, i) => (
+                        <Button
+                          key={i}
+                          variant={ticketRange === i ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setTicketRange(ticketRange === i ? null : i)}
+                        >
+                          {range.label}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <Separator className="mb-6" />
+
+                  {/* Target Size Range */}
+                  <div className="mb-6">
+                    <h4 className="mb-3 text-sm font-semibold">Target Size</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {TARGET_RANGES.map((range, i) => (
+                        <Button
+                          key={i}
+                          variant={targetRange === i ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setTargetRange(targetRange === i ? null : i)}
+                        >
+                          {range.label}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <Separator className="mb-6" />
+
+                  {/* Accelerator */}
+                  <div className="mb-6">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="accelerator-toggle" className="text-sm font-semibold cursor-pointer">Accelerator-backed only</Label>
+                      <Switch
+                        id="accelerator-toggle"
+                        checked={acceleratorOnly}
+                        onCheckedChange={setAcceleratorOnly}
+                      />
+                    </div>
+                    <p className="mt-1 text-xs text-muted-foreground">Show only YC, Techstars, etc.</p>
                   </div>
                 </div>
 

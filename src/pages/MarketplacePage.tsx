@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { differenceInDays } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -386,6 +387,10 @@ const MarketplacePage = () => {
                         <span>By {listing.seller.name}</span>
                         <span>{getTimeSince(listing.created_at)}</span>
                       </div>
+                      <div className="mt-2 flex items-center gap-3 border-t pt-2 text-xs text-muted-foreground">
+                        <span>{differenceInDays(new Date(), new Date(listing.created_at))}d listed</span>
+                        <span className="flex items-center gap-1"><Eye className="h-3 w-3" />{getViewCount(listing.id)} views</span>
+                      </div>
                     </CardContent>
                   </Card>
                 );
@@ -573,6 +578,7 @@ const MarketplacePage = () => {
                 <span className={!canAfford ? 'text-destructive' : ''}>{formatCurrency(currentUser?.wallet_balance_eur || 0)}</span>
               </div>
               {isOwnListing && <p className="text-sm text-destructive">You cannot buy your own listing</p>}
+              <p className="text-xs text-muted-foreground">Resale is not guaranteed. This listing may take time to sell.</p>
             </div>
           )}
           {listing && showOfferForm && (
@@ -704,10 +710,13 @@ const MarketplacePage = () => {
                   />
                 </div>
 
-                <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm">
-                  <p className="text-muted-foreground mb-1">Buyer will receive:</p>
+                <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm space-y-1">
+                  <p className="text-muted-foreground">Buyer will receive:</p>
                   <p className="font-semibold text-primary">{formatPercent(sellPreviewEquity, 3)} equity</p>
-                  <p className="text-xs text-muted-foreground mt-2">Resale fee: 1% (paid by buyer)</p>
+                  <div className="mt-2 border-t border-primary/10 pt-2 text-xs text-muted-foreground space-y-0.5">
+                    <p>Estimated proceeds: {formatCurrency(parseFloat(sellPrice || '0'))} (1% fee paid by buyer)</p>
+                    <p>Max sellable: 100% of position</p>
+                  </div>
                 </div>
               </>
             )}
