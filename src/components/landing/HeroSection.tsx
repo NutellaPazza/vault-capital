@@ -4,13 +4,13 @@ import { ArrowRight, Clock, Banknote, Shield, RotateCcw } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
 const mockVaults = [
-  { name: 'NovaTech AI', stage: 'Seed', progress: 72, timeLeft: '48h left', ticket: '€100' },
-  { name: 'GreenLoop', stage: 'Series A', progress: 45, timeLeft: '61h left', ticket: '€250' },
-  { name: 'FinBridge', stage: 'Pre-Seed', progress: 88, timeLeft: '12h left', ticket: '€100' },
-];
+{ name: 'NovaTech AI', stage: 'Seed', progress: 72, timeLeft: '48h left', ticket: '€100' },
+{ name: 'GreenLoop', stage: 'Series A', progress: 45, timeLeft: '61h left', ticket: '€250' },
+{ name: 'FinBridge', stage: 'Pre-Seed', progress: 88, timeLeft: '12h left', ticket: '€100' }];
 
-const HeroSection = () => (
-  <section className="relative overflow-hidden">
+
+const HeroSection = () =>
+<section className="relative overflow-hidden">
     {/* Subtle gradient background */}
     <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-primary/5" />
 
@@ -22,7 +22,8 @@ const HeroSection = () => (
         </p>
         <h1 className="mb-4 text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">
           Invest in Private Startups{' '}
-          <span className="text-primary">from €100</span>
+          <span className="text-primary">
+from €100</span>
         </h1>
         <p className="mb-8 max-w-xl text-lg text-muted-foreground md:text-xl">
           Curated deals. 72 hour vaults. SPV held positions.
@@ -83,17 +84,16 @@ const HeroSection = () => (
       <div className="relative mx-auto w-full max-w-sm md:mx-0 md:flex-1">
         <p className="mb-3 text-center text-[11px] text-muted-foreground">Example vaults</p>
         <div className="relative h-[320px]">
-          {mockVaults.map((vault, i) => (
-            <div
-              key={vault.name}
-              className="vault-float absolute left-0 right-0 rounded-xl border bg-card p-4 shadow-lg"
-              style={{
-                top: `${i * 90}px`,
-                zIndex: 3 - i,
-                animationDelay: `${i * 0.5}s`,
-                transform: `scale(${1 - i * 0.03})`,
-              }}
-            >
+          {mockVaults.map((vault, i) => <div
+            key={vault.name}
+            className="vault-float absolute left-0 right-0 rounded-xl border bg-card p-4 shadow-lg"
+            style={{
+              top: `${i * 90}px`,
+              zIndex: 3 - i,
+              animationDelay: `${i * 0.5}s`,
+              transform: `scale(${1 - i * 0.03})`
+            }}>
+
               <div className="mb-3 flex items-center justify-between">
                 <span className="font-semibold text-card-foreground">{vault.name}</span>
                 <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
@@ -114,11 +114,11 @@ const HeroSection = () => (
                 <span>Min. {vault.ticket}</span>
               </div>
             </div>
-          ))}
+        )}
         </div>
       </div>
     </div>
-  </section>
-);
+  </section>;
+
 
 export default HeroSection;
