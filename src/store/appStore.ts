@@ -26,6 +26,7 @@ import {
   initialTransactions,
   initialNotifications,
   mockSellerUser,
+  mockSellerUser3,
   initialOffers,
 } from '@/data/mockData';
 
@@ -112,7 +113,7 @@ export const useAppStore = create<AppState>()(
       listings: initialListings,
       transactions: initialTransactions,
       notifications: initialNotifications,
-      allUsers: [initialUser, mockSellerUser],
+      allUsers: [initialUser, mockSellerUser, mockSellerUser3],
       applications: [],
       offers: initialOffers,
       
@@ -1043,7 +1044,7 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: 'vaultcapital-storage',
-      version: 2,
+      version: 3,
       migrate: () => ({} as any),
     }
   )
