@@ -77,7 +77,7 @@ const faqCategories = [
     faqs: [
       {
         q: 'What fees does VaultCapital charge?',
-        a: 'We charge three types of fees: (1) A 2% entry fee at the time of investment, which covers deal sourcing, due diligence, and SPV formation costs. (2) A 2% carry fee on profits at exit — if there\'s no profit, there\'s no carry. (3) A 1% marketplace fee on secondary trades, paid by the buyer. There are no annual management fees, account maintenance fees, or withdrawal fees.',
+        a: 'We charge three types of fees: (1) A 2% entry fee at the time of investment, which covers deal sourcing, due diligence, and SPV formation costs. (2) A 2% carry fee on profits at exit — if there\'s no profit, there\'s no carry. (3) A 1% Resale Board fee on resale trades, paid by the buyer. There are no annual management fees, account maintenance fees, or withdrawal fees.',
       },
       {
         q: 'How is the entry fee calculated?',
@@ -90,19 +90,19 @@ const faqCategories = [
     ],
   },
   {
-    title: 'Marketplace & Liquidity',
+    title: 'Resale Board & Liquidity',
     faqs: [
       {
         q: 'Can I sell my position before the startup exits?',
-        a: 'Yes. Once a pool moves to "active" status (after the investment settles), you can list your position on our secondary marketplace. Other investors can buy it at the price you set, or make counter-offers. This provides liquidity that traditional startup investments don\'t offer.',
+        a: 'Yes. Once a vault moves to "active" status (after the investment settles), you can list your position on our Resale Board. Other investors can buy it at the price you set, or make counter-offers. This provides liquidity that traditional startup investments don\'t offer.',
       },
       {
-        q: 'How does the marketplace work?',
-        a: 'Sellers list their positions (fully or partially) at a desired price. Buyers can purchase at the asking price or submit a counter-offer. Once a transaction is agreed upon, the position is transferred to the buyer and the seller receives the funds in their wallet. A 1% marketplace fee is paid by the buyer.',
+        q: 'How does the Resale Board work?',
+        a: 'Sellers list their positions (fully or partially) at a desired price. Buyers can purchase at the asking price or submit a counter-offer. Once a transaction is agreed upon, the position is transferred to the buyer and the seller receives the funds in their wallet. A 1% fee is paid by the buyer.',
       },
       {
-        q: 'Is selling on the marketplace guaranteed?',
-        a: 'No. The marketplace depends on supply and demand. There\'s no guarantee that buyers will be interested in your position at your desired price. You may need to adjust your price or wait for a buyer. The marketplace provides the opportunity for liquidity, but doesn\'t guarantee it.',
+        q: 'Is selling on the Resale Board guaranteed?',
+        a: 'No. The Resale Board depends on supply and demand. There\'s no guarantee that buyers will be interested in your position at your desired price. You may need to adjust your price or wait for a buyer. The Resale Board provides the opportunity for liquidity, but doesn\'t guarantee it.',
       },
     ],
   },
