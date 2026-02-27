@@ -37,9 +37,9 @@ const transactionTypeLabels: Record<TransactionType, string> = {
   deposit: 'Deposit',
   withdraw: 'Withdrawal',
   invest: 'Investment',
-  pool_refund: 'Pool Refund',
-  market_buy: 'Market Purchase',
-  market_sell: 'Market Sale',
+  pool_refund: 'Vault Refund',
+  market_buy: 'Resale Purchase',
+  market_sell: 'Resale Sale',
   exit_distribution: 'Exit Distribution',
   fee: 'Fee',
 };

@@ -115,7 +115,7 @@ export const PoolCard = ({ pool, variant = 'default' }: PoolCardProps) => {
 
           <Button asChild className="w-full" size="lg">
             <Link to={`/pool/${pool.id}`}>
-              {isLive ? 'Invest Now' : isUpcoming ? 'View Details' : 'View Pool'}
+              {isLive ? 'Invest Now' : isUpcoming ? 'View Details' : 'View Vault'}
             </Link>
           </Button>
         </CardContent>

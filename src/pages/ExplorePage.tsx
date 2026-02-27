@@ -105,7 +105,7 @@ const ExplorePage = () => {
   return (
     <div className="container py-6">
       <div className="mb-6">
-        <h1 className="mb-2 text-2xl font-bold">Explore Pools</h1>
+        <h1 className="mb-2 text-2xl font-bold">Explore Vaults</h1>
         <p className="text-muted-foreground">Discover and invest in curated startup opportunities</p>
       </div>
 
@@ -137,7 +137,7 @@ const ExplorePage = () => {
               </SheetTrigger>
               <SheetContent className="flex w-80 flex-col">
                 <SheetHeader>
-                  <SheetTitle>Filter Pools</SheetTitle>
+                  <SheetTitle>Filter Vaults</SheetTitle>
                 </SheetHeader>
                 
                 <div className="flex-1 overflow-y-auto py-4">
@@ -255,7 +255,7 @@ const ExplorePage = () => {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Search className="mb-4 h-12 w-12 text-muted-foreground" />
-            <h3 className="mb-2 font-semibold">No pools found</h3>
+            <h3 className="mb-2 font-semibold">No vaults found</h3>
             <p className="text-center text-sm text-muted-foreground">
               {hasFilters 
                 ? 'Try adjusting your filters or search terms' 

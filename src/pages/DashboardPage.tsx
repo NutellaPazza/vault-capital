@@ -103,7 +103,7 @@ const DashboardPage = () => {
       {livePools.length > 0 && (
         <section>
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Live Pool</h2>
+            <h2 className="text-xl font-semibold">Live Vault</h2>
             <Button variant="ghost" size="sm" asChild>
               <Link to="/explore">View All <ArrowRight className="ml-1 h-4 w-4" /></Link>
             </Button>
@@ -145,11 +145,22 @@ const DashboardPage = () => {
                 <div className="flex flex-col items-center justify-center border-t bg-muted/50 p-6 md:border-l md:border-t-0">
                   <p className="mb-2 text-xs font-medium text-muted-foreground">TIME REMAINING</p>
                   <CountdownTimer endDatetime={livePools[0].end_datetime} />
-                  <Button className="mt-4 w-full" asChild>
-                    <Link to={`/pool/${livePools[0].id}`}>
-                      Invest Now <ArrowRight className="ml-1 h-4 w-4" />
-                    </Link>
-                  </Button>
+                  {new Date(livePools[0].end_datetime) > new Date() ? (
+                    <Button className="mt-4 w-full" asChild>
+                      <Link to={`/pool/${livePools[0].id}`}>
+                        Invest Now <ArrowRight className="ml-1 h-4 w-4" />
+                      </Link>
+                    </Button>
+                  ) : (
+                    <>
+                      <span className="mt-2 inline-block rounded bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">Ended</span>
+                      <Button className="mt-2 w-full" variant="outline" asChild>
+                        <Link to={`/pool/${livePools[0].id}`}>
+                          View Vault <ArrowRight className="ml-1 h-4 w-4" />
+                        </Link>
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -232,10 +243,10 @@ const DashboardPage = () => {
           <Card>
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Store className="h-5 w-5" />
-                  Marketplace Activity
-                </CardTitle>
+                 <CardTitle className="flex items-center gap-2 text-lg">
+                   <Store className="h-5 w-5" />
+                   Resale Board Activity
+                 </CardTitle>
                 <Button variant="ghost" size="sm" asChild>
                   <Link to="/marketplace?tab=sell">Manage</Link>
                 </Button>
@@ -263,7 +274,7 @@ const DashboardPage = () => {
       {upcomingPools.length > 0 && (
         <section>
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Upcoming Pools</h2>
+            <h2 className="text-xl font-semibold">Upcoming Vaults</h2>
             <Button variant="ghost" size="sm" asChild>
               <Link to="/explore">View All <ArrowRight className="ml-1 h-4 w-4" /></Link>
             </Button>
@@ -323,8 +334,8 @@ const DashboardPage = () => {
         <Card className="bg-gradient-to-br from-card to-muted">
           <CardContent className="flex items-center justify-between p-6">
             <div>
-              <h3 className="font-semibold">Browse Marketplace</h3>
-              <p className="text-sm text-muted-foreground">Buy shares from other investors</p>
+              <h3 className="font-semibold">Browse Resale Board</h3>
+              <p className="text-sm text-muted-foreground">Buy positions from other investors</p>
             </div>
             <Button variant="outline" asChild>
               <Link to="/marketplace">Explore</Link>
