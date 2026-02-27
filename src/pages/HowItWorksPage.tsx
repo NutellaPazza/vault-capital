@@ -50,7 +50,7 @@ const HowItWorksPage = () => (
     <div className="mb-16 text-center">
       <h1 className="mb-4 text-4xl font-bold">How VaultCapital Works</h1>
       <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-        From deal sourcing to exit distribution — here's how we make private startup investing accessible, transparent, and secure.
+        From deal sourcing to exit distribution here's how we make private startup investing accessible, transparent, and secure.
       </p>
     </div>
 
