@@ -99,19 +99,20 @@ const DashboardPage = () => {
         </Card>
       </div>
 
-      {/* Featured Live Pool with Countdown & Progress */}
+      {/* Live Vaults */}
       {livePools.length > 0 && (
         <section>
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Live Vault</h2>
+            <h2 className="text-xl font-semibold">Live Vaults</h2>
             <Button variant="ghost" size="sm" asChild>
               <Link to="/explore">View All <ArrowRight className="ml-1 h-4 w-4" /></Link>
             </Button>
           </div>
-          <Card className="overflow-hidden">
+
+          {/* Featured first live vault */}
+          <Card className="mb-4 overflow-hidden">
             <CardContent className="p-0">
               <div className="flex flex-col md:flex-row">
-                {/* Pool Info */}
                 <div className="flex-1 p-6">
                   <div className="mb-3 flex items-center gap-2">
                     <span className="rounded-full bg-success/10 px-3 py-0.5 text-xs font-semibold text-success animate-pulse-soft">
@@ -122,7 +123,6 @@ const DashboardPage = () => {
                   <h3 className="mb-2 text-2xl font-bold">{livePools[0].deal.startup_name}</h3>
                   <p className="mb-4 text-sm text-muted-foreground">{livePools[0].deal.short_description}</p>
                   
-                  {/* Funding Progress */}
                   <div className="mb-4 space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">
@@ -141,7 +141,6 @@ const DashboardPage = () => {
                   </div>
                 </div>
 
-                {/* Countdown + CTA */}
                 <div className="flex flex-col items-center justify-center border-t bg-muted/50 p-6 md:border-l md:border-t-0">
                   <p className="mb-2 text-xs font-medium text-muted-foreground">TIME REMAINING</p>
                   <CountdownTimer endDatetime={livePools[0].end_datetime} />
@@ -165,6 +164,41 @@ const DashboardPage = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* Other live vaults as compact cards */}
+          {livePools.length > 1 && (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {livePools.slice(1).map(pool => (
+                <Card key={pool.id} className="transition-colors hover:bg-muted/30">
+                  <CardContent className="p-4">
+                    <div className="mb-2 flex items-center gap-2">
+                      <span className="rounded-full bg-success/10 px-2 py-0.5 text-[10px] font-semibold text-success">
+                        ● LIVE
+                      </span>
+                      <span className="text-xs text-muted-foreground">{pool.deal.industry}</span>
+                    </div>
+                    <h4 className="mb-1 font-semibold">{pool.deal.startup_name}</h4>
+                    <p className="mb-3 line-clamp-2 text-xs text-muted-foreground">{pool.deal.short_description}</p>
+                    <div className="mb-2 space-y-1">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">{formatCompactCurrency(pool.raised_eur)} raised</span>
+                        <span className="font-medium">{formatPercent((pool.raised_eur / pool.target_eur) * 100, 0)}</span>
+                      </div>
+                      <Progress value={(pool.raised_eur / pool.target_eur) * 100} className="h-1.5" />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground">{pool.investors_count} investors</span>
+                      <Button size="sm" variant="outline" className="h-7 text-xs" asChild>
+                        <Link to={`/pool/${pool.id}`}>
+                          View <ArrowRight className="ml-1 h-3 w-3" />
+                        </Link>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </section>
       )}
 
