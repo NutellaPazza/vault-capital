@@ -58,7 +58,7 @@ export const TopBar = () => {
       <div className="container flex h-14 items-center justify-between">
         <Link to="/dashboard" className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-            <span className="text-sm font-bold text-primary-foreground">V</span>
+            <span className="text-sm font-bold text-primary-foreground">VC</span>
           </div>
             <span className="text-lg font-semibold">VaultCapital</span>
             <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0">Demo</Badge>
