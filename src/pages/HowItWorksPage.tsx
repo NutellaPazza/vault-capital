@@ -27,12 +27,17 @@ const steps = [
   {
     icon: TrendingUp,
     title: '4. Ownership & Monitoring',
-    description: 'Your position appears in your portfolio with your ownership percentage, estimated value, and all startup updates. You can hold your position or list it on the secondary marketplace for liquidity.',
+    description: 'Your position appears in your portfolio with your ownership percentage, estimated value, and all startup updates. You can hold your position or list it on the resale board.',
   },
   {
     icon: HandCoins,
-    title: '5. Exit & Distribution',
-    description: 'When the startup has an exit event (acquisition, IPO, or secondary sale), VaultCapital manages the entire process. Proceeds are distributed pro-rata to all SPV participants, minus the carry fee on profits.',
+    title: '5. Exit Objectives & Distribution',
+    description: 'Each vault includes exit objectives, set by VaultCapital based on the company, stage, and market. These objectives explain what we aim for — such as a target return multiple, revenue growth milestones, or a valuation threshold.',
+    extraParagraphs: [
+      'Exit events (acquisition, IPO, or a secondary sale opportunity) may create liquidity, but we don\'t automatically sell. We act based on the vault\'s objectives and the best available execution at the time.',
+      'When a sale happens, proceeds are distributed pro rata to investors after fees (carry applies only on profit).',
+    ],
+    disclaimer: 'Objectives are targets, not guarantees.',
   },
 ];
 
@@ -61,6 +66,12 @@ const HowItWorksPage = () => (
               <div>
                 <h3 className="mb-2 text-xl font-semibold">{step.title}</h3>
                 <p className="text-muted-foreground">{step.description}</p>
+                {'extraParagraphs' in step && (step as any).extraParagraphs?.map((p: string, i: number) => (
+                  <p key={i} className="mt-2 text-muted-foreground">{p}</p>
+                ))}
+                {'disclaimer' in step && (step as any).disclaimer && (
+                  <p className="mt-3 text-xs font-medium text-muted-foreground/70 italic">{(step as any).disclaimer}</p>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -161,41 +172,38 @@ const HowItWorksPage = () => (
             </div>
             <div className="space-y-4">
               <div className="rounded-lg border p-4">
-                <h4 className="mb-1 font-semibold">1. Exit Event Occurs</h4>
+                <h4 className="mb-1 font-semibold">1. A liquidity opportunity appears</h4>
                 <p className="text-sm text-muted-foreground">
-                  The startup is acquired, goes public (IPO), or a secondary sale opportunity arises. 
-                  VaultCapital's investment committee evaluates the offer and decides whether to accept — 
-                  always prioritizing the best outcome for investors.
+                  An acquisition, IPO, or a secondary sale opportunity may create liquidity.
                 </p>
               </div>
               <div className="rounded-lg border p-4">
-                <h4 className="mb-1 font-semibold">2. Proceeds Received</h4>
+                <h4 className="mb-1 font-semibold">2. We check the vault's exit objectives</h4>
                 <p className="text-sm text-muted-foreground">
-                  The exit proceeds are received by the SPV. VaultCapital calculates each investor's share 
-                  based on their ownership percentage.
+                  We compare the opportunity to the vault's objectives and current market conditions. We may sell, sell partially, or hold.
                 </p>
               </div>
               <div className="rounded-lg border p-4">
-                <h4 className="mb-1 font-semibold">3. Carry Fee Applied</h4>
+                <h4 className="mb-1 font-semibold">3. Execution and settlement</h4>
                 <p className="text-sm text-muted-foreground">
-                  If there is a profit (proceeds &gt; original investment), VaultCapital takes a 2% carry fee 
-                  on the profit only. If the exit is at a loss or break-even, no carry fee is charged.
+                  If we proceed, the SPV completes the transaction and receives proceeds.
                 </p>
               </div>
               <div className="rounded-lg border p-4">
-                <h4 className="mb-1 font-semibold">4. Distribution to Investors</h4>
+                <h4 className="mb-1 font-semibold">4. Carry fee (profit only)</h4>
                 <p className="text-sm text-muted-foreground">
-                  Net proceeds are distributed to your VaultCapital wallet. You can withdraw to your bank account 
-                  or reinvest into new pools. Full transaction details are visible in your wallet history.
+                  If proceeds exceed invested capital, a 2% carry is applied on profit only. If there's no profit, no carry is charged.
                 </p>
               </div>
               <div className="rounded-lg border p-4">
-                <h4 className="mb-1 font-semibold">5. SPV Dissolution</h4>
+                <h4 className="mb-1 font-semibold">5. Distribution to investors</h4>
                 <p className="text-sm text-muted-foreground">
-                  After all proceeds are distributed, the SPV is dissolved. The pool status changes to "Exit Completed" 
-                  in your portfolio, and a final summary is provided.
+                  Net proceeds are distributed pro rata to investors' wallets. A transaction summary is shown in the vault and wallet history.
                 </p>
               </div>
+              <p className="text-xs text-muted-foreground/70 italic">
+                If no liquidity event occurs, the position remains illiquid until an opportunity is available.
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -265,7 +273,7 @@ const HowItWorksPage = () => (
               <h3 className="mt-2 text-lg font-semibold">Marketplace Fee</h3>
               <Separator className="my-4" />
               <ul className="space-y-2 text-left text-sm text-muted-foreground">
-                <li>• Applied on secondary market transactions</li>
+                <li>• Applied on resale board transactions</li>
                 <li>• Paid by the buyer, not the seller</li>
                 <li>• Covers transaction processing and position transfer</li>
                 <li>• Example: Buy a €5,000 listing → you pay €5,050 total</li>

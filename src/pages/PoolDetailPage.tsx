@@ -355,11 +355,31 @@ const PoolDetailPage = () => {
                         are made by VaultCapital acting as nominee on behalf of all pool participants.
                       </p>
                       <p>
-                        <strong>Exit:</strong> Exit timing and execution are decided by VaultCapital. Proceeds are distributed pro-rata 
-                        based on your ownership percentage of the SPV.
+                        <strong>Exit:</strong> Exit timing and execution follow the vault's exit objectives. VaultCapital may deviate if market conditions change. Proceeds are distributed pro rata based on your ownership percentage of the SPV.
                       </p>
                     </div>
                   </div>
+
+                  {/* Exit Objectives */}
+                  {deal.exit_objectives && deal.exit_objectives.length > 0 && (
+                    <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+                      <h4 className="mb-3 flex items-center gap-2 font-semibold">
+                        <TrendingUp className="h-4 w-4 text-primary" />
+                        Exit Objectives
+                      </h4>
+                      <ul className="space-y-2">
+                        {deal.exit_objectives.map((obj, i) => (
+                          <li key={i} className="flex items-start gap-2 text-sm">
+                            <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                            <span><strong>{obj.label}:</strong> {obj.value}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      <p className="mt-3 text-xs text-muted-foreground italic">
+                        VaultCapital may deviate if market conditions change.
+                      </p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -461,7 +481,7 @@ const PoolDetailPage = () => {
                     },
                     {
                       q: 'Can I sell my position before an exit?',
-                      a: 'Yes, once the pool is active, you can list your position on our secondary marketplace and sell to other investors.'
+                      a: 'Yes, once the pool is active, you can list your position on the resale board. Liquidity is not guaranteed — listings may not sell.'
                     },
                     {
                       q: 'What are the fees?',

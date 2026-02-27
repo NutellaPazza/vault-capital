@@ -41,6 +41,11 @@ export interface CompanyUpdate {
   summary: string;
 }
 
+export interface ExitObjective {
+  label: string;
+  value: string;
+}
+
 export interface StartupDeal {
   id: string;
   startup_name: string;
@@ -68,6 +73,7 @@ export interface StartupDeal {
   last_valuation_date?: string;
   last_valuation_note?: string;
   company_updates: CompanyUpdate[];
+  exit_objectives: ExitObjective[];
 }
 
 export interface Pool {

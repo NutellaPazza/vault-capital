@@ -63,6 +63,13 @@ export const initialDeals: StartupDeal[] = [
         summary: 'New partnership expands enterprise reach across DACH region',
       },
     ],
+    exit_objectives: [
+      { label: 'Target return', value: '3.0x' },
+      { label: 'Preferred window', value: '24 to 60 months' },
+      { label: 'Trigger', value: 'Revenue growth of 4x or more' },
+      { label: 'Trigger', value: 'Qualified secondary sale at or above current valuation' },
+      { label: 'Trigger', value: 'Acquisition offer above €30M' },
+    ],
   },
   {
     id: 'deal-2',
@@ -117,6 +124,12 @@ export const initialDeals: StartupDeal[] = [
     last_valuation_date: undefined,
     last_valuation_note: undefined,
     company_updates: [],
+    exit_objectives: [
+      { label: 'Target return', value: '4.0x' },
+      { label: 'Preferred window', value: '36 to 72 months' },
+      { label: 'Trigger', value: 'Fleet expansion to 500+ vehicles' },
+      { label: 'Trigger', value: 'Series B at 3x or higher valuation' },
+    ],
   },
   {
     id: 'deal-3',
@@ -188,6 +201,12 @@ export const initialDeals: StartupDeal[] = [
         headline: 'Marketplace hits 50K monthly active buyers',
         summary: 'Growth accelerates as more consumers prioritize sustainable shopping',
       },
+    ],
+    exit_objectives: [
+      { label: 'Target return', value: '5.0x' },
+      { label: 'Preferred window', value: '36 to 60 months' },
+      { label: 'Trigger', value: 'Regulated status obtained in 2+ EU markets' },
+      { label: 'Trigger', value: 'Acquisition offer from established financial institution' },
     ],
   },
 ];
