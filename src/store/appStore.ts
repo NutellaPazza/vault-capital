@@ -1043,6 +1043,8 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: 'vaultcapital-storage',
+      version: 2,
+      migrate: () => ({} as any),
     }
   )
 );
