@@ -16,7 +16,9 @@ interface PoolCardProps {
 export const PoolCard = ({ pool, variant = 'default' }: PoolCardProps) => {
   const progress = (pool.raised_eur / pool.target_eur) * 100;
   const isExpired = new Date(pool.end_datetime) <= new Date();
-  const effectiveStatus = pool.pool_status === 'live' && isExpired ? 'filled' : pool.pool_status;
+  const effectiveStatus = pool.pool_status === 'live' && isExpired
+    ? (pool.raised_eur >= pool.target_eur ? 'filled' : 'processing')
+    : pool.pool_status;
   const isLive = effectiveStatus === 'live';
   const isUpcoming = effectiveStatus === 'upcoming';
 
