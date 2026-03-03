@@ -15,8 +15,10 @@ interface PoolCardProps {
 
 export const PoolCard = ({ pool, variant = 'default' }: PoolCardProps) => {
   const progress = (pool.raised_eur / pool.target_eur) * 100;
-  const isLive = pool.pool_status === 'live';
-  const isUpcoming = pool.pool_status === 'upcoming';
+  const isExpired = new Date(pool.end_datetime) <= new Date();
+  const effectiveStatus = pool.pool_status === 'live' && isExpired ? 'filled' : pool.pool_status;
+  const isLive = effectiveStatus === 'live';
+  const isUpcoming = effectiveStatus === 'upcoming';
 
   if (variant === 'compact') {
     return (
@@ -28,7 +30,7 @@ export const PoolCard = ({ pool, variant = 'default' }: PoolCardProps) => {
                 <h3 className="font-semibold">{pool.deal.startup_name}</h3>
                 <p className="text-xs text-muted-foreground">{pool.deal.industry}</p>
               </div>
-              <StatusBadge status={pool.pool_status} />
+              <StatusBadge status={effectiveStatus} />
             </div>
             <p className="mb-3 line-clamp-2 text-xs text-muted-foreground">{pool.deal.short_description}</p>
             <div className="mb-3 flex flex-wrap gap-1.5 text-xs text-muted-foreground">
@@ -65,7 +67,7 @@ export const PoolCard = ({ pool, variant = 'default' }: PoolCardProps) => {
         <CardHeader className="pb-2">
           <div className="flex items-start justify-between">
             <div>
-              <StatusBadge status={pool.pool_status} className="mb-2" />
+              <StatusBadge status={effectiveStatus} className="mb-2" />
               <h2 className="text-2xl font-bold">{pool.deal.startup_name}</h2>
               <p className="text-muted-foreground">{pool.deal.industry} • {pool.deal.country}</p>
             </div>
@@ -132,7 +134,7 @@ export const PoolCard = ({ pool, variant = 'default' }: PoolCardProps) => {
             <div className="flex-1">
               <div className="mb-1 flex items-center gap-2">
                 <h3 className="font-semibold">{pool.deal.startup_name}</h3>
-                <StatusBadge status={pool.pool_status} />
+                <StatusBadge status={effectiveStatus} />
               </div>
               <p className="text-sm text-muted-foreground">
                 {pool.deal.industry} • {pool.deal.country}
