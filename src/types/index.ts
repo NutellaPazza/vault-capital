@@ -4,7 +4,7 @@ export type RiskProfile = 'conservative' | 'balanced' | 'aggressive';
 export type KYCStatus = 'not_started' | 'pending' | 'verified';
 export type DealStage = 'pre-seed' | 'seed' | 'series-a';
 export type DealStatus = 'upcoming' | 'live' | 'filled' | 'failed' | 'closed';
-export type PoolStatus = 'upcoming' | 'live' | 'filled' | 'failed' | 'settling' | 'active' | 'exit_completed';
+export type PoolStatus = 'upcoming' | 'live' | 'filled' | 'failed' | 'processing' | 'settling' | 'active' | 'exit_completed';
 export type ListingStatus = 'active' | 'sold' | 'cancelled';
 export type TransactionType = 'deposit' | 'withdraw' | 'invest' | 'pool_refund' | 'market_buy' | 'market_sell' | 'exit_distribution' | 'fee';
 

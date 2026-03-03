@@ -13,6 +13,7 @@ const statusConfig: Record<string, { label: string; className: string }> = {
   upcoming: { label: 'UPCOMING', className: 'bg-primary/20 text-primary' },
   filled: { label: 'FILLED', className: 'bg-accent text-accent-foreground' },
   failed: { label: 'FAILED', className: 'bg-destructive/20 text-destructive' },
+  processing: { label: 'PROCESSING', className: 'bg-warning/20 text-warning animate-pulse-soft' },
   settling: { label: 'SETTLING', className: 'bg-warning/20 text-warning' },
   active: { label: 'ACTIVE', className: 'bg-success/20 text-success' },
   exit_completed: { label: 'EXITED', className: 'bg-muted text-muted-foreground' },
