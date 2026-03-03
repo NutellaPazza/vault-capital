@@ -70,15 +70,17 @@ const DashboardPage = () => {
         ].map((stat, i) => (
           <motion.div key={stat.label} variants={fadeUp} custom={i}>
             <Card>
-              <CardContent className="flex items-center gap-2.5 p-3 md:gap-4 md:p-4">
+              <CardContent className="flex h-full items-center gap-2.5 p-3 md:gap-4 md:p-4">
                 <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${stat.bg} md:h-12 md:w-12`}>
                   {stat.icon}
                 </div>
-                <div className="min-w-0">
+                <div className="min-w-0 flex flex-col justify-center">
                   <p className="truncate text-[11px] text-muted-foreground md:text-sm">{stat.label}</p>
-                  <p className={`truncate text-base font-bold md:text-xl ${stat.color || ''}`}>{stat.value}</p>
-                  {stat.extra && (
-                    <p className={`text-[10px] md:text-xs ${stat.color}`}>{stat.extra}</p>
+                  <p className={`truncate text-base font-bold leading-tight md:text-xl ${stat.color || ''}`}>{stat.value}</p>
+                  {stat.extra ? (
+                    <p className={`text-[10px] leading-tight md:text-xs ${stat.color}`}>{stat.extra}</p>
+                  ) : (
+                    <p className="text-[10px] leading-tight md:text-xs opacity-0" aria-hidden="true">&nbsp;</p>
                   )}
                 </div>
               </CardContent>

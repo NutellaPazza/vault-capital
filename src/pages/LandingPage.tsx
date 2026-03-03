@@ -64,7 +64,7 @@ const LandingPage = () => {
       <HeroSection />
 
       {/* Why VaultCapital */}
-      <section className="py-16">
+      <section className="py-8 md:py-16">
         <div className="container">
           <h2 className="mb-10 text-center text-3xl font-bold">Why VaultCapital?</h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -88,7 +88,7 @@ const LandingPage = () => {
       <ReturnSimulator />
 
       {/* Navigation Cards */}
-      <section className="container py-16">
+      <section className="container py-8 md:py-16">
         <h2 className="mb-8 text-center text-3xl font-bold">Learn More</h2>
         <div className="grid gap-6 md:grid-cols-3">
           {sections.map(s => (
@@ -114,7 +114,7 @@ const LandingPage = () => {
       <RiskDisclaimer />
 
       {/* Final CTA */}
-      <section className="bg-primary py-16 text-primary-foreground">
+      <section className="bg-primary py-8 md:py-16 text-primary-foreground">
         <div className="container text-center">
           <h2 className="mb-4 text-3xl font-bold">Ready to start?</h2>
           <p className="mb-8 text-primary-foreground/80">
@@ -132,9 +132,9 @@ const LandingPage = () => {
           <p className="mb-3 text-center text-xs text-muted-foreground">
             Fees shown upfront. No hidden charges.
           </p>
-          <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
+          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-muted-foreground md:text-sm md:gap-x-4">
             <span>© 2025 VaultCapital</span>
-            <span>•</span>
+            <span className="hidden sm:inline">•</span>
             <Link to="/about" className="hover:text-foreground">About</Link>
             <span>•</span>
             <Link to="/how-it-works" className="hover:text-foreground">How It Works</Link>

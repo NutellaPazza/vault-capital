@@ -934,7 +934,7 @@ export const useAppStore = create<AppState>()(
       getLivePools: () => {
         const state = get();
         return state.pools
-          .filter(p => p.pool_status === 'live')
+          .filter(p => p.pool_status === 'live' && new Date(p.end_datetime) > new Date())
           .map(pool => {
             const deal = state.deals.find(d => d.id === pool.deal_id);
             if (!deal) return null;
