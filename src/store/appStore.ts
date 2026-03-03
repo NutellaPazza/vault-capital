@@ -279,6 +279,7 @@ export const useAppStore = create<AppState>()(
         
         if (state.currentUser.wallet_balance_eur < total) return false;
         if (pool.pool_status !== 'live') return false;
+        if (new Date(pool.end_datetime) <= new Date()) return false;
         
         const timestamp = new Date().toISOString();
         const deal = state.deals.find(d => d.id === pool.deal_id);

@@ -40,7 +40,9 @@ const PoolDetailPage = () => {
 
   const { deal, ...pool } = poolWithDeal;
   const progress = (pool.raised_eur / pool.target_eur) * 100;
-  const isLive = pool.pool_status === 'live';
+  const isExpired = new Date(pool.end_datetime) <= new Date();
+  const isLive = pool.pool_status === 'live' && !isExpired;
+  const effectiveStatus = pool.pool_status === 'live' && isExpired ? 'filled' : pool.pool_status;
   
   const amount = parseFloat(investAmount) || 0;
   const fee = amount * (pool.fee_entry_percent / 100);
@@ -99,7 +101,7 @@ const PoolDetailPage = () => {
               <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between sm:gap-4">
                 <div>
                   <div className="mb-2 flex flex-wrap items-center gap-1.5 md:gap-2">
-                    <StatusBadge status={pool.pool_status} />
+                    <StatusBadge status={effectiveStatus} />
                     <StatusBadge status={deal.stage} />
                     {deal.accelerator && (
                       <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 md:text-xs">
