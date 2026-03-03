@@ -84,32 +84,32 @@ const PoolDetailPage = () => {
   ];
 
   return (
-    <div className="container py-6">
+    <div className="container px-4 py-4 md:px-6 md:py-6">
       {/* Back Button */}
-      <Button variant="ghost" className="mb-4" onClick={() => navigate(-1)}>
-        <ArrowLeft className="mr-2 h-4 w-4" /> Back
+      <Button variant="ghost" className="mb-3 md:mb-4" size="sm" onClick={() => navigate(-1)}>
+        <ArrowLeft className="mr-1.5 h-4 w-4" /> Back
       </Button>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-4 md:gap-6 lg:grid-cols-3">
         {/* Main Content */}
         <div className="lg:col-span-2">
           {/* Header */}
-          <Card className="mb-6">
-            <CardHeader>
-              <div className="flex flex-wrap items-start justify-between gap-4">
+          <Card className="mb-4 md:mb-6">
+            <CardHeader className="p-4 md:p-6">
+              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between sm:gap-4">
                 <div>
-                  <div className="mb-2 flex flex-wrap items-center gap-2">
+                  <div className="mb-2 flex flex-wrap items-center gap-1.5 md:gap-2">
                     <StatusBadge status={pool.pool_status} />
                     <StatusBadge status={deal.stage} />
                     {deal.accelerator && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 md:text-xs">
                         <Award className="h-3 w-3" />
                         {deal.accelerator}
                       </span>
                     )}
                   </div>
-                  <CardTitle className="text-2xl">{deal.startup_name}</CardTitle>
-                  <CardDescription className="text-base">
+                  <CardTitle className="text-xl md:text-2xl">{deal.startup_name}</CardTitle>
+                  <CardDescription className="text-sm md:text-base">
                     {deal.industry} • {deal.sector_type} • {deal.country}
                   </CardDescription>
                 </div>
@@ -121,25 +121,25 @@ const PoolDetailPage = () => {
                 )}
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
+            <CardContent className="px-4 md:px-6">
+              <div className="space-y-3 md:space-y-4">
                 <div>
-                  <div className="mb-2 flex justify-between text-sm">
+                  <div className="mb-2 flex justify-between text-xs md:text-sm">
                     <span className="text-muted-foreground">
                       {formatCompactCurrency(pool.raised_eur)} raised of {formatCompactCurrency(pool.target_eur)}
                     </span>
                     <span className="font-medium">{formatPercent(progress, 0)}</span>
                   </div>
-                  <Progress value={progress} className="h-2.5" />
+                  <Progress value={progress} className="h-2 md:h-2.5" />
                 </div>
                 
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-3 text-xs text-muted-foreground md:gap-4 md:text-sm">
                   <div className="flex items-center gap-1">
-                    <Users className="h-4 w-4" />
+                    <Users className="h-3.5 w-3.5 md:h-4 md:w-4" />
                     <span>{pool.investors_count} investors</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
+                    <Clock className="h-3.5 w-3.5 md:h-4 md:w-4" />
                     <span>Started {formatDate(pool.start_datetime)}</span>
                   </div>
                 </div>
@@ -148,15 +148,15 @@ const PoolDetailPage = () => {
           </Card>
 
           {/* Key Metrics Card */}
-          <Card className="mb-6">
-            <CardContent className="p-4">
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <Card className="mb-4 md:mb-6">
+            <CardContent className="p-3 md:p-4">
+              <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 md:gap-4">
                 {keyMetrics.map(m => (
-                  <div key={m.label} className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
-                    <m.icon className="h-5 w-5 text-primary" />
+                  <div key={m.label} className="flex items-center gap-2.5 rounded-lg bg-muted/50 p-2.5 md:gap-3 md:p-3">
+                    <m.icon className="h-4 w-4 text-primary md:h-5 md:w-5" />
                     <div>
-                      <p className="text-xs text-muted-foreground">{m.label}</p>
-                      <p className="font-semibold">{m.value}</p>
+                      <p className="text-[10px] text-muted-foreground md:text-xs">{m.label}</p>
+                      <p className="text-sm font-semibold md:text-base">{m.value}</p>
                     </div>
                   </div>
                 ))}
@@ -166,13 +166,13 @@ const PoolDetailPage = () => {
 
           {/* Tabs */}
           <Tabs defaultValue="overview">
-            <TabsList className="w-full justify-start">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="team">Team</TabsTrigger>
-              <TabsTrigger value="terms">Terms</TabsTrigger>
-              <TabsTrigger value="updates">Updates</TabsTrigger>
-              <TabsTrigger value="documents">Documents</TabsTrigger>
-              <TabsTrigger value="faq">FAQ</TabsTrigger>
+            <TabsList className="w-full justify-start overflow-x-auto">
+              <TabsTrigger value="overview" className="text-xs md:text-sm">Overview</TabsTrigger>
+              <TabsTrigger value="team" className="text-xs md:text-sm">Team</TabsTrigger>
+              <TabsTrigger value="terms" className="text-xs md:text-sm">Terms</TabsTrigger>
+              <TabsTrigger value="updates" className="text-xs md:text-sm">Updates</TabsTrigger>
+              <TabsTrigger value="documents" className="text-xs md:text-sm">Docs</TabsTrigger>
+              <TabsTrigger value="faq" className="text-xs md:text-sm">FAQ</TabsTrigger>
             </TabsList>
             
             <TabsContent value="overview" className="space-y-4">
