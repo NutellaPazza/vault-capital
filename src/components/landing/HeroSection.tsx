@@ -14,7 +14,7 @@ const HeroSection = () =>
     {/* Subtle gradient background */}
     <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-primary/5" />
 
-    <div className="container relative flex flex-col gap-12 py-16 md:flex-row md:items-center md:gap-16 md:py-24">
+    <div className="container relative flex flex-col gap-8 py-8 md:flex-row md:items-center md:gap-16 md:py-24">
       {/* Left: Copy */}
       <div className="flex-1 text-center md:text-left">
         <p className="mb-3 text-sm font-semibold uppercase tracking-wider text-primary">
@@ -25,9 +25,7 @@ const HeroSection = () =>
           <span className="text-primary">
 from €100</span>
         </h1>
-        <p className="mb-8 max-w-xl text-lg text-muted-foreground md:text-xl">Curated deals. 
-72-hour vaults. 
-SPV held positions.</p>
+        <p className="mb-8 max-w-xl text-base text-muted-foreground md:text-xl">Curated deals · 72-hour vaults · SPV held positions.</p>
 
         {/* Micro bullets */}
         <div className="mb-8 flex flex-wrap justify-center gap-6 md:justify-start">
@@ -58,7 +56,7 @@ SPV held positions.</p>
               Explore Vaults <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
-          <Button size="lg" variant="ghost" asChild>
+          <Button size="lg" variant="outline" asChild>
             <Link to="/how-it-works">How It Works</Link>
           </Button>
         </div>
