@@ -25,9 +25,9 @@ const HeroSection = () =>
           <span className="text-primary">
 from €100</span>
         </h1>
-        <p className="mb-8 max-w-xl text-lg text-muted-foreground md:text-xl">
-          Curated deals. 72 hour vaults. SPV held positions.
-        </p>
+        <p className="mb-8 max-w-xl text-lg text-muted-foreground md:text-xl">Curated deals. 
+72-hour vaults. 
+SPV held positions.</p>
 
         {/* Micro bullets */}
         <div className="mb-8 flex flex-wrap justify-center gap-6 md:justify-start">
@@ -85,14 +85,14 @@ from €100</span>
         <p className="mb-3 text-center text-[11px] text-muted-foreground">Example vaults</p>
         <div className="relative h-[320px]">
           {mockVaults.map((vault, i) => <div
-            key={vault.name}
-            className="vault-float absolute left-0 right-0 rounded-xl border bg-card p-4 shadow-lg"
-            style={{
-              top: `${i * 90}px`,
-              zIndex: 3 - i,
-              animationDelay: `${i * 0.5}s`,
-              transform: `scale(${1 - i * 0.03})`
-            }}>
+          key={vault.name}
+          className="vault-float absolute left-0 right-0 rounded-xl border bg-card p-4 shadow-lg"
+          style={{
+            top: `${i * 90}px`,
+            zIndex: 3 - i,
+            animationDelay: `${i * 0.5}s`,
+            transform: `scale(${1 - i * 0.03})`
+          }}>
 
               <div className="mb-3 flex items-center justify-between">
                 <span className="font-semibold text-card-foreground">{vault.name}</span>
