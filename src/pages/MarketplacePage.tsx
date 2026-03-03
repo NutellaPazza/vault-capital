@@ -376,41 +376,41 @@ const MarketplacePage = () => {
   }, [queryTab, querySection, myReceivedOffers.length]);
 
   return (
-    <div className="container py-6">
+    <div className="container px-4 py-4 md:px-6 md:py-6">
       {/* Header */}
-      <div className="mb-6 flex items-start justify-between">
+      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between md:mb-6">
         <div>
-          <h1 className="mb-2 text-2xl font-bold">Resale Board</h1>
-          <p className="text-muted-foreground">List or buy positions. Listings may not sell.</p>
+          <h1 className="mb-1 text-xl font-bold md:mb-2 md:text-2xl">Resale Board</h1>
+          <p className="text-sm text-muted-foreground md:text-base">List or buy positions. Listings may not sell.</p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => setShowHowItWorks(true)} className="gap-2">
-          <HelpCircle className="h-4 w-4" />
+        <Button variant="outline" size="sm" onClick={() => setShowHowItWorks(true)} className="gap-1.5 self-start text-xs md:text-sm">
+          <HelpCircle className="h-3.5 w-3.5 md:h-4 md:w-4" />
           How It Works
         </Button>
       </div>
 
-      {/* 1. Market Summary Strip */}
-      <div className="mb-2 grid grid-cols-3 gap-3">
+      {/* Market Summary Strip */}
+      <div className="mb-2 grid grid-cols-3 gap-2 md:gap-3">
         <Card>
-          <CardContent className="p-3 text-center">
-            <p className="text-xs text-muted-foreground">Active listings</p>
-            <p className="text-xl font-bold">{marketStats.activeCount}</p>
+          <CardContent className="p-2.5 text-center md:p-3">
+            <p className="text-[10px] text-muted-foreground md:text-xs">Active listings</p>
+            <p className="text-lg font-bold md:text-xl">{marketStats.activeCount}</p>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-3 text-center">
-            <p className="text-xs text-muted-foreground">Total notional listed</p>
-            <p className="text-xl font-bold">{formatCompactCurrency(marketStats.totalNotional)}</p>
+          <CardContent className="p-2.5 text-center md:p-3">
+            <p className="text-[10px] text-muted-foreground md:text-xs">Total notional</p>
+            <p className="text-lg font-bold md:text-xl">{formatCompactCurrency(marketStats.totalNotional)}</p>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-3 text-center">
-            <p className="text-xs text-muted-foreground">Avg days listed</p>
-            <p className="text-xl font-bold">{marketStats.avgDays}d</p>
+          <CardContent className="p-2.5 text-center md:p-3">
+            <p className="text-[10px] text-muted-foreground md:text-xs">Avg days listed</p>
+            <p className="text-lg font-bold md:text-xl">{marketStats.avgDays}d</p>
           </CardContent>
         </Card>
       </div>
-      <p className="mb-6 text-xs text-muted-foreground">Listings may not sell. Liquidity is not guaranteed.</p>
+      <p className="mb-4 text-[10px] text-muted-foreground md:mb-6 md:text-xs">Listings may not sell. Liquidity is not guaranteed.</p>
 
       {/* 9. Recent Activity (desktop only) */}
       {recentActivity.length > 0 && (
@@ -478,60 +478,62 @@ const MarketplacePage = () => {
         </DialogContent>
       </Dialog>
 
-      <Tabs value={tab} onValueChange={(v) => setTab(v as 'buy' | 'sell')} className="space-y-6">
+      <Tabs value={tab} onValueChange={(v) => setTab(v as 'buy' | 'sell')} className="space-y-4 md:space-y-6">
         <TabsList className="grid w-full max-w-sm grid-cols-2">
-          <TabsTrigger value="buy" className="gap-2">
-            <ShoppingCart className="h-4 w-4" />
+          <TabsTrigger value="buy" className="gap-1.5 text-xs md:gap-2 md:text-sm">
+            <ShoppingCart className="h-3.5 w-3.5 md:h-4 md:w-4" />
             Buy Listings
           </TabsTrigger>
-          <TabsTrigger value="sell" className="gap-2">
-            <Store className="h-4 w-4" />
+          <TabsTrigger value="sell" className="gap-1.5 text-xs md:gap-2 md:text-sm">
+            <Store className="h-3.5 w-3.5 md:h-4 md:w-4" />
             Your Listings
           </TabsTrigger>
         </TabsList>
 
         {/* BUY TAB */}
-        <TabsContent value="buy" className="space-y-6">
-          {/* 2. Search + Filters + Sorting */}
+        <TabsContent value="buy" className="space-y-4 md:space-y-6">
+          {/* Search + Filters + Sorting */}
           <Card>
-            <CardContent className="p-4">
-              <div className="flex gap-2">
+            <CardContent className="p-3 md:p-4">
+              <div className="flex flex-col gap-2 sm:flex-row sm:gap-2">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     placeholder="Search listings..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="pl-9"
+                    className="pl-9 text-sm"
                   />
                 </div>
-                <Button variant="outline" size="icon" className="relative shrink-0" onClick={() => setFiltersOpen(true)}>
-                  <SlidersHorizontal className="h-4 w-4" />
-                  {activeFilterCount > 0 && (
-                    <Badge variant="destructive" className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full p-0 text-[10px]">
-                      {activeFilterCount}
-                    </Badge>
-                  )}
-                </Button>
-                <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
-                  <SelectTrigger className="w-[160px] shrink-0">
-                    <ArrowUpDown className="mr-2 h-3.5 w-3.5" />
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="newest">Newest</SelectItem>
-                    <SelectItem value="lowest_price">Lowest price</SelectItem>
-                    <SelectItem value="highest_percent">Highest % for sale</SelectItem>
-                    <SelectItem value="most_viewed">Most viewed</SelectItem>
-                    <SelectItem value="oldest">Oldest listings</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="icon" className="relative h-9 w-9 shrink-0" onClick={() => setFiltersOpen(true)}>
+                    <SlidersHorizontal className="h-4 w-4" />
+                    {activeFilterCount > 0 && (
+                      <Badge variant="destructive" className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full p-0 text-[10px]">
+                        {activeFilterCount}
+                      </Badge>
+                    )}
+                  </Button>
+                  <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
+                    <SelectTrigger className="w-full text-xs sm:w-[160px] sm:text-sm">
+                      <ArrowUpDown className="mr-1.5 h-3.5 w-3.5" />
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="newest">Newest</SelectItem>
+                      <SelectItem value="lowest_price">Lowest price</SelectItem>
+                      <SelectItem value="highest_percent">Highest % for sale</SelectItem>
+                      <SelectItem value="most_viewed">Most viewed</SelectItem>
+                      <SelectItem value="oldest">Oldest listings</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </CardContent>
           </Card>
 
           {buyableListings.length > 0 ? (
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-3 sm:grid-cols-2 md:gap-4">
               {buyableListings.map(l => {
                 const equityPercent = getListingEquity(l);
                 const daysListed = differenceInDays(new Date(), new Date(l.created_at));
@@ -542,41 +544,41 @@ const MarketplacePage = () => {
                     className="cursor-pointer transition-all hover:shadow-md hover:border-primary/30"
                     onClick={() => setDetailListing(l.id)}
                   >
-                    <CardContent className="p-4">
+                    <CardContent className="p-3 md:p-4">
                       {/* Header */}
-                      <div className="mb-3 flex items-start justify-between">
-                        <div>
-                          <h3 className="font-semibold">{l.deal.startup_name}</h3>
-                          <p className="text-xs text-muted-foreground">{l.deal.industry}</p>
+                      <div className="mb-2 flex items-start justify-between md:mb-3">
+                        <div className="min-w-0 flex-1">
+                          <h3 className="truncate text-sm font-semibold md:text-base">{l.deal.startup_name}</h3>
+                          <p className="text-[10px] text-muted-foreground md:text-xs">{l.deal.industry}</p>
                         </div>
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex shrink-0 items-center gap-1 ml-2">
                           <StatusBadge status={l.deal.stage} />
-                          <Badge variant="outline" className="text-[10px]">{l.deal.country}</Badge>
+                          <Badge variant="outline" className="hidden text-[10px] sm:inline-flex">{l.deal.country}</Badge>
                         </div>
                       </div>
                       {/* Key metrics */}
-                      <div className="mb-3 grid grid-cols-3 gap-2 text-sm">
+                      <div className="mb-2 grid grid-cols-3 gap-1.5 text-xs md:mb-3 md:gap-2 md:text-sm">
                         <div>
-                          <span className="text-xs text-muted-foreground block">Ask price</span>
+                          <span className="block text-[10px] text-muted-foreground md:text-xs">Ask price</span>
                           <span className="font-semibold">{formatCompactCurrency(l.ask_price_eur)}</span>
                         </div>
                         <div>
-                          <span className="text-xs text-muted-foreground block">% for sale</span>
+                          <span className="block text-[10px] text-muted-foreground md:text-xs">% for sale</span>
                           <span className="font-semibold">{l.percent_of_position_for_sale}%</span>
                         </div>
                         <div>
-                          <span className="text-xs text-muted-foreground block"><ExposureLabel /></span>
+                          <span className="block text-[10px] text-muted-foreground md:text-xs"><ExposureLabel /></span>
                           <span className="font-semibold text-primary">{equityPercent.toFixed(3)}%</span>
                         </div>
                       </div>
                       {/* Secondary row */}
-                      <div className="flex items-center justify-between text-xs text-muted-foreground border-t pt-2">
-                        <div className="flex items-center gap-3">
-                          <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{daysListed}d listed</span>
-                          <span className="flex items-center gap-1"><Eye className="h-3 w-3" />{views} views</span>
+                      <div className="flex items-center justify-between border-t pt-2 text-[10px] text-muted-foreground md:text-xs">
+                        <div className="flex items-center gap-2 md:gap-3">
+                          <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{daysListed}d</span>
+                          <span className="flex items-center gap-1"><Eye className="h-3 w-3" />{views}</span>
                         </div>
-                        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={(e) => { e.stopPropagation(); setDetailListing(l.id); }}>
-                          View listing
+                        <Button variant="ghost" size="sm" className="h-6 text-[10px] md:h-7 md:text-xs" onClick={(e) => { e.stopPropagation(); setDetailListing(l.id); }}>
+                          View
                         </Button>
                       </div>
                     </CardContent>
@@ -595,11 +597,11 @@ const MarketplacePage = () => {
         </TabsContent>
 
         {/* SELL TAB */}
-        <TabsContent value="sell" className="space-y-6">
+        <TabsContent value="sell" className="space-y-4 md:space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Your Listings</h2>
-            <Button onClick={() => { setIsSellDialogOpen(true); setSellConfirmed(false); }}>
-              <Plus className="mr-2 h-4 w-4" /> Create Listing
+            <h2 className="text-base font-semibold md:text-lg">Your Listings</h2>
+            <Button size="sm" className="text-xs md:text-sm" onClick={() => { setIsSellDialogOpen(true); setSellConfirmed(false); }}>
+              <Plus className="mr-1.5 h-3.5 w-3.5 md:mr-2 md:h-4 md:w-4" /> Create Listing
             </Button>
           </div>
 
