@@ -12,6 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DealStage, PoolStatus } from '@/types';
+import { motion } from 'framer-motion';
 
 const STAGES: { value: DealStage; label: string }[] = [
   { value: 'pre-seed', label: 'Pre-seed' },
@@ -27,7 +28,6 @@ const STATUSES: { value: PoolStatus; label: string }[] = [
 ];
 
 const COUNTRIES = ['Italy', 'Germany', 'Netherlands', 'France', 'Spain', 'UK'];
-
 const SECTORS = ['B2B', 'B2C', 'B2B2C', 'Fintech', 'AI/ML', 'SaaS', 'E-commerce', 'HealthTech', 'CleanTech'];
 
 const TICKET_RANGES = [
@@ -148,28 +148,28 @@ const ExplorePage = () => {
   const hasFilters = activeFilterCount > 0 || search;
 
   return (
-    <div className="container py-6">
-      <div className="mb-6">
-        <h1 className="mb-2 text-2xl font-bold">Explore Vaults</h1>
-        <p className="text-muted-foreground">Discover and invest in curated startup opportunities</p>
+    <div className="container px-4 py-4 md:px-6 md:py-6">
+      <div className="mb-4 md:mb-6">
+        <h1 className="mb-1 text-xl font-bold md:mb-2 md:text-2xl">Explore Vaults</h1>
+        <p className="text-sm text-muted-foreground md:text-base">Discover and invest in curated startup opportunities</p>
       </div>
 
       {/* Search and Filters */}
-      <Card className="mb-6">
-        <CardContent className="flex flex-col gap-3 p-4 sm:flex-row">
+      <Card className="mb-4 md:mb-6">
+        <CardContent className="flex flex-col gap-2.5 p-3 sm:flex-row sm:gap-3 sm:p-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search by startup, industry, or country..."
+              placeholder="Search startup, industry..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9"
+              className="pl-9 text-sm"
             />
           </div>
           
           <div className="flex gap-2">
             <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
-              <SelectTrigger className="w-[160px]">
+              <SelectTrigger className="w-full text-xs sm:w-[160px] sm:text-sm">
                 <SelectValue placeholder="Sort by..." />
               </SelectTrigger>
               <SelectContent>
@@ -182,17 +182,17 @@ const ExplorePage = () => {
 
             <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
               <SheetTrigger asChild>
-                <Button variant="outline" className="gap-2">
-                  <Filter className="h-4 w-4" />
+                <Button variant="outline" size="sm" className="gap-1.5 text-xs sm:gap-2 sm:text-sm">
+                  <Filter className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   Filters
                   {activeFilterCount > 0 && (
-                    <span className="ml-1 rounded-full bg-primary px-1.5 text-xs text-primary-foreground">
+                    <span className="ml-0.5 rounded-full bg-primary px-1.5 text-[10px] text-primary-foreground sm:ml-1">
                       {activeFilterCount}
                     </span>
                   )}
                 </Button>
               </SheetTrigger>
-              <SheetContent className="flex w-80 flex-col">
+              <SheetContent className="flex w-[85vw] max-w-80 flex-col">
                 <SheetHeader>
                   <SheetTitle>Filter Vaults</SheetTitle>
                 </SheetHeader>
@@ -291,6 +291,7 @@ const ExplorePage = () => {
                           key={i}
                           variant={ticketRange === i ? 'default' : 'outline'}
                           size="sm"
+                          className="text-xs"
                           onClick={() => setTicketRange(ticketRange === i ? null : i)}
                         >
                           {range.label}
@@ -310,6 +311,7 @@ const ExplorePage = () => {
                           key={i}
                           variant={targetRange === i ? 'default' : 'outline'}
                           size="sm"
+                          className="text-xs"
                           onClick={() => setTargetRange(targetRange === i ? null : i)}
                         >
                           {range.label}
@@ -346,7 +348,7 @@ const ExplorePage = () => {
             </Sheet>
 
             {hasFilters && (
-              <Button variant="ghost" size="icon" onClick={clearFilters}>
+              <Button variant="ghost" size="icon" className="h-9 w-9" onClick={clearFilters}>
                 <X className="h-4 w-4" />
               </Button>
             )}
@@ -356,11 +358,24 @@ const ExplorePage = () => {
 
       {/* Pool Grid */}
       {poolsWithDeals.length > 0 ? (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {poolsWithDeals.map(pool => pool && (
-            <PoolCard key={pool.id} pool={pool} />
+        <motion.div
+          className="grid gap-3 sm:grid-cols-2 md:gap-6 lg:grid-cols-3"
+          initial="hidden"
+          animate="visible"
+          variants={{ visible: { transition: { staggerChildren: 0.07 } } }}
+        >
+          {poolsWithDeals.map((pool, i) => pool && (
+            <motion.div
+              key={pool.id}
+              variants={{
+                hidden: { opacity: 0, y: 16 },
+                visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] as const } },
+              }}
+            >
+              <PoolCard pool={pool} />
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       ) : (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">

@@ -9,6 +9,16 @@ import {
   Wallet, TrendingUp, PieChart, ArrowRight, Clock, 
   Newspaper, Store, BarChart3 
 } from 'lucide-react';
+import { motion } from 'framer-motion';
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 18 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.08, duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] as const },
+  }),
+};
 
 const DashboardPage = () => {
   const { 
@@ -41,67 +51,45 @@ const DashboardPage = () => {
     return listing?.seller_user_id === currentUser?.id && o.status === 'pending';
   });
 
+  let sectionIndex = 0;
+
   return (
     <div className="container space-y-4 px-4 py-4 md:space-y-6 md:px-6 md:py-6">
       {/* Stats Cards — 2x2 grid on mobile, 4 cols on desktop */}
-      <div className="grid grid-cols-2 gap-2.5 md:gap-4 lg:grid-cols-4">
-        <Card>
-          <CardContent className="flex items-center gap-2.5 p-3 md:gap-4 md:p-4">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 md:h-12 md:w-12">
-              <Wallet className="h-4 w-4 text-primary md:h-6 md:w-6" />
-            </div>
-            <div className="min-w-0">
-              <p className="truncate text-[11px] text-muted-foreground md:text-sm">Wallet</p>
-              <p className="truncate text-base font-bold md:text-xl">{formatCurrency(currentUser?.wallet_balance_eur || 0, false)}</p>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="flex items-center gap-2.5 p-3 md:gap-4 md:p-4">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent md:h-12 md:w-12">
-              <PieChart className="h-4 w-4 text-accent-foreground md:h-6 md:w-6" />
-            </div>
-            <div className="min-w-0">
-              <p className="truncate text-[11px] text-muted-foreground md:text-sm">Investments</p>
-              <p className="truncate text-base font-bold md:text-xl">{positions.length}</p>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="flex items-center gap-2.5 p-3 md:gap-4 md:p-4">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted md:h-12 md:w-12">
-              <TrendingUp className="h-4 w-4 text-muted-foreground md:h-6 md:w-6" />
-            </div>
-            <div className="min-w-0">
-              <p className="truncate text-[11px] text-muted-foreground md:text-sm">Invested</p>
-              <p className="truncate text-base font-bold md:text-xl">{formatCompactCurrency(totalInvested)}</p>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="flex items-center gap-2.5 p-3 md:gap-4 md:p-4">
-            <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg md:h-12 md:w-12 ${unrealizedGain >= 0 ? 'bg-success/10' : 'bg-destructive/10'}`}>
-              <BarChart3 className={`h-4 w-4 md:h-6 md:w-6 ${unrealizedGain >= 0 ? 'text-success' : 'text-destructive'}`} />
-            </div>
-            <div className="min-w-0">
-              <p className="truncate text-[11px] text-muted-foreground md:text-sm">P&L</p>
-              <p className={`truncate text-base font-bold md:text-xl ${unrealizedGain >= 0 ? 'text-success' : 'text-destructive'}`}>
-                {unrealizedGain >= 0 ? '+' : ''}{formatCurrency(unrealizedGain, false)}
-              </p>
-              <p className={`text-[10px] md:text-xs ${unrealizedGain >= 0 ? 'text-success' : 'text-destructive'}`}>
-                {gainPercent >= 0 ? '+' : ''}{formatPercent(gainPercent, 1)}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <motion.div
+        className="grid grid-cols-2 gap-2.5 md:gap-4 lg:grid-cols-4"
+        initial="hidden"
+        animate="visible"
+        variants={{ visible: { transition: { staggerChildren: 0.06 } } }}
+      >
+        {[
+          { icon: <Wallet className="h-4 w-4 text-primary md:h-6 md:w-6" />, bg: 'bg-primary/10', label: 'Wallet', value: formatCurrency(currentUser?.wallet_balance_eur || 0, false) },
+          { icon: <PieChart className="h-4 w-4 text-accent-foreground md:h-6 md:w-6" />, bg: 'bg-accent', label: 'Investments', value: positions.length },
+          { icon: <TrendingUp className="h-4 w-4 text-muted-foreground md:h-6 md:w-6" />, bg: 'bg-muted', label: 'Invested', value: formatCompactCurrency(totalInvested) },
+          { icon: <BarChart3 className={`h-4 w-4 md:h-6 md:w-6 ${unrealizedGain >= 0 ? 'text-success' : 'text-destructive'}`} />, bg: unrealizedGain >= 0 ? 'bg-success/10' : 'bg-destructive/10', label: 'P&L', value: `${unrealizedGain >= 0 ? '+' : ''}${formatCurrency(unrealizedGain, false)}`, extra: `${gainPercent >= 0 ? '+' : ''}${formatPercent(gainPercent, 1)}`, color: unrealizedGain >= 0 ? 'text-success' : 'text-destructive' },
+        ].map((stat, i) => (
+          <motion.div key={stat.label} variants={fadeUp} custom={i}>
+            <Card>
+              <CardContent className="flex items-center gap-2.5 p-3 md:gap-4 md:p-4">
+                <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${stat.bg} md:h-12 md:w-12`}>
+                  {stat.icon}
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-[11px] text-muted-foreground md:text-sm">{stat.label}</p>
+                  <p className={`truncate text-base font-bold md:text-xl ${stat.color || ''}`}>{stat.value}</p>
+                  {stat.extra && (
+                    <p className={`text-[10px] md:text-xs ${stat.color}`}>{stat.extra}</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
+      </motion.div>
 
       {/* Live Vaults */}
       {livePools.length > 0 && (
-        <section>
+        <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} variants={fadeUp} custom={sectionIndex++}>
           <div className="mb-3 flex items-center justify-between md:mb-4">
             <h2 className="text-lg font-semibold md:text-xl">Live Vaults</h2>
             <Button variant="ghost" size="sm" asChild>
@@ -201,13 +189,13 @@ const DashboardPage = () => {
               ))}
             </div>
           )}
-        </section>
+        </motion.section>
       )}
 
       <div className="grid gap-4 md:gap-6 lg:grid-cols-2">
         {/* Portfolio Performance */}
         {positions.length > 0 && (
-          <section>
+          <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} variants={fadeUp} custom={sectionIndex++}>
             <Card>
               <CardHeader className="px-4 pb-2 pt-4 md:px-6 md:pb-3 md:pt-6">
                 <div className="flex items-center justify-between">
@@ -242,12 +230,12 @@ const DashboardPage = () => {
                 })}
               </CardContent>
             </Card>
-          </section>
+          </motion.section>
         )}
 
         {/* Company Updates Feed */}
         {companyUpdates.length > 0 && (
-          <section>
+          <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} variants={fadeUp} custom={sectionIndex++}>
             <Card>
               <CardHeader className="px-4 pb-2 pt-4 md:px-6 md:pb-3 md:pt-6">
                 <CardTitle className="flex items-center gap-2 text-base md:text-lg">
@@ -268,13 +256,13 @@ const DashboardPage = () => {
                 ))}
               </CardContent>
             </Card>
-          </section>
+          </motion.section>
         )}
       </div>
 
       {/* Marketplace Activity */}
       {(myListings.length > 0 || myPendingOffers.length > 0) && (
-        <section>
+        <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} variants={fadeUp} custom={sectionIndex++}>
           <Card>
             <CardHeader className="px-4 pb-2 pt-4 md:px-6 md:pb-3 md:pt-6">
               <div className="flex items-center justify-between">
@@ -302,12 +290,12 @@ const DashboardPage = () => {
               </div>
             </CardContent>
           </Card>
-        </section>
+        </motion.section>
       )}
 
       {/* Upcoming Pools */}
       {upcomingPools.length > 0 && (
-        <section>
+        <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} variants={fadeUp} custom={sectionIndex++}>
           <div className="mb-3 flex items-center justify-between md:mb-4">
             <h2 className="text-lg font-semibold md:text-xl">Upcoming Vaults</h2>
             <Button variant="ghost" size="sm" asChild>
@@ -321,12 +309,12 @@ const DashboardPage = () => {
               </div>
             ))}
           </div>
-        </section>
+        </motion.section>
       )}
 
       {/* Recent Notifications */}
       {recentNotifications.length > 0 && (
-        <section>
+        <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} variants={fadeUp} custom={sectionIndex++}>
           <Card>
             <CardHeader className="px-4 pb-2 pt-4 md:px-6 md:pb-3 md:pt-6">
               <div className="flex items-center justify-between">
@@ -350,11 +338,18 @@ const DashboardPage = () => {
               ))}
             </CardContent>
           </Card>
-        </section>
+        </motion.section>
       )}
 
       {/* Quick Actions */}
-      <section className="grid gap-2.5 sm:grid-cols-2 md:gap-4">
+      <motion.section
+        className="grid gap-2.5 sm:grid-cols-2 md:gap-4"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={fadeUp}
+        custom={sectionIndex++}
+      >
         <Card className="bg-gradient-to-br from-card to-accent/20">
           <CardContent className="flex items-center justify-between p-4 md:p-6">
             <div>
@@ -377,7 +372,7 @@ const DashboardPage = () => {
             </Button>
           </CardContent>
         </Card>
-      </section>
+      </motion.section>
     </div>
   );
 };

@@ -9,12 +9,7 @@ import { TrendingUp, TrendingDown, ExternalLink, Store, PieChart, ShoppingBag, I
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,6 +19,8 @@ import {
   LineChart, Line, BarChart, Bar, PieChart as RechartsPie, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend,
 } from 'recharts';
+import { motion } from 'framer-motion';
+import { Progress } from '@/components/ui/progress';
 
 // Mock chart data
 const portfolioValueData = [
@@ -36,11 +33,19 @@ const portfolioValueData = [
 ];
 
 const DONUT_COLORS = [
-  'hsl(24, 90%, 55%)',   // primary
-  'hsl(142, 72%, 42%)',  // success
-  'hsl(220, 15%, 60%)',  // muted
-  'hsl(38, 92%, 50%)',   // warning
+  'hsl(24, 90%, 55%)',
+  'hsl(142, 72%, 42%)',
+  'hsl(220, 15%, 60%)',
+  'hsl(38, 92%, 50%)',
 ];
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 18 },
+  visible: (i: number) => ({
+    opacity: 1, y: 0,
+    transition: { delay: i * 0.08, duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] as const },
+  }),
+};
 
 const IllustrativeTag = () => (
   <TooltipProvider>
@@ -71,26 +76,22 @@ const PortfolioPage = () => {
   const unrealizedGain = totalValue - totalInvested;
   const unrealizedPercent = totalInvested > 0 ? (unrealizedGain / totalInvested) * 100 : 0;
 
-  // P&L by position for bar chart
   const plByPosition = useMemo(() => positions.map(p => ({
     name: p.deal.startup_name,
     pnl: p.current_estimated_value_eur - p.invested_eur,
   })), [positions]);
 
-  // Allocation donut data
   const allocationData = useMemo(() => positions.map(p => ({
     name: p.deal.startup_name,
     value: p.invested_eur,
   })), [positions]);
 
-  // Total fees paid
   const totalFees = useMemo(() => {
     return transactions
       .filter(t => t.type === 'fee')
       .reduce((sum, t) => sum + Math.abs(t.amount_eur), 0);
   }, [transactions]);
 
-  // Get user's active listings
   const myActiveListings = listings.filter(l => 
     l.seller_user_id === positions[0]?.user_id && l.status === 'active'
   );
@@ -100,20 +101,12 @@ const PortfolioPage = () => {
     const price = parseFloat(listingPrice);
     
     if (!listingPosition || isNaN(percent) || isNaN(price) || percent <= 0 || percent > 100 || price <= 0) {
-      toast({
-        title: 'Invalid Input',
-        description: 'Please enter valid values for percentage and price.',
-        variant: 'destructive',
-      });
+      toast({ title: 'Invalid Input', description: 'Please enter valid values for percentage and price.', variant: 'destructive' });
       return;
     }
     
     createListing(listingPosition, percent, price);
-    
-    toast({
-      title: 'Listing Created!',
-      description: 'Your position is now listed on the resale board.',
-    });
+    toast({ title: 'Listing Created!', description: 'Your position is now listed on the resale board.' });
     
     setIsDialogOpen(false);
     setListingPosition(null);
@@ -127,19 +120,21 @@ const PortfolioPage = () => {
     setIsDialogOpen(true);
   };
 
+  let sectionIndex = 0;
+
   return (
-    <div className="container py-6">
+    <div className="container px-4 py-4 md:px-6 md:py-6">
       {/* Page Header */}
-      <div className="mb-6 flex items-start justify-between">
+      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between md:mb-6">
         <div>
-          <h1 className="mb-2 text-2xl font-bold">Portfolio</h1>
-          <p className="text-muted-foreground">Track your startup investments</p>
+          <h1 className="mb-1 text-xl font-bold md:mb-2 md:text-2xl">Portfolio</h1>
+          <p className="text-sm text-muted-foreground md:text-base">Track your startup investments</p>
         </div>
         {myActiveListings.length > 0 && (
-          <Button variant="outline" asChild>
+          <Button variant="outline" size="sm" className="self-start md:size-default" asChild>
             <Link to="/marketplace">
-              <ShoppingBag className="mr-2 h-4 w-4" />
-              Manage Listings ({myActiveListings.length})
+              <ShoppingBag className="mr-1.5 h-3.5 w-3.5 md:mr-2 md:h-4 md:w-4" />
+              Listings ({myActiveListings.length})
             </Link>
           </Button>
         )}
@@ -147,56 +142,59 @@ const PortfolioPage = () => {
 
       {positions.length > 0 ? (
         <>
-          {/* KPIs + Charts Split */}
-          <div className="mb-6 grid gap-6 lg:grid-cols-5">
-            {/* Left: KPI Summary */}
+          {/* KPIs + Charts */}
+          <motion.div
+            className="mb-4 grid gap-3 md:mb-6 md:gap-6 lg:grid-cols-5"
+            initial="hidden" animate="visible" variants={fadeUp} custom={sectionIndex++}
+          >
+            {/* KPI Summary — horizontal on mobile, vertical on desktop */}
             <Card className="lg:col-span-2">
-              <CardContent className="flex flex-col justify-center gap-6 p-6">
+              <CardContent className="grid grid-cols-3 gap-3 p-4 md:flex md:flex-col md:gap-6 md:p-6">
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Invested</p>
-                  <p className="text-2xl font-bold">{formatCurrency(totalInvested, false)}</p>
+                  <p className="text-[11px] text-muted-foreground md:text-sm">Total Invested</p>
+                  <p className="text-base font-bold md:text-2xl">{formatCurrency(totalInvested, false)}</p>
                 </div>
                 <div>
-                  <p className="flex items-center gap-1 text-sm text-muted-foreground">
+                  <p className="flex items-center gap-1 text-[11px] text-muted-foreground md:text-sm">
                     Est. Value
-                    <span className="rounded bg-muted px-1 py-0.5 text-[10px] font-medium">Est.</span>
+                    <span className="hidden rounded bg-muted px-1 py-0.5 text-[10px] font-medium md:inline">Est.</span>
                   </p>
-                  <p className="text-2xl font-bold">{formatCurrency(totalValue, false)}</p>
+                  <p className="text-base font-bold md:text-2xl">{formatCurrency(totalValue, false)}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Unrealized P&L</p>
-                  <p className={`text-2xl font-bold ${unrealizedGain >= 0 ? 'text-success' : 'text-destructive'}`}>
+                  <p className="text-[11px] text-muted-foreground md:text-sm">P&L</p>
+                  <p className={`text-base font-bold md:text-2xl ${unrealizedGain >= 0 ? 'text-success' : 'text-destructive'}`}>
                     {unrealizedGain >= 0 ? '+' : ''}{formatCurrency(unrealizedGain, false)}
-                    <span className="ml-2 text-base font-medium">
-                      ({formatPercent(unrealizedPercent, 1)})
-                    </span>
+                  </p>
+                  <p className={`text-[10px] md:text-sm ${unrealizedGain >= 0 ? 'text-success' : 'text-destructive'}`}>
+                    ({formatPercent(unrealizedPercent, 1)})
                   </p>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Right: Chart Tabs */}
+            {/* Chart Tabs */}
             <Card className="lg:col-span-3">
-              <Tabs defaultValue="value" className="p-4">
+              <Tabs defaultValue="value" className="p-3 md:p-4">
                 <div className="mb-2 flex items-center justify-between">
-                  <CardTitle className="text-base">Portfolio Overview</CardTitle>
-                  <TabsList className="h-8">
-                    <TabsTrigger value="value" className="px-2 py-1 text-xs">Value</TabsTrigger>
-                    <TabsTrigger value="pnl" className="px-2 py-1 text-xs">P&L</TabsTrigger>
-                    <TabsTrigger value="allocation" className="px-2 py-1 text-xs">Allocation</TabsTrigger>
+                  <CardTitle className="text-sm md:text-base">Portfolio Overview</CardTitle>
+                  <TabsList className="h-7 md:h-8">
+                    <TabsTrigger value="value" className="px-2 py-0.5 text-[11px] md:text-xs">Value</TabsTrigger>
+                    <TabsTrigger value="pnl" className="px-2 py-0.5 text-[11px] md:text-xs">P&L</TabsTrigger>
+                    <TabsTrigger value="allocation" className="px-2 py-0.5 text-[11px] md:text-xs">Allocation</TabsTrigger>
                   </TabsList>
                 </div>
 
                 <TabsContent value="value" className="mt-0">
                   <div className="flex items-center">
-                    <span className="text-xs text-muted-foreground">Portfolio value over time</span>
+                    <span className="text-[10px] text-muted-foreground md:text-xs">Portfolio value over time</span>
                     <IllustrativeTag />
                   </div>
-                  <ResponsiveContainer width="100%" height={200}>
+                  <ResponsiveContainer width="100%" height={180}>
                     <LineChart data={portfolioValueData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                      <XAxis dataKey="month" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
-                      <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} tickFormatter={v => `€${(v/1000).toFixed(0)}K`} />
+                      <XAxis dataKey="month" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
+                      <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} tickFormatter={v => `€${(v/1000).toFixed(0)}K`} width={40} />
                       <RechartsTooltip
                         contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 12 }}
                         formatter={(value: number) => [formatCurrency(value, false), 'Value']}
@@ -208,14 +206,14 @@ const PortfolioPage = () => {
 
                 <TabsContent value="pnl" className="mt-0">
                   <div className="flex items-center">
-                    <span className="text-xs text-muted-foreground">Unrealized P&L by position</span>
+                    <span className="text-[10px] text-muted-foreground md:text-xs">Unrealized P&L by position</span>
                     <IllustrativeTag />
                   </div>
-                  <ResponsiveContainer width="100%" height={200}>
+                  <ResponsiveContainer width="100%" height={180}>
                     <BarChart data={plByPosition}>
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                      <XAxis dataKey="name" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
-                      <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} tickFormatter={v => `€${v}`} />
+                      <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
+                      <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} tickFormatter={v => `€${v}`} width={40} />
                       <RechartsTooltip
                         contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 12 }}
                         formatter={(value: number) => [formatCurrency(value, false), 'P&L']}
@@ -231,12 +229,12 @@ const PortfolioPage = () => {
 
                 <TabsContent value="allocation" className="mt-0">
                   <div className="flex items-center">
-                    <span className="text-xs text-muted-foreground">Allocation by company</span>
+                    <span className="text-[10px] text-muted-foreground md:text-xs">Allocation by company</span>
                     <IllustrativeTag />
                   </div>
-                  <ResponsiveContainer width="100%" height={200}>
+                  <ResponsiveContainer width="100%" height={180}>
                     <RechartsPie>
-                      <Pie data={allocationData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={3} dataKey="value">
+                      <Pie data={allocationData} cx="50%" cy="50%" innerRadius={40} outerRadius={65} paddingAngle={3} dataKey="value">
                         {allocationData.map((_, i) => (
                           <Cell key={i} fill={DONUT_COLORS[i % DONUT_COLORS.length]} />
                         ))}
@@ -245,141 +243,200 @@ const PortfolioPage = () => {
                         contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 12 }}
                         formatter={(value: number) => [formatCurrency(value, false), 'Invested']}
                       />
-                      <Legend formatter={(value) => <span className="text-xs">{value}</span>} />
+                      <Legend formatter={(value) => <span className="text-[10px] md:text-xs">{value}</span>} />
                     </RechartsPie>
                   </ResponsiveContainer>
                 </TabsContent>
               </Tabs>
             </Card>
-          </div>
+          </motion.div>
 
-          {/* Positions Table */}
-          <Card className="mb-6">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">Your Positions</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Company</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Invested</TableHead>
-                      <TableHead className="text-right">Ownership %</TableHead>
-                      <TableHead className="text-right">Est. Value</TableHead>
-                      <TableHead className="text-right">Unrealized P&L</TableHead>
-                      <TableHead className="text-center">Listed?</TableHead>
-                      <TableHead>Last Update</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {positions.map(position => {
-                      const gain = position.current_estimated_value_eur - position.invested_eur;
-                      const gainPercent = (gain / position.invested_eur) * 100;
-                      const pool = pools.find(p => p.id === position.pool_id);
-                      const deal = deals.find(d => d.id === pool?.deal_id);
-                      const canList = pool?.pool_status === 'active' && !position.is_listed_on_market;
-                      const lastUpdate = deal?.company_updates?.[0]?.date || position.created_at;
-                      
-                      return (
-                        <TableRow key={position.id}>
-                          <TableCell>
-                            <Link to={`/pool/${position.pool_id}`} className="font-medium hover:underline">
-                              {position.deal.startup_name}
-                            </Link>
-                            <p className="text-xs text-muted-foreground">{position.deal.industry}</p>
-                          </TableCell>
-                          <TableCell>
-                            <StatusBadge status={position.pool.pool_status} />
-                          </TableCell>
-                          <TableCell className="text-right font-medium">
-                            {formatCompactCurrency(position.invested_eur)}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            {formatPercent(position.ownership_percent_of_spv, 2)}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <span className="text-[10px] text-muted-foreground">Est. </span>
-                            <span className="font-medium">{formatCompactCurrency(position.current_estimated_value_eur)}</span>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <span className={`font-medium ${gain >= 0 ? 'text-success' : 'text-destructive'}`}>
-                              {gain >= 0 ? '+' : ''}{formatCompactCurrency(gain)}
-                            </span>
-                            <span className={`ml-1 text-xs ${gain >= 0 ? 'text-success' : 'text-destructive'}`}>
-                              ({formatPercent(gainPercent, 1)})
-                            </span>
-                          </TableCell>
-                          <TableCell className="text-center">
-                            {position.is_listed_on_market ? (
-                              <Link to="/marketplace" className="rounded bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground hover:bg-accent/80">
-                                Yes
-                              </Link>
-                            ) : (
-                              <span className="text-xs text-muted-foreground">No</span>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-xs text-muted-foreground">
-                            {formatDate(lastUpdate)}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-1">
-                              <Button variant="outline" size="sm" asChild>
-                                <Link to={`/pool/${position.pool_id}`}>
-                                  <ExternalLink className="h-3.5 w-3.5" />
-                                </Link>
-                              </Button>
-                              {canList && (
-                                <Button
-                                  size="sm"
-                                  variant="secondary"
-                                  onClick={() => openListingDialog(position.id, position.current_estimated_value_eur)}
-                                >
-                                  <Store className="mr-1 h-3.5 w-3.5" /> Sell
-                                </Button>
-                              )}
+          {/* Positions — Cards on mobile, Table on desktop */}
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.15 }} variants={fadeUp} custom={sectionIndex++}>
+            <Card className="mb-4 md:mb-6">
+              <CardHeader className="px-4 pb-2 pt-4 md:px-6 md:pb-3 md:pt-6">
+                <CardTitle className="text-sm md:text-base">Your Positions</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                {/* Mobile: card list */}
+                <div className="space-y-2 p-3 md:hidden">
+                  {positions.map(position => {
+                    const gain = position.current_estimated_value_eur - position.invested_eur;
+                    const gainPct = (gain / position.invested_eur) * 100;
+                    const pool = pools.find(p => p.id === position.pool_id);
+                    const canList = pool?.pool_status === 'active' && !position.is_listed_on_market;
+
+                    return (
+                      <Link key={position.id} to={`/pool/${position.pool_id}`} className="block">
+                        <div className="rounded-lg border p-3 transition-colors hover:bg-muted/50">
+                          <div className="mb-2 flex items-start justify-between gap-2">
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-sm font-semibold">{position.deal.startup_name}</p>
+                              <p className="text-[10px] text-muted-foreground">{position.deal.industry}</p>
                             </div>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
+                            <StatusBadge status={position.pool.pool_status} />
+                          </div>
+                          <div className="grid grid-cols-2 gap-2 text-[11px]">
+                            <div>
+                              <span className="text-muted-foreground">Invested</span>
+                              <p className="font-medium">{formatCompactCurrency(position.invested_eur)}</p>
+                            </div>
+                            <div className="text-right">
+                              <span className="text-muted-foreground">Est. Value</span>
+                              <p className="font-medium">{formatCompactCurrency(position.current_estimated_value_eur)}</p>
+                            </div>
+                            <div>
+                              <span className="text-muted-foreground">Ownership</span>
+                              <p className="font-medium">{formatPercent(position.ownership_percent_of_spv, 2)}</p>
+                            </div>
+                            <div className="text-right">
+                              <span className="text-muted-foreground">P&L</span>
+                              <p className={`font-medium ${gain >= 0 ? 'text-success' : 'text-destructive'}`}>
+                                {gain >= 0 ? '+' : ''}{formatCompactCurrency(gain)} ({formatPercent(gainPct, 1)})
+                              </p>
+                            </div>
+                          </div>
+                          {canList && (
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              className="mt-2 h-7 w-full text-xs"
+                              onClick={(e) => { e.preventDefault(); openListingDialog(position.id, position.current_estimated_value_eur); }}
+                            >
+                              <Store className="mr-1 h-3 w-3" /> Sell on Resale Board
+                            </Button>
+                          )}
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
 
-          {/* Realized vs Unrealized P&L */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">P&L Summary</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 sm:grid-cols-3">
-                <div className="rounded-lg border p-4">
-                  <p className="text-sm text-muted-foreground">Realized P&L</p>
-                  <p className="mt-1 text-xl font-bold text-muted-foreground">€0</p>
-                  <p className="mt-1 text-xs text-muted-foreground">No exits yet</p>
+                {/* Desktop: table */}
+                <div className="hidden overflow-x-auto md:block">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Company</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Invested</TableHead>
+                        <TableHead className="text-right">Ownership %</TableHead>
+                        <TableHead className="text-right">Est. Value</TableHead>
+                        <TableHead className="text-right">Unrealized P&L</TableHead>
+                        <TableHead className="text-center">Listed?</TableHead>
+                        <TableHead>Last Update</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {positions.map(position => {
+                        const gain = position.current_estimated_value_eur - position.invested_eur;
+                        const gainPct = (gain / position.invested_eur) * 100;
+                        const pool = pools.find(p => p.id === position.pool_id);
+                        const deal = deals.find(d => d.id === pool?.deal_id);
+                        const canList = pool?.pool_status === 'active' && !position.is_listed_on_market;
+                        const lastUpdate = deal?.company_updates?.[0]?.date || position.created_at;
+                        
+                        return (
+                          <TableRow key={position.id}>
+                            <TableCell>
+                              <Link to={`/pool/${position.pool_id}`} className="font-medium hover:underline">
+                                {position.deal.startup_name}
+                              </Link>
+                              <p className="text-xs text-muted-foreground">{position.deal.industry}</p>
+                            </TableCell>
+                            <TableCell>
+                              <StatusBadge status={position.pool.pool_status} />
+                            </TableCell>
+                            <TableCell className="text-right font-medium">
+                              {formatCompactCurrency(position.invested_eur)}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {formatPercent(position.ownership_percent_of_spv, 2)}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <span className="text-[10px] text-muted-foreground">Est. </span>
+                              <span className="font-medium">{formatCompactCurrency(position.current_estimated_value_eur)}</span>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <span className={`font-medium ${gain >= 0 ? 'text-success' : 'text-destructive'}`}>
+                                {gain >= 0 ? '+' : ''}{formatCompactCurrency(gain)}
+                              </span>
+                              <span className={`ml-1 text-xs ${gain >= 0 ? 'text-success' : 'text-destructive'}`}>
+                                ({formatPercent(gainPct, 1)})
+                              </span>
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {position.is_listed_on_market ? (
+                                <Link to="/marketplace" className="rounded bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground hover:bg-accent/80">
+                                  Yes
+                                </Link>
+                              ) : (
+                                <span className="text-xs text-muted-foreground">No</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-xs text-muted-foreground">
+                              {formatDate(lastUpdate)}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end gap-1">
+                                <Button variant="outline" size="sm" asChild>
+                                  <Link to={`/pool/${position.pool_id}`}>
+                                    <ExternalLink className="h-3.5 w-3.5" />
+                                  </Link>
+                                </Button>
+                                {canList && (
+                                  <Button
+                                    size="sm"
+                                    variant="secondary"
+                                    onClick={() => openListingDialog(position.id, position.current_estimated_value_eur)}
+                                  >
+                                    <Store className="mr-1 h-3.5 w-3.5" /> Sell
+                                  </Button>
+                                )}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
                 </div>
-                <div className="rounded-lg border p-4">
-                  <p className="text-sm text-muted-foreground">Unrealized P&L</p>
-                  <p className={`mt-1 text-xl font-bold ${unrealizedGain >= 0 ? 'text-success' : 'text-destructive'}`}>
-                    {unrealizedGain >= 0 ? '+' : ''}{formatCurrency(unrealizedGain, false)}
-                  </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    <span className="rounded bg-muted px-1 py-0.5 text-[10px]">Est.</span> Based on latest valuations
-                  </p>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* P&L Summary */}
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} variants={fadeUp} custom={sectionIndex++}>
+            <Card>
+              <CardHeader className="px-4 pb-2 pt-4 md:px-6 md:pb-3 md:pt-6">
+                <CardTitle className="text-sm md:text-base">P&L Summary</CardTitle>
+              </CardHeader>
+              <CardContent className="px-4 md:px-6">
+                <div className="grid gap-3 grid-cols-1 sm:grid-cols-3 md:gap-4">
+                  <div className="rounded-lg border p-3 md:p-4">
+                    <p className="text-xs text-muted-foreground md:text-sm">Realized P&L</p>
+                    <p className="mt-1 text-lg font-bold text-muted-foreground md:text-xl">€0</p>
+                    <p className="mt-0.5 text-[10px] text-muted-foreground md:mt-1 md:text-xs">No exits yet</p>
+                  </div>
+                  <div className="rounded-lg border p-3 md:p-4">
+                    <p className="text-xs text-muted-foreground md:text-sm">Unrealized P&L</p>
+                    <p className={`mt-1 text-lg font-bold md:text-xl ${unrealizedGain >= 0 ? 'text-success' : 'text-destructive'}`}>
+                      {unrealizedGain >= 0 ? '+' : ''}{formatCurrency(unrealizedGain, false)}
+                    </p>
+                    <p className="mt-0.5 text-[10px] text-muted-foreground md:mt-1 md:text-xs">
+                      <span className="rounded bg-muted px-1 py-0.5 text-[10px]">Est.</span> Based on latest valuations
+                    </p>
+                  </div>
+                  <div className="rounded-lg border p-3 md:p-4">
+                    <p className="text-xs text-muted-foreground md:text-sm">Total Fees Paid</p>
+                    <p className="mt-1 text-lg font-bold md:text-xl">{formatCurrency(totalFees, false)}</p>
+                    <p className="mt-0.5 text-[10px] text-muted-foreground md:mt-1 md:text-xs">Entry + carry + resale fees</p>
+                  </div>
                 </div>
-                <div className="rounded-lg border p-4">
-                  <p className="text-sm text-muted-foreground">Total Fees Paid</p>
-                  <p className="mt-1 text-xl font-bold">{formatCurrency(totalFees, false)}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">Entry + carry + resale fees</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </motion.div>
         </>
       ) : (
         <Card>
@@ -410,30 +467,14 @@ const PortfolioPage = () => {
             <div className="space-y-2">
               <Label htmlFor="percent">Percentage to Sell</Label>
               <div className="flex gap-2">
-                <Input
-                  id="percent"
-                  type="number"
-                  value={listingPercent}
-                  onChange={(e) => setListingPercent(e.target.value)}
-                  min={1}
-                  max={100}
-                  step={1}
-                />
+                <Input id="percent" type="number" value={listingPercent} onChange={(e) => setListingPercent(e.target.value)} min={1} max={100} step={1} />
                 <span className="flex items-center text-muted-foreground">%</span>
               </div>
             </div>
             
             <div className="space-y-2">
               <Label htmlFor="price">Asking Price (EUR)</Label>
-              <Input
-                id="price"
-                type="number"
-                value={listingPrice}
-                onChange={(e) => setListingPrice(e.target.value)}
-                min={1}
-                step={100}
-                placeholder="e.g. 5000"
-              />
+              <Input id="price" type="number" value={listingPrice} onChange={(e) => setListingPrice(e.target.value)} min={1} step={100} placeholder="e.g. 5000" />
             </div>
             
             <div className="rounded-lg bg-muted p-3 text-sm">
@@ -444,12 +485,8 @@ const PortfolioPage = () => {
           </div>
           
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleCreateListing}>
-              Create Listing
-            </Button>
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleCreateListing}>Create Listing</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
