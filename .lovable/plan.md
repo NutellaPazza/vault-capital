@@ -1,44 +1,39 @@
 
 
-# Add 9 New Startup Deals with Full Data
+# Fix UI Issues: Alignment, Mobile Landing, and Live Vault Consistency
 
-Expand the mock data from 3 to 12 startups, with matching pools, positions, marketplace listings, and notifications. This gives a realistic feel to every page in the app.
+## Issues Identified (from screenshots)
 
-## New Startups (9 total)
+1. **Stats cards alignment** (image 1) -- P&L card text not vertically aligned with other cards
+2. **Hero subtitle wrapping** (image 2) -- "SPV held positions." breaks onto a second line awkwardly on mobile
+3. **"How It Works" CTA** (image 2) -- ghost button looks weak/broken on mobile, needs outline
+4. **Excessive whitespace on mobile** (image 3) -- too much padding between sections on landing page mobile view
+5. **Footer text wrapping** (image 4) -- footer links wrap badly on mobile, poor font sizing
+6. **Live Vaults showing "Ended"** (image 5) -- pools with `pool_status: 'live'` but expired `end_datetime` appear in Live Vaults section with "Ended" label -- logical contradiction
 
-Designed for maximum variety across stage, status, country, sector, and accelerator:
+## Plan
 
-| # | Name | Industry | Sector | Country | Stage | Deal Status | Pool Status |
-|---|------|----------|--------|---------|-------|-------------|-------------|
-| 4 | Paylo | Fintech | B2B | France | seed | live | live (85% funded) |
-| 5 | MediScan | HealthTech | B2B2C | Spain | series-a | live | live (40% funded) |
-| 6 | FarmStack | AgriTech | B2B | Ireland | pre-seed | upcoming | upcoming |
-| 7 | CloudShield | Cybersecurity | B2B | Estonia | seed | closed | active |
-| 8 | EduVerse | EdTech | B2C | Portugal | pre-seed | upcoming | upcoming |
-| 9 | LogiRoute | Logistics | B2B2C | Poland | seed | closed | active |
-| 10 | BioNova | BioTech | B2B | Switzerland | series-a | closed | active |
-| 11 | StyleLoop | Fashion Tech | B2C | Sweden | seed | filled | settling |
-| 12 | UrbanNest | PropTech | B2B2C | Austria | pre-seed | failed | failed |
+### 1. Fix Stats Card Alignment (DashboardPage.tsx)
+Ensure all 4 stat cards have consistent vertical alignment. The icon + text layout needs `items-center` and equal minimum heights so the P&L card (with its extra percentage line) doesn't push other content out of alignment.
 
-Each startup includes: full founders (2-3), highlights (5), risks (4), exit objectives (3-5), company updates where relevant, accelerator for some (mix of YC, Techstars, 500 Global, none), realistic valuations, and varied min tickets (100-500).
+### 2. Fix Hero Subtitle on Mobile (HeroSection.tsx)
+Change the subtitle from a multi-line paragraph to a single-line approach on mobile. Use `whitespace-nowrap` or restructure the text to fit in one line on small screens. Alternatively, reduce font size on mobile so it fits.
 
-## Additional Mock Data
+### 3. Fix "How It Works" CTA (HeroSection.tsx)
+Change the ghost button to `variant="outline"` so it has a visible border on mobile. Ghost buttons are nearly invisible on light backgrounds.
 
-- **9 new pools** (pool-4 to pool-12) matching each deal, with varied funding levels and timelines
-- **4 new positions** for the demo user in completed pools (CloudShield, LogiRoute, BioNova) to enrich the portfolio page
-- **3 new marketplace listings** from different sellers to populate the Resale Board with more variety
-- **4 new notifications** for the new live/upcoming pools
-- **3 new transactions** for the new investments
+### 4. Reduce Landing Page Whitespace on Mobile (LandingPage.tsx + HeroSection.tsx)
+Reduce `py-16` to `py-10` or `py-8` on mobile for landing page sections. Use responsive padding: `py-8 md:py-16`.
 
-## Store Migration
+### 5. Fix Footer Mobile Layout (LandingPage.tsx)
+Make footer links wrap gracefully on mobile: use `flex-wrap` and `justify-center`, reduce gaps, and ensure consistent font sizing. Stack copyright on its own line on mobile.
 
-Bump persist version from `2` to `3` with the same reset migration to ensure fresh data loads automatically.
+### 6. Fix Live Vault Consistency (appStore.ts)
+Filter `getLivePools()` to also check `new Date(pool.end_datetime) > new Date()`. Pools whose time has expired should not appear in the "Live Vaults" section regardless of their `pool_status` field. This prevents the "LIVE" + "Ended" contradiction.
 
-## Technical Details
-
-**File modified**: `src/data/mockData.ts` (bulk of changes -- adding 9 deals, 9 pools, 4 positions, 3 listings, 4 notifications, 3 transactions)
-
-**File modified**: `src/store/appStore.ts` (version bump `2` -> `3`)
-
-No type changes needed -- all new data uses existing interfaces.
+## Files to Modify
+- `src/pages/DashboardPage.tsx` -- stats card alignment
+- `src/components/landing/HeroSection.tsx` -- subtitle + CTA + spacing
+- `src/pages/LandingPage.tsx` -- section padding + footer
+- `src/store/appStore.ts` -- `getLivePools` filter logic
 
