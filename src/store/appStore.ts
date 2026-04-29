@@ -46,6 +46,7 @@ interface AppState {
   allUsers: User[];
   applications: StartupApplication[];
   offers: MarketplaceOffer[];
+  toastedNotificationIds: string[];
   
   // Actions - Auth
   login: (email: string, password: string) => boolean;
@@ -81,6 +82,7 @@ interface AppState {
   // Actions - Notifications
   markNotificationRead: (notificationId: string) => void;
   markAllNotificationsRead: () => void;
+  markNotificationsToasted: (ids: string[]) => void;
   
   // Actions - Applications
   submitApplication: (data: Omit<StartupApplication, 'id' | 'status' | 'internal_notes' | 'created_at' | 'updated_at'>) => string;
@@ -117,6 +119,7 @@ export const useAppStore = create<AppState>()(
       allUsers: [initialUser, mockSellerUser, mockSellerUser3],
       applications: [],
       offers: initialOffers,
+      toastedNotificationIds: [],
       
       // Auth actions
       login: (email, _password) => {
@@ -474,6 +477,7 @@ export const useAppStore = create<AppState>()(
             read: false,
             created_at: timestamp,
             type: 'pool',
+            link: outcome === 'filled' ? '/portfolio' : '/wallet',
           }));
 
           const currentUser = state.currentUser
@@ -639,6 +643,7 @@ export const useAppStore = create<AppState>()(
           read: false,
           created_at: new Date().toISOString(),
           type: 'marketplace',
+          link: '/marketplace',
         };
 
         set(state => ({
@@ -980,6 +985,17 @@ export const useAppStore = create<AppState>()(
           };
         });
       },
+
+      markNotificationsToasted: (ids) => {
+        if (!ids.length) return;
+        set(state => {
+          const merged = new Set(state.toastedNotificationIds);
+          ids.forEach(id => merged.add(id));
+          // Cap to last 500 to keep storage bounded
+          const arr = Array.from(merged).slice(-500);
+          return { toastedNotificationIds: arr };
+        });
+      },
       
       // Helper functions
       getPoolWithDeal: (poolId) => {
@@ -1072,6 +1088,7 @@ export const useAppStore = create<AppState>()(
           allUsers: [initialUser, mockSellerUser],
           applications: [],
           offers: initialOffers,
+          toastedNotificationIds: [],
         });
       },
 

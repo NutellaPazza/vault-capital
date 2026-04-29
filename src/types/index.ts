@@ -134,6 +134,7 @@ export interface Notification {
   read: boolean;
   created_at: string;
   type: 'pool' | 'portfolio' | 'marketplace' | 'system';
+  link?: string;
 }
 
 // Helper types

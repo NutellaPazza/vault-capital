@@ -1,44 +1,68 @@
 import { useEffect, useRef } from 'react';
-import { toast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { useAppStore } from '@/store/appStore';
+import type { Notification } from '@/types';
+
+const labelForLink = (link?: string) => {
+  if (!link) return null;
+  if (link.startsWith('/pool/')) return 'Open vault';
+  if (link.startsWith('/marketplace')) return 'Open Resale board';
+  if (link.startsWith('/portfolio')) return 'Open portfolio';
+  if (link.startsWith('/wallet')) return 'Open wallet';
+  return 'Open';
+};
 
 /**
- * Subscribes to the notifications slice and fires a toast every time a new
- * notification is created for the current user. Also implicitly causes the UI
- * to re-render wallet/portfolio because Zustand state changed atomically.
+ * Subscribes to notifications and emits a toast whenever a new notification
+ * lands for the current user. Dedup is persisted across reloads via the
+ * `toastedNotificationIds` slice in the Zustand store.
+ *
+ * Clicking the toast action navigates to the notification's `link` and marks
+ * it as read.
  */
 export const useNotificationToasts = () => {
-  const seenIds = useRef<Set<string>>(new Set());
-  const initialized = useRef(false);
+  const navigate = useNavigate();
+  const navRef = useRef(navigate);
+  navRef.current = navigate;
 
   useEffect(() => {
-    // Seed with currently existing notifications so we don't toast on mount
-    const { notifications, currentUser } = useAppStore.getState();
-    notifications.forEach(n => seenIds.current.add(n.id));
-    initialized.current = true;
+    const fire = (notifications: Notification[]) => {
+      const { currentUser, toastedNotificationIds, markNotificationsToasted, markNotificationRead } =
+        useAppStore.getState();
+      if (!currentUser) return;
+      const seen = new Set(toastedNotificationIds);
+      const fresh = notifications.filter(n => n.user_id === currentUser.id && !seen.has(n.id));
+      if (!fresh.length) return;
 
-    const unsub = useAppStore.subscribe((state, prev) => {
-      if (!initialized.current) return;
-      const user = state.currentUser;
-      if (!user) return;
-      if (state.notifications === prev.notifications) return;
-
-      const fresh = state.notifications.filter(
-        n => n.user_id === user.id && !seenIds.current.has(n.id),
-      );
       fresh.forEach(n => {
-        seenIds.current.add(n.id);
         const isFailure = /fail/i.test(n.title);
-        toast({
-          title: n.title,
+        const actionLabel = labelForLink(n.link);
+        toast(n.title, {
           description: n.message,
-          variant: isFailure ? 'destructive' : 'default',
+          className: isFailure ? 'border-destructive/40' : undefined,
+          action: actionLabel && n.link
+            ? {
+                label: actionLabel,
+                onClick: () => {
+                  markNotificationRead(n.id);
+                  navRef.current(n.link!);
+                },
+              }
+            : undefined,
         });
       });
-    });
 
-    // Reference currentUser to silence lint and re-evaluate seed if user changes later
-    void currentUser;
+      markNotificationsToasted(fresh.map(n => n.id));
+    };
+
+    // Run once on mount for any notifications created while this user was offline
+    fire(useAppStore.getState().notifications);
+
+    const unsub = useAppStore.subscribe((state, prev) => {
+      if (state.notifications === prev.notifications) return;
+      fire(state.notifications);
+    });
     return () => unsub();
   }, []);
 };
