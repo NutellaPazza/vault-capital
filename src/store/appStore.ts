@@ -63,6 +63,7 @@ interface AppState {
   
   // Actions - Pool Management (Admin)
   forcePoolStatus: (poolId: string, status: Pool['pool_status']) => void;
+  resolveProcessingPool: (poolId: string, outcome: 'filled' | 'failed') => void;
   simulateExit: (poolId: string, exitMultiple: number) => void;
   createPool: (deal: StartupDeal, pool: Omit<Pool, 'id' | 'deal_id'>) => void;
   
