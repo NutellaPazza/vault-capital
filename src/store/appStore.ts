@@ -82,6 +82,7 @@ interface AppState {
   // Actions - Notifications
   markNotificationRead: (notificationId: string) => void;
   markAllNotificationsRead: () => void;
+  markNotificationsToasted: (ids: string[]) => void;
   
   // Actions - Applications
   submitApplication: (data: Omit<StartupApplication, 'id' | 'status' | 'internal_notes' | 'created_at' | 'updated_at'>) => string;
