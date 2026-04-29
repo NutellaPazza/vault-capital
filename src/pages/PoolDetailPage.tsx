@@ -24,6 +24,13 @@ const PoolDetailPage = () => {
   
   const [investAmount, setInvestAmount] = useState('');
   const [isInvesting, setIsInvesting] = useState(false);
+  const [isResolving, setIsResolving] = useState(false);
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
 
   const poolWithDeal = getPoolWithDeal(poolId || '');
 
