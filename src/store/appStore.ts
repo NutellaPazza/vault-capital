@@ -1088,6 +1088,7 @@ export const useAppStore = create<AppState>()(
           allUsers: [initialUser, mockSellerUser],
           applications: [],
           offers: initialOffers,
+          toastedNotificationIds: [],
         });
       },
 
