@@ -119,6 +119,7 @@ export const useAppStore = create<AppState>()(
       allUsers: [initialUser, mockSellerUser, mockSellerUser3],
       applications: [],
       offers: initialOffers,
+      toastedNotificationIds: [],
       
       // Auth actions
       login: (email, _password) => {
