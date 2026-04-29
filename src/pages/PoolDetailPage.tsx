@@ -117,6 +117,45 @@ const PoolDetailPage = () => {
             <p className="text-xs text-muted-foreground">
               No action is required from you at this stage. You will be notified as soon as a decision is made.
             </p>
+
+            {isAdmin && (
+              <div className="mt-3 flex flex-col gap-2 rounded-md border border-warning/30 bg-background/60 p-3 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-xs font-medium text-foreground">
+                  Admin simulation — resolve this vault:
+                </p>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="border-success/50 text-success hover:bg-success/10"
+                    onClick={() => {
+                      resolveProcessingPool(pool.id, 'filled');
+                      toast({
+                        title: `${deal.startup_name}: vault FILLED`,
+                        description: 'VaultCapital covered the gap. Portfolio updated.',
+                      });
+                    }}
+                  >
+                    <CheckCircle className="mr-1.5 h-4 w-4" /> Mark FILLED
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="border-destructive/50 text-destructive hover:bg-destructive/10"
+                    onClick={() => {
+                      resolveProcessingPool(pool.id, 'failed');
+                      toast({
+                        title: `${deal.startup_name}: vault FAILED`,
+                        description: 'Capital and entry fees refunded to investors.',
+                        variant: 'destructive',
+                      });
+                    }}
+                  >
+                    <AlertTriangle className="mr-1.5 h-4 w-4" /> Mark FAILED
+                  </Button>
+                </div>
+              </div>
+            )}
           </AlertDescription>
         </Alert>
       )}
