@@ -4,6 +4,20 @@ import { toast } from 'sonner';
 import { useAppStore } from '@/store/appStore';
 import type { Notification } from '@/types';
 
+const KNOWN_STATIC_ROUTES = new Set([
+  '/dashboard',
+  '/explore',
+  '/portfolio',
+  '/wallet',
+  '/marketplace',
+  '/profile',
+  '/admin',
+  '/about',
+  '/how-it-works',
+  '/faq',
+  '/terms',
+]);
+
 const labelForLink = (link?: string) => {
   if (!link) return null;
   if (link.startsWith('/pool/')) return 'Open vault';
@@ -11,6 +25,34 @@ const labelForLink = (link?: string) => {
   if (link.startsWith('/portfolio')) return 'Open portfolio';
   if (link.startsWith('/wallet')) return 'Open wallet';
   return 'Open';
+};
+
+/**
+ * Validate that a notification link can actually be opened in the current
+ * session. Returns null if the route is reachable, or a human-readable reason
+ * string when it is not.
+ */
+const validateLink = (link: string): string | null => {
+  try {
+    const [pathRaw] = link.split('?');
+    const path = pathRaw.split('#')[0];
+
+    if (path.startsWith('/pool/')) {
+      const poolId = path.slice('/pool/'.length);
+      if (!poolId) return 'This vault is no longer available.';
+      const { pools } = useAppStore.getState();
+      const pool = pools.find(p => p.id === poolId);
+      if (!pool) return 'This vault is no longer available.';
+      return null;
+    }
+
+    if (KNOWN_STATIC_ROUTES.has(path)) return null;
+
+    // Unknown / unsupported path
+    return 'This page is not available right now.';
+  } catch {
+    return 'This page is not available right now.';
+  }
 };
 
 /**
@@ -26,6 +68,10 @@ const labelForLink = (link?: string) => {
  *
  * Any interaction with the toast (clicking the action button or dismissing
  * it) marks the underlying notification as read.
+ *
+ * Toast action navigation guards the destination: it shows a loading toast,
+ * validates that the route is reachable in the current session, and surfaces
+ * an error toast if navigation fails or the link is stale.
  */
 export const useNotificationToasts = () => {
   const navigate = useNavigate();
@@ -63,9 +109,40 @@ export const useNotificationToasts = () => {
             ? {
                 label: actionLabel,
                 onClick: () => {
-                  markNotificationRead(n.id);
-                  navRef.current(n.link!);
-                  toast.dismiss(toastId);
+                  const link = n.link!;
+                  const loadingId = `notif-nav-${n.id}`;
+
+                  // Show a transient loading toast while we validate + navigate.
+                  toast.loading('Opening…', { id: loadingId });
+
+                  // Defer to the next tick so the loading state is visible
+                  // even when validation is synchronous.
+                  setTimeout(() => {
+                    const reason = validateLink(link);
+                    if (reason) {
+                      toast.error('Page unavailable', {
+                        id: loadingId,
+                        description: reason,
+                      });
+                      // Still mark as read — the user acknowledged the alert.
+                      markNotificationRead(n.id);
+                      toast.dismiss(toastId);
+                      return;
+                    }
+
+                    try {
+                      navRef.current(link);
+                      markNotificationRead(n.id);
+                      toast.dismiss(loadingId);
+                      toast.dismiss(toastId);
+                    } catch (err) {
+                      console.error('Notification navigation failed', err);
+                      toast.error('Could not open page', {
+                        id: loadingId,
+                        description: 'Something went wrong. Please try again.',
+                      });
+                    }
+                  }, 0);
                 },
               }
             : undefined,
