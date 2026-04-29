@@ -2,11 +2,13 @@ import { Outlet, useLocation, Navigate } from 'react-router-dom';
 import { TopBar } from './TopBar';
 import { BottomNav } from './BottomNav';
 import { useAppStore } from '@/store/appStore';
+import { useNotificationToasts } from '@/hooks/useNotificationToasts';
 
 export const AppLayout = () => {
   const location = useLocation();
   const { isAuthenticated } = useAppStore();
-  
+  useNotificationToasts();
+
   const isPublicPage = ['/', '/login', '/signup', '/terms'].includes(location.pathname);
   const showBottomNav = !isPublicPage && isAuthenticated;
 
