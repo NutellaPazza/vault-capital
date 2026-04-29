@@ -108,64 +108,93 @@ const PoolDetailPage = () => {
           <AlertDescription className="mt-2 space-y-2 text-sm text-foreground/80">
             <p>
               This vault has reached its deadline without fully meeting the funding target
-              ({formatCompactCurrency(pool.raised_eur)} raised of {formatCompactCurrency(pool.target_eur)}).
-              VaultCapital is now evaluating the next step. Two outcomes are possible:
-            </p>
-            <ul className="ml-4 list-disc space-y-1">
-              <li>
-                <strong className="text-success">FILLED</strong> — VaultCapital covers the remaining gap
-                and the vault closes successfully. Your investment proceeds as planned.
-              </li>
-              <li>
-                <strong className="text-destructive">FAILED</strong> — The vault is declared failed and
-                your full capital, including the entry fee, is refunded to your wallet within a few business days.
-              </li>
-            </ul>
-            <p className="text-xs text-muted-foreground">
-              No action is required from you at this stage. You will be notified as soon as a decision is made.
-            </p>
+      {effectiveStatus === 'processing' && (() => {
+        const elapsedMs = Math.max(0, now - new Date(pool.end_datetime).getTime());
+        const totalSec = Math.floor(elapsedMs / 1000);
+        const days = Math.floor(totalSec / 86400);
+        const hours = Math.floor((totalSec % 86400) / 3600);
+        const minutes = Math.floor((totalSec % 3600) / 60);
+        const seconds = totalSec % 60;
+        const elapsedLabel = days > 0
+          ? `${days}d ${hours}h ${minutes}m ${seconds}s`
+          : `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
-            {isAdmin && (
-              <div className="mt-3 flex flex-col gap-2 rounded-md border border-warning/30 bg-background/60 p-3 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-xs font-medium text-foreground">
-                  Admin simulation — resolve this vault:
-                </p>
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="border-success/50 text-success hover:bg-success/10"
-                    onClick={() => {
-                      resolveProcessingPool(pool.id, 'filled');
-                      toast({
-                        title: `${deal.startup_name}: vault FILLED`,
-                        description: 'VaultCapital covered the gap. Portfolio updated.',
-                      });
-                    }}
-                  >
-                    <CheckCircle className="mr-1.5 h-4 w-4" /> Mark FILLED
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="border-destructive/50 text-destructive hover:bg-destructive/10"
-                    onClick={() => {
-                      resolveProcessingPool(pool.id, 'failed');
-                      toast({
-                        title: `${deal.startup_name}: vault FAILED`,
-                        description: 'Capital and entry fees refunded to investors.',
-                        variant: 'destructive',
-                      });
-                    }}
-                  >
-                    <AlertTriangle className="mr-1.5 h-4 w-4" /> Mark FAILED
-                  </Button>
+        return (
+          <Alert className="mb-4 border-warning/40 bg-warning/10 md:mb-6">
+            <Clock className="h-4 w-4 text-warning" />
+            <AlertTitle className="flex flex-wrap items-center justify-between gap-2 text-warning">
+              <span>Vault in Processing</span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-warning/15 px-2 py-0.5 font-mono text-xs text-warning">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-warning" />
+                Processing for {elapsedLabel}
+              </span>
+            </AlertTitle>
+            <AlertDescription className="mt-2 space-y-2 text-sm text-foreground/80">
+              <p>
+                This vault has reached its deadline without fully meeting the funding target
+                ({formatCompactCurrency(pool.raised_eur)} raised of {formatCompactCurrency(pool.target_eur)}).
+                VaultCapital is now evaluating the next step. Two outcomes are possible:
+              </p>
+              <ul className="ml-4 list-disc space-y-1">
+                <li>
+                  <strong className="text-success">FILLED</strong> — VaultCapital covers the remaining gap
+                  and the vault closes successfully. Your investment proceeds as planned.
+                </li>
+                <li>
+                  <strong className="text-destructive">FAILED</strong> — The vault is declared failed and
+                  your full capital, including the entry fee, is refunded to your wallet within a few business days.
+                </li>
+              </ul>
+              <p className="text-xs text-muted-foreground">
+                No action is required from you at this stage. You will be notified as soon as a decision is made.
+              </p>
+
+              {isAdmin && (
+                <div className="mt-3 flex flex-col gap-2 rounded-md border border-warning/30 bg-background/60 p-3 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-xs font-medium text-foreground">
+                    Admin simulation — resolve this vault:
+                  </p>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={isResolving}
+                      className="border-success/50 text-success hover:bg-success/10"
+                      onClick={() => {
+                        setIsResolving(true);
+                        resolveProcessingPool(pool.id, 'filled');
+                        toast({
+                          title: `${deal.startup_name}: vault FILLED`,
+                          description: 'VaultCapital covered the gap. Portfolio updated.',
+                        });
+                      }}
+                    >
+                      <CheckCircle className="mr-1.5 h-4 w-4" /> Mark FILLED
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={isResolving}
+                      className="border-destructive/50 text-destructive hover:bg-destructive/10"
+                      onClick={() => {
+                        setIsResolving(true);
+                        resolveProcessingPool(pool.id, 'failed');
+                        toast({
+                          title: `${deal.startup_name}: vault FAILED`,
+                          description: 'Capital and entry fees refunded to investors.',
+                          variant: 'destructive',
+                        });
+                      }}
+                    >
+                      <AlertTriangle className="mr-1.5 h-4 w-4" /> Mark FAILED
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            )}
-          </AlertDescription>
-        </Alert>
-      )}
+              )}
+            </AlertDescription>
+          </Alert>
+        );
+      })()}
 
       <div className="grid gap-4 md:gap-6 lg:grid-cols-3">
         {/* Main Content */}
