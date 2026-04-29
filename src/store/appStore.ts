@@ -640,6 +640,7 @@ export const useAppStore = create<AppState>()(
           read: false,
           created_at: new Date().toISOString(),
           type: 'marketplace',
+          link: '/marketplace',
         };
 
         set(state => ({
