@@ -101,13 +101,6 @@ const PoolDetailPage = () => {
         <ArrowLeft className="mr-1.5 h-4 w-4" /> Back
       </Button>
 
-      {effectiveStatus === 'processing' && (
-        <Alert className="mb-4 border-warning/40 bg-warning/10 md:mb-6">
-          <Clock className="h-4 w-4 text-warning" />
-          <AlertTitle className="text-warning">Vault in Processing</AlertTitle>
-          <AlertDescription className="mt-2 space-y-2 text-sm text-foreground/80">
-            <p>
-              This vault has reached its deadline without fully meeting the funding target
       {effectiveStatus === 'processing' && (() => {
         const elapsedMs = Math.max(0, now - new Date(pool.end_datetime).getTime());
         const totalSec = Math.floor(elapsedMs / 1000);
