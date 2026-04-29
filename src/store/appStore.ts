@@ -985,6 +985,17 @@ export const useAppStore = create<AppState>()(
           };
         });
       },
+
+      markNotificationsToasted: (ids) => {
+        if (!ids.length) return;
+        set(state => {
+          const merged = new Set(state.toastedNotificationIds);
+          ids.forEach(id => merged.add(id));
+          // Cap to last 500 to keep storage bounded
+          const arr = Array.from(merged).slice(-500);
+          return { toastedNotificationIds: arr };
+        });
+      },
       
       // Helper functions
       getPoolWithDeal: (poolId) => {
