@@ -410,7 +410,95 @@ export const useAppStore = create<AppState>()(
         });
       },
       
-      simulateExit: (poolId, exitMultiple) => {
+      resolveProcessingPool: (poolId, outcome) => {
+        set(state => {
+          const pool = state.pools.find(p => p.id === poolId);
+          if (!pool) return state;
+          const deal = state.deals.find(d => d.id === pool.deal_id);
+          const startupName = deal?.startup_name || 'Vault';
+          const isExpired = new Date(pool.end_datetime) <= new Date();
+          // Only valid for live pools whose deadline has passed and target was missed
+          const inProcessing =
+            pool.pool_status === 'live' && isExpired && pool.raised_eur < pool.target_eur;
+          if (!inProcessing) return state;
+
+          const timestamp = new Date().toISOString();
+          const poolPositions = state.positions.filter(p => p.pool_id === poolId);
+          const affectedUserIds = Array.from(new Set(poolPositions.map(p => p.user_id)));
+
+          let newTransactions = [...state.transactions];
+          let updatedUsers = [...state.allUsers];
+          let newPositions = state.positions;
+
+          if (outcome === 'failed') {
+            // Refund full invested capital + entry fee paid
+            poolPositions.forEach(position => {
+              const entryFee = position.invested_eur * (pool.fee_entry_percent / 100);
+              const refundAmount = position.invested_eur + entryFee;
+
+              const refundTx: Transaction = {
+                id: generateId(),
+                user_id: position.user_id,
+                type: 'pool_refund',
+                amount_eur: refundAmount,
+                timestamp,
+                meta: {
+                  pool_id: poolId,
+                  notes: `${startupName} failed — capital + entry fee refund`,
+                },
+              };
+              newTransactions = [refundTx, ...newTransactions];
+
+              updatedUsers = updatedUsers.map(u =>
+                u.id === position.user_id
+                  ? { ...u, wallet_balance_eur: u.wallet_balance_eur + refundAmount }
+                  : u
+              );
+            });
+            // Remove positions tied to this failed pool
+            newPositions = state.positions.filter(p => p.pool_id !== poolId);
+          }
+
+          // In-app notifications for every affected investor
+          const newNotifications: Notification[] = affectedUserIds.map(uid => ({
+            id: generateId(),
+            user_id: uid,
+            title:
+              outcome === 'filled'
+                ? `${startupName}: vault FILLED`
+                : `${startupName}: vault FAILED — refund issued`,
+            message:
+              outcome === 'filled'
+                ? `VaultCapital covered the remaining gap. Your investment in ${startupName} is now active.`
+                : `${startupName} did not reach its target. Your full capital and entry fee have been refunded to your wallet.`,
+            read: false,
+            created_at: timestamp,
+            type: 'pool',
+          }));
+
+          const currentUser = state.currentUser
+            ? updatedUsers.find(u => u.id === state.currentUser!.id) || state.currentUser
+            : null;
+
+          return {
+            pools: state.pools.map(p =>
+              p.id === poolId
+                ? {
+                    ...p,
+                    pool_status: outcome === 'filled' ? 'active' : 'failed',
+                    raised_eur: outcome === 'filled' ? p.target_eur : p.raised_eur,
+                  }
+                : p
+            ),
+            positions: newPositions,
+            transactions: newTransactions,
+            allUsers: updatedUsers,
+            currentUser,
+            notifications: [...newNotifications, ...state.notifications],
+          };
+        });
+      },
+      
         set(state => {
           const pool = state.pools.find(p => p.id === poolId);
           if (!pool || pool.pool_status !== 'active') return state;
