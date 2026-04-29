@@ -34,15 +34,35 @@ const labelForLink = (link?: string) => {
  */
 const validateLink = (link: string): string | null => {
   try {
-    const [pathRaw] = link.split('?');
+    const [pathRaw, queryRaw = ''] = link.split('?');
     const path = pathRaw.split('#')[0];
+    const query = new URLSearchParams(queryRaw.split('#')[0]);
+    const { pools, listings } = useAppStore.getState();
 
     if (path.startsWith('/pool/')) {
       const poolId = path.slice('/pool/'.length);
       if (!poolId) return 'This vault is no longer available.';
-      const { pools } = useAppStore.getState();
       const pool = pools.find(p => p.id === poolId);
       if (!pool) return 'This vault is no longer available.';
+      return null;
+    }
+
+    if (path === '/marketplace') {
+      // Optional deep links: ?listing=<id> or ?pool=<id>
+      const listingId = query.get('listing');
+      if (listingId) {
+        const listing = listings.find(l => l.id === listingId);
+        if (!listing) return 'This listing no longer exists on the Resale board.';
+        if (listing.status !== 'active') {
+          return listing.status === 'sold'
+            ? 'This listing has already been sold.'
+            : 'This listing is no longer active.';
+        }
+      }
+      const poolId = query.get('pool');
+      if (poolId && !pools.find(p => p.id === poolId)) {
+        return 'This vault is no longer available on the Resale board.';
+      }
       return null;
     }
 
