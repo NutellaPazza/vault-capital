@@ -15,11 +15,17 @@ const labelForLink = (link?: string) => {
 
 /**
  * Subscribes to notifications and emits a toast whenever a new notification
- * lands for the current user. Dedup is persisted across reloads via the
- * `toastedNotificationIds` slice in the Zustand store.
+ * lands for the current user.
  *
- * Clicking the toast action navigates to the notification's `link` and marks
- * it as read.
+ * Dedup strategy (defense in depth):
+ *   1. `toastedNotificationIds` (persisted in localStorage) tracks every
+ *      notification we have already shown — survives reloads and route
+ *      changes.
+ *   2. We also skip notifications already marked as `read` so that anything
+ *      acknowledged via the Notification Center never re-toasts.
+ *
+ * Any interaction with the toast (clicking the action button or dismissing
+ * it) marks the underlying notification as read.
  */
 export const useNotificationToasts = () => {
   const navigate = useNavigate();
@@ -31,32 +37,43 @@ export const useNotificationToasts = () => {
       const { currentUser, toastedNotificationIds, markNotificationsToasted, markNotificationRead } =
         useAppStore.getState();
       if (!currentUser) return;
+
       const seen = new Set(toastedNotificationIds);
-      const fresh = notifications.filter(n => n.user_id === currentUser.id && !seen.has(n.id));
+      const fresh = notifications.filter(
+        n => n.user_id === currentUser.id && !seen.has(n.id) && !n.read,
+      );
       if (!fresh.length) return;
+
+      // Reserve the IDs immediately so a re-render mid-loop cannot double-fire.
+      markNotificationsToasted(fresh.map(n => n.id));
 
       fresh.forEach(n => {
         const isFailure = /fail/i.test(n.title);
         const actionLabel = labelForLink(n.link);
+        const toastId = `notif-${n.id}`;
+
         toast(n.title, {
+          id: toastId,
           description: n.message,
           className: isFailure ? 'border-destructive/40' : undefined,
+          // Any dismiss (timeout, swipe, X button) marks the notification as read.
+          onDismiss: () => markNotificationRead(n.id),
+          onAutoClose: () => markNotificationRead(n.id),
           action: actionLabel && n.link
             ? {
                 label: actionLabel,
                 onClick: () => {
                   markNotificationRead(n.id);
                   navRef.current(n.link!);
+                  toast.dismiss(toastId);
                 },
               }
             : undefined,
         });
       });
-
-      markNotificationsToasted(fresh.map(n => n.id));
     };
 
-    // Run once on mount for any notifications created while this user was offline
+    // Run once on mount for any notifications created while this user was offline.
     fire(useAppStore.getState().notifications);
 
     const unsub = useAppStore.subscribe((state, prev) => {
