@@ -499,6 +499,7 @@ export const useAppStore = create<AppState>()(
         });
       },
       
+      simulateExit: (poolId, exitMultiple) => {
         set(state => {
           const pool = state.pools.find(p => p.id === poolId);
           if (!pool || pool.pool_status !== 'active') return state;
