@@ -474,6 +474,7 @@ export const useAppStore = create<AppState>()(
             read: false,
             created_at: timestamp,
             type: 'pool',
+            link: outcome === 'filled' ? '/portfolio' : '/wallet',
           }));
 
           const currentUser = state.currentUser
