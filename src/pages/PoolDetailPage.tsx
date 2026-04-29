@@ -20,7 +20,7 @@ import {
 const PoolDetailPage = () => {
   const { poolId } = useParams();
   const navigate = useNavigate();
-  const { getPoolWithDeal, currentUser, invest } = useAppStore();
+  const { getPoolWithDeal, currentUser, invest, isAdmin, resolveProcessingPool } = useAppStore();
   
   const [investAmount, setInvestAmount] = useState('');
   const [isInvesting, setIsInvesting] = useState(false);
