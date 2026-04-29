@@ -46,6 +46,7 @@ interface AppState {
   allUsers: User[];
   applications: StartupApplication[];
   offers: MarketplaceOffer[];
+  toastedNotificationIds: string[];
   
   // Actions - Auth
   login: (email: string, password: string) => boolean;
