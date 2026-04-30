@@ -281,37 +281,66 @@ const SignupPage = () => {
               )}
 
               {failed && (
-                <div className="space-y-3">
-                  <div className="flex items-start gap-3 rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-sm">
-                    <AlertTriangle className="mt-0.5 h-5 w-5 text-amber-600" />
+                <div className="-mx-6 space-y-0">
+                  <div className="flex items-start gap-3 border-y border-amber-500/40 bg-amber-500/10 px-6 py-4 text-sm">
+                    <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
                     <div>
                       <div className="font-medium text-amber-700 dark:text-amber-400">You didn’t pass the assessment</div>
-                      <div className="text-muted-foreground">You can still proceed, but you must acknowledge the risk warning below.</div>
+                      <div className="text-muted-foreground">You scored {score} of {QUESTIONS.length}. You can still proceed, but you must read and acknowledge the risk warning below.</div>
                     </div>
                   </div>
 
-                  <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-4 text-sm">
-                    <div className="mb-2 flex items-center gap-2 font-medium text-destructive">
-                      <AlertTriangle className="h-4 w-4" />
-                      Risk Warning. Required Acknowledgment
-                    </div>
-                    <p className="text-foreground/80">
-                      Startup investments carry a high risk of total loss. You may lose all of the capital you invest.
-                      These investments are illiquid: you cannot withdraw after a vault closes. Past performance is not
-                      indicative of future results. VaultCapital does not provide investment advice.
-                    </p>
-                  </div>
+                  <div className="bg-red-950 px-6 py-10 text-white">
+                    <div className="mx-auto max-w-xl space-y-6">
+                      <div className="flex flex-col items-center text-center">
+                        <AlertTriangle className="!h-12 !w-12 text-red-400" strokeWidth={2} />
+                        <h3 className="mt-4 text-2xl font-bold tracking-tight text-white">
+                          Risk Warning. Required Reading
+                        </h3>
+                        <p className="mt-2 text-sm text-red-300">
+                          You must read and acknowledge the following before continuing.
+                        </p>
+                      </div>
 
-                  <Label className="flex cursor-pointer items-start gap-3 rounded-lg border p-3 text-sm font-normal">
-                    <Checkbox
-                      checked={acknowledged}
-                      onCheckedChange={(v) => setAcknowledged(v === true)}
-                      className="mt-0.5"
-                    />
-                    <span>
-                      I have read and understood the above risk warning and I acknowledge that startup investing is high risk and illiquid.
-                    </span>
-                  </Label>
+                      <div className="h-px w-full bg-red-400/30" />
+
+                      <div className="space-y-4 text-base leading-relaxed text-white/95">
+                        <p>
+                          Startup investments carry a high risk of total loss. You may lose all of the
+                          capital you invest. There is no guarantee of returns or capital protection.
+                        </p>
+                        <p>
+                          These investments are illiquid. Once a vault closes, you cannot withdraw your
+                          capital. Your only exit option is the resale board, where no buyer is guaranteed.
+                        </p>
+                        <p>
+                          Past performance of other investments is not indicative of future results.
+                        </p>
+                        <p>
+                          VaultCapital does not provide investment advice. Nothing on this platform
+                          constitutes a personalized investment recommendation.
+                        </p>
+                        <p>
+                          Investment caps apply: non-sophisticated investors are limited to max(€1,000
+                          or 5% of net worth) per vault under ECSPR Article 21.
+                        </p>
+                      </div>
+
+                      <div className="h-px w-full bg-red-400/30" />
+
+                      <Label className="flex cursor-pointer items-start gap-3 rounded-lg border border-red-400/40 bg-red-900/40 p-4 text-base font-normal text-white hover:bg-red-900/60">
+                        <Checkbox
+                          checked={acknowledged}
+                          onCheckedChange={(v) => setAcknowledged(v === true)}
+                          className="mt-0.5 border-red-300 data-[state=checked]:border-red-300 data-[state=checked]:bg-red-500 data-[state=checked]:text-white"
+                        />
+                        <span className="leading-relaxed">
+                          I have read and fully understood the above risk warning. I acknowledge that
+                          startup investing is high risk, illiquid, and I may lose all invested capital.
+                        </span>
+                      </Label>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
@@ -330,7 +359,16 @@ const SignupPage = () => {
                 <Checkbox checked={agreeTerms} onCheckedChange={(v) => setAgreeTerms(v === true)} className="mt-0.5" />
                 <span>
                   I have read and agree to the{' '}
-                  <Link to="/terms" target="_blank" className="text-primary hover:underline">Terms of Service and Conflicts of Interest Policy</Link>.
+                  <a
+                    href="/terms"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    Terms of Service and Conflicts of Interest Policy
+                  </a>
+                  .
                 </span>
               </Label>
 
@@ -338,7 +376,15 @@ const SignupPage = () => {
                 <Checkbox checked={agreeRegulatory} onCheckedChange={(v) => setAgreeRegulatory(v === true)} className="mt-0.5" />
                 <span>
                   I have read the{' '}
-                  <Link to="/regulatory" target="_blank" className="text-primary hover:underline">Regulatory & Compliance page</Link>{' '}
+                  <a
+                    href="/regulatory"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    Regulatory & Compliance page
+                  </a>{' '}
                   and understand VaultCapital operates under ECSPR (Reg. EU 2020/1503).
                 </span>
               </Label>
@@ -349,6 +395,10 @@ const SignupPage = () => {
                   I confirm I am at least 18 years old and a resident of the European Union.
                 </span>
               </Label>
+
+              <p className="text-xs text-muted-foreground">
+                Links open in a new tab so you don't lose your progress.
+              </p>
             </div>
           )}
 
@@ -376,6 +426,7 @@ const SignupPage = () => {
               <Button
                 onClick={handleStep3}
                 disabled={!allAnswered || (failed && !acknowledged)}
+                variant={failed && acknowledged ? 'destructive' : 'default'}
               >
                 {failed ? 'I Acknowledge. Continue' : 'Continue'}
                 <ArrowRight className="ml-2 h-4 w-4" />
