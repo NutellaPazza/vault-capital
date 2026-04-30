@@ -130,6 +130,41 @@ const AdminPage = () => {
                 <Button onClick={handleExit} disabled={!selectedPool} className="w-full">Simulate Exit</Button>
               </CardContent>
             </Card>
+
+            <Card className="lg:col-span-2">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Percent className="h-5 w-5" /> Marketplace Fee</CardTitle>
+                <CardDescription>
+                  Buyer fee charged on every Resale Board purchase. Applies to new listings only. Existing listings keep the fee they were created with.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+                  <div className="flex-1 space-y-2">
+                    <Label htmlFor="market-fee">Fee percentage</Label>
+                    <div className="relative max-w-[180px]">
+                      <Input
+                        id="market-fee"
+                        type="number"
+                        min="0"
+                        max="10"
+                        step="0.1"
+                        value={feeInput}
+                        onChange={(e) => setFeeInput(e.target.value)}
+                        className="pr-8"
+                      />
+                      <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm text-muted-foreground">%</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Currently active: <span className="font-medium text-foreground">{marketplaceFeePercent}%</span>. Allowed range 0–10%.
+                    </p>
+                  </div>
+                  <Button onClick={handleSaveFee} disabled={parseFloat(feeInput) === marketplaceFeePercent || feeInput.trim() === ''}>
+                    Save fee
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </TabsContent>
 
