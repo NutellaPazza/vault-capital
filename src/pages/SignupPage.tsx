@@ -5,142 +5,400 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Progress } from '@/components/ui/progress';
 import { useAppStore } from '@/store/appStore';
 import { toast } from '@/hooks/use-toast';
-import { RiskProfile } from '@/types';
+import { InvestorType } from '@/types';
+import { KNOWLEDGE_TEST_LS_KEY } from '@/components/common/KnowledgeTestModal';
+import { ArrowLeft, ArrowRight, AlertTriangle, CheckCircle2, ShieldCheck } from 'lucide-react';
+
+const QUESTIONS = [
+  {
+    q: 'What happens to your investment if the startup fails?',
+    options: [
+      { label: 'You get your money back', value: 'A' },
+      { label: 'You may lose all invested capital', value: 'B' },
+      { label: 'VaultCapital compensates you', value: 'C' },
+    ],
+    correct: 'B',
+  },
+  {
+    q: 'Can you withdraw your investment after a vault closes?',
+    options: [
+      { label: 'Yes, anytime', value: 'A' },
+      { label: 'Yes, within 30 days', value: 'B' },
+      { label: 'No. The only exit is the resale board', value: 'C' },
+    ],
+    correct: 'C',
+  },
+  {
+    q: 'What is a Special Purpose Vehicle (SPV)?',
+    options: [
+      { label: 'A type of bank account', value: 'A' },
+      { label: 'A separate legal entity that holds startup shares on behalf of investors', value: 'B' },
+      { label: 'A government guarantee fund', value: 'C' },
+    ],
+    correct: 'B',
+  },
+  {
+    q: 'Startup investments are:',
+    options: [
+      { label: 'Guaranteed by Consob', value: 'A' },
+      { label: 'Illiquid and high risk', value: 'B' },
+      { label: 'Similar to savings accounts', value: 'C' },
+    ],
+    correct: 'B',
+  },
+];
+
+const TOTAL_STEPS = 4;
 
 const SignupPage = () => {
   const navigate = useNavigate();
   const { signup, updateUserProfile } = useAppStore();
+
+  const [step, setStep] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Step 1
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [riskProfile, setRiskProfile] = useState<RiskProfile>('balanced');
-  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  // Step 2
+  const [investorType, setInvestorType] = useState<InvestorType>('non_sophisticated');
+  const [netWorth, setNetWorth] = useState('');
+
+  // Step 3
+  const [answers, setAnswers] = useState<Record<number, string>>({});
+  const [acknowledged, setAcknowledged] = useState(false);
+
+  // Step 4
+  const [agreeTerms, setAgreeTerms] = useState(false);
+  const [agreeRegulatory, setAgreeRegulatory] = useState(false);
+  const [agreeAge, setAgreeAge] = useState(false);
+
+  const score = QUESTIONS.reduce(
+    (acc, q, i) => acc + (answers[i] === q.correct ? 1 : 0),
+    0,
+  );
+  const allAnswered = QUESTIONS.every((_, i) => !!answers[i]);
+  const passed = allAnswered && score >= 3;
+  const failed = allAnswered && score < 3;
+
+  const goNext = () => setStep(s => Math.min(s + 1, TOTAL_STEPS));
+  const goBack = () => setStep(s => Math.max(s - 1, 1));
+
+  const handleStep1 = () => {
     if (!name || !email || !password) {
-      toast({
-        title: 'Validation Error',
-        description: 'Please fill in all fields',
-        variant: 'destructive',
-      });
+      toast({ title: 'Missing fields', description: 'Please fill in all fields.', variant: 'destructive' });
       return;
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      toast({ title: 'Invalid email', description: 'Please enter a valid email.', variant: 'destructive' });
+      return;
+    }
+    if (password.length < 6) {
+      toast({ title: 'Weak password', description: 'Password must be at least 6 characters.', variant: 'destructive' });
+      return;
+    }
+    goNext();
+  };
 
+  const handleStep3 = () => {
+    if (!allAnswered) return;
+    if (failed && !acknowledged) return;
+    localStorage.setItem(
+      KNOWLEDGE_TEST_LS_KEY,
+      JSON.stringify({
+        passed,
+        acknowledged: failed ? true : false,
+        date: new Date().toISOString(),
+      }),
+    );
+    goNext();
+  };
+
+  const handleSubmit = async () => {
     setIsLoading(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
+    await new Promise(r => setTimeout(r, 400));
     const success = signup(name, email, password);
-    
     if (success) {
-      updateUserProfile({ risk_profile: riskProfile });
+      updateUserProfile({
+        investor_type: investorType,
+        ...(investorType === 'non_sophisticated' && netWorth
+          ? { net_worth: parseFloat(netWorth) }
+          : {}),
+      });
       toast({
-        title: 'Account Created!',
-        description: 'Welcome to VaultCapital. Start exploring investment opportunities.',
+        title: 'Account Created',
+        description: 'Welcome to VaultCapital. Start exploring opportunities.',
       });
       navigate('/dashboard');
     } else {
-      toast({
-        title: 'Signup Failed',
-        description: 'Something went wrong. Please try again.',
-        variant: 'destructive',
-      });
+      toast({ title: 'Signup Failed', description: 'Something went wrong.', variant: 'destructive' });
     }
-    
     setIsLoading(false);
   };
 
+  const stepTitles: Record<number, { title: string; subtitle?: string }> = {
+    1: { title: 'Create your account', subtitle: 'Join VaultCapital and start investing in startups.' },
+    2: {
+      title: 'Tell us about your investor profile',
+      subtitle: 'Required by EU Crowdfunding Regulation (ECSPR) to ensure appropriate investor protections.',
+    },
+    3: {
+      title: 'Knowledge & Experience Assessment',
+      subtitle: 'Required by EU Crowdfunding Regulation before your first investment. If you don’t pass, you can still invest after acknowledging the risk warning.',
+    },
+    4: { title: 'Almost done', subtitle: 'Review and confirm to create your account.' },
+  };
+
+  const current = stepTitles[step];
+
   return (
     <div className="container flex min-h-[calc(100vh-3.5rem)] items-center justify-center py-8">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Create Account</CardTitle>
-          <CardDescription>
-            Join VaultCapital and start investing in startups
-          </CardDescription>
+      <Card className="w-full max-w-2xl">
+        <CardHeader>
+          <div className="mb-4 space-y-2">
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span className="font-medium">Step {step} of {TOTAL_STEPS}</span>
+              <span>{Math.round((step / TOTAL_STEPS) * 100)}%</span>
+            </div>
+            <Progress value={(step / TOTAL_STEPS) * 100} className="h-1.5" />
+          </div>
+          <CardTitle className="text-2xl">{current.title}</CardTitle>
+          {current.subtitle && <CardDescription>{current.subtitle}</CardDescription>}
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
-              <Input
-                id="name"
-                type="text"
-                placeholder="Alex Demo"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                autoComplete="name"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="alex@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                autoComplete="email"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoComplete="new-password"
-              />
-            </div>
 
-            <div className="space-y-3">
-              <Label>Risk Profile</Label>
-              <RadioGroup
-                value={riskProfile}
-                onValueChange={(value) => setRiskProfile(value as RiskProfile)}
-                className="grid grid-cols-3 gap-2"
-              >
-                {[
-                  { value: 'conservative', label: 'Conservative', description: 'Lower risk' },
-                  { value: 'balanced', label: 'Balanced', description: 'Moderate' },
-                  { value: 'aggressive', label: 'Aggressive', description: 'Higher risk' },
-                ].map((option) => (
-                  <div key={option.value}>
-                    <RadioGroupItem
-                      value={option.value}
-                      id={option.value}
-                      className="peer sr-only"
+        <CardContent className="space-y-6">
+          {step === 1 && (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name</Label>
+                <Input id="name" type="text" placeholder="Alex Demo" value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" type="email" placeholder="alex@example.com" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input id="password" type="password" placeholder="At least 6 characters" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" />
+              </div>
+            </div>
+          )}
+
+          {step === 2 && (
+            <div className="space-y-6">
+              <div className="space-y-3">
+                <Label>Investor type</Label>
+                <RadioGroup
+                  value={investorType}
+                  onValueChange={(v) => setInvestorType(v as InvestorType)}
+                  className="space-y-2"
+                >
+                  <Label htmlFor="non_soph" className="flex cursor-pointer items-start gap-3 rounded-lg border p-4 text-sm font-normal hover:bg-muted/50 [&:has([data-state=checked])]:border-primary">
+                    <RadioGroupItem id="non_soph" value="non_sophisticated" className="mt-0.5" />
+                    <div>
+                      <div className="font-medium">Non-sophisticated investor</div>
+                      <div className="text-muted-foreground">I am a retail investor (default protection applies).</div>
+                    </div>
+                  </Label>
+                  <Label htmlFor="soph" className="flex cursor-pointer items-start gap-3 rounded-lg border p-4 text-sm font-normal hover:bg-muted/50 [&:has([data-state=checked])]:border-primary">
+                    <RadioGroupItem id="soph" value="sophisticated" className="mt-0.5" />
+                    <div>
+                      <div className="font-medium">Sophisticated investor</div>
+                      <div className="text-muted-foreground">I qualify as a professional investor under MiFID II.</div>
+                    </div>
+                  </Label>
+                </RadioGroup>
+              </div>
+
+              {investorType === 'non_sophisticated' && (
+                <div className="space-y-2 rounded-lg border bg-muted/30 p-4">
+                  <Label htmlFor="net_worth" className="text-sm">
+                    Approximate net worth (optional. Used to calculate your investment cap)
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Non-sophisticated investors are capped at max(€1,000 or 5% of net worth) per vault per ECSPR Art. 21.
+                  </p>
+                  <div className="relative">
+                    <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-muted-foreground">€</span>
+                    <Input
+                      id="net_worth"
+                      type="number"
+                      min="0"
+                      placeholder="e.g. 50000"
+                      value={netWorth}
+                      onChange={(e) => setNetWorth(e.target.value)}
+                      className="pl-7"
                     />
-                    <Label
-                      htmlFor={option.value}
-                      className="flex cursor-pointer flex-col items-center rounded-lg border-2 border-muted bg-popover p-3 text-center hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                    >
-                      <span className="text-sm font-medium">{option.label}</span>
-                      <span className="text-xs text-muted-foreground">{option.description}</span>
-                    </Label>
                   </div>
-                ))}
-              </RadioGroup>
+                  <p className="text-xs text-muted-foreground">
+                    This is not verified at signup. Investment caps are enforced automatically by the platform.
+                  </p>
+                </div>
+              )}
             </div>
+          )}
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Creating account...' : 'Create Account'}
-            </Button>
-          </form>
+          {step === 3 && (
+            <div className="space-y-5">
+              {QUESTIONS.map((q, i) => (
+                <div key={i} className="space-y-2">
+                  <p className="text-sm font-medium">
+                    {i + 1}. {q.q}
+                  </p>
+                  <RadioGroup
+                    value={answers[i] || ''}
+                    onValueChange={(v) => setAnswers(prev => ({ ...prev, [i]: v }))}
+                    className="space-y-1.5"
+                  >
+                    {q.options.map(opt => (
+                      <Label
+                        key={opt.value}
+                        htmlFor={`q${i}-${opt.value}`}
+                        className="flex cursor-pointer items-center gap-3 rounded-lg border p-3 text-sm font-normal hover:bg-muted/50 [&:has([data-state=checked])]:border-primary"
+                      >
+                        <RadioGroupItem id={`q${i}-${opt.value}`} value={opt.value} />
+                        <span>{opt.label}</span>
+                      </Label>
+                    ))}
+                  </RadioGroup>
+                </div>
+              ))}
 
-          <p className="mt-4 text-center text-sm text-muted-foreground">
-            Already have an account?{' '}
-            <Link to="/login" className="font-medium text-primary hover:underline">
-              Sign in
-            </Link>
-          </p>
+              {passed && (
+                <div className="flex items-start gap-3 rounded-lg border border-green-500/40 bg-green-500/10 p-4 text-sm">
+                  <CheckCircle2 className="mt-0.5 h-5 w-5 text-green-600" />
+                  <div>
+                    <div className="font-medium text-green-700 dark:text-green-400">Assessment passed</div>
+                    <div className="text-muted-foreground">You scored {score} of {QUESTIONS.length}. You can continue to the next step.</div>
+                  </div>
+                </div>
+              )}
+
+              {failed && (
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3 rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-sm">
+                    <AlertTriangle className="mt-0.5 h-5 w-5 text-amber-600" />
+                    <div>
+                      <div className="font-medium text-amber-700 dark:text-amber-400">You didn’t pass the assessment</div>
+                      <div className="text-muted-foreground">You can still proceed, but you must acknowledge the risk warning below.</div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-4 text-sm">
+                    <div className="mb-2 flex items-center gap-2 font-medium text-destructive">
+                      <AlertTriangle className="h-4 w-4" />
+                      Risk Warning. Required Acknowledgment
+                    </div>
+                    <p className="text-foreground/80">
+                      Startup investments carry a high risk of total loss. You may lose all of the capital you invest.
+                      These investments are illiquid: you cannot withdraw after a vault closes. Past performance is not
+                      indicative of future results. VaultCapital does not provide investment advice.
+                    </p>
+                  </div>
+
+                  <Label className="flex cursor-pointer items-start gap-3 rounded-lg border p-3 text-sm font-normal">
+                    <Checkbox
+                      checked={acknowledged}
+                      onCheckedChange={(v) => setAcknowledged(v === true)}
+                      className="mt-0.5"
+                    />
+                    <span>
+                      I have read and understood the above risk warning and I acknowledge that startup investing is high risk and illiquid.
+                    </span>
+                  </Label>
+                </div>
+              )}
+            </div>
+          )}
+
+          {step === 4 && (
+            <div className="space-y-4">
+              <div className="flex items-start gap-3 rounded-lg border bg-muted/30 p-4 text-sm">
+                <ShieldCheck className="mt-0.5 h-5 w-5 text-primary" />
+                <p className="text-muted-foreground">
+                  Please review and confirm the following before creating your account.
+                </p>
+              </div>
+
+              <Label className="flex cursor-pointer items-start gap-3 rounded-lg border p-3 text-sm font-normal">
+                <Checkbox checked={agreeTerms} onCheckedChange={(v) => setAgreeTerms(v === true)} className="mt-0.5" />
+                <span>
+                  I have read and agree to the{' '}
+                  <Link to="/terms" target="_blank" className="text-primary hover:underline">Terms of Service and Conflicts of Interest Policy</Link>.
+                </span>
+              </Label>
+
+              <Label className="flex cursor-pointer items-start gap-3 rounded-lg border p-3 text-sm font-normal">
+                <Checkbox checked={agreeRegulatory} onCheckedChange={(v) => setAgreeRegulatory(v === true)} className="mt-0.5" />
+                <span>
+                  I have read the{' '}
+                  <Link to="/regulatory" target="_blank" className="text-primary hover:underline">Regulatory & Compliance page</Link>{' '}
+                  and understand VaultCapital operates under ECSPR (Reg. EU 2020/1503).
+                </span>
+              </Label>
+
+              <Label className="flex cursor-pointer items-start gap-3 rounded-lg border p-3 text-sm font-normal">
+                <Checkbox checked={agreeAge} onCheckedChange={(v) => setAgreeAge(v === true)} className="mt-0.5" />
+                <span>
+                  I confirm I am at least 18 years old and a resident of the European Union.
+                </span>
+              </Label>
+            </div>
+          )}
+
+          {/* Navigation */}
+          <div className="flex items-center justify-between gap-3 pt-2">
+            {step > 1 ? (
+              <Button variant="outline" onClick={goBack} disabled={isLoading}>
+                <ArrowLeft className="mr-2 h-4 w-4" /> Back
+              </Button>
+            ) : (
+              <span />
+            )}
+
+            {step === 1 && (
+              <Button onClick={handleStep1}>
+                Continue <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            )}
+            {step === 2 && (
+              <Button onClick={goNext}>
+                Continue <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            )}
+            {step === 3 && (
+              <Button
+                onClick={handleStep3}
+                disabled={!allAnswered || (failed && !acknowledged)}
+              >
+                {failed ? 'I Acknowledge. Continue' : 'Continue'}
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            )}
+            {step === 4 && (
+              <Button
+                onClick={handleSubmit}
+                disabled={isLoading || !agreeTerms || !agreeRegulatory || !agreeAge}
+              >
+                {isLoading ? 'Creating account...' : 'Create Account'}
+              </Button>
+            )}
+          </div>
+
+          {step === 1 && (
+            <p className="text-center text-sm text-muted-foreground">
+              Already have an account?{' '}
+              <Link to="/login" className="font-medium text-primary hover:underline">
+                Sign in
+              </Link>
+            </p>
+          )}
         </CardContent>
       </Card>
     </div>
