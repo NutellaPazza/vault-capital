@@ -9,7 +9,7 @@ export const AppLayout = () => {
   const { isAuthenticated } = useAppStore();
   useNotificationToasts();
 
-  const isPublicPage = ['/', '/login', '/signup', '/terms'].includes(location.pathname);
+  const isPublicPage = ['/', '/login', '/signup', '/terms', '/regulatory', '/about', '/how-it-works', '/faq'].includes(location.pathname);
   const showBottomNav = !isPublicPage && isAuthenticated;
 
   // Redirect unauthenticated users from protected pages
