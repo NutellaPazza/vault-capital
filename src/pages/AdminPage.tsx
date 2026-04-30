@@ -12,14 +12,15 @@ import { ApplicationDetail } from '@/components/admin/ApplicationDetail';
 import { useAppStore } from '@/store/appStore';
 import { formatCurrency, formatCompactCurrency } from '@/lib/formatters';
 import { toast } from '@/hooks/use-toast';
-import { Settings, Zap, RefreshCw, FileText } from 'lucide-react';
+import { Settings, Zap, RefreshCw, FileText, Percent } from 'lucide-react';
 import { PoolStatus, StartupApplication } from '@/types';
 
 const AdminPage = () => {
-  const { isAdmin, pools, deals, positions, applications, forcePoolStatus, simulateExit, resetToInitialState } = useAppStore();
+  const { isAdmin, pools, deals, positions, applications, forcePoolStatus, simulateExit, resetToInitialState, marketplaceFeePercent, setMarketplaceFeePercent } = useAppStore();
   const [selectedPool, setSelectedPool] = useState('');
   const [exitMultiple, setExitMultiple] = useState('2.0');
   const [selectedApplication, setSelectedApplication] = useState<StartupApplication | null>(null);
+  const [feeInput, setFeeInput] = useState(marketplaceFeePercent.toString());
 
   if (!isAdmin) {
     return <Navigate to="/" replace />;
@@ -46,6 +47,18 @@ const AdminPage = () => {
   const handleReset = () => {
     resetToInitialState();
     toast({ title: 'Data Reset', description: 'All data restored to initial state.' });
+    setFeeInput('1');
+  };
+
+  const handleSaveFee = () => {
+    const value = parseFloat(feeInput);
+    if (isNaN(value) || value < 0 || value > 10) {
+      toast({ title: 'Invalid fee', description: 'Enter a value between 0 and 10%.', variant: 'destructive' });
+      setFeeInput(marketplaceFeePercent.toString());
+      return;
+    }
+    setMarketplaceFeePercent(value);
+    toast({ title: 'Marketplace fee updated', description: `New listings will use ${value}%. Existing listings keep their original fee.` });
   };
 
   const activePools = poolsWithDeals.filter(p => p.pool_status === 'active');
@@ -115,6 +128,41 @@ const AdminPage = () => {
                   <Input type="number" value={exitMultiple} onChange={(e) => setExitMultiple(e.target.value)} step="0.1" min="0.1" />
                 </div>
                 <Button onClick={handleExit} disabled={!selectedPool} className="w-full">Simulate Exit</Button>
+              </CardContent>
+            </Card>
+
+            <Card className="lg:col-span-2">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Percent className="h-5 w-5" /> Marketplace Fee</CardTitle>
+                <CardDescription>
+                  Buyer fee charged on every Resale Board purchase. Applies to new listings only. Existing listings keep the fee they were created with.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+                  <div className="flex-1 space-y-2">
+                    <Label htmlFor="market-fee">Fee percentage</Label>
+                    <div className="relative max-w-[180px]">
+                      <Input
+                        id="market-fee"
+                        type="number"
+                        min="0"
+                        max="10"
+                        step="0.1"
+                        value={feeInput}
+                        onChange={(e) => setFeeInput(e.target.value)}
+                        className="pr-8"
+                      />
+                      <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm text-muted-foreground">%</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Currently active: <span className="font-medium text-foreground">{marketplaceFeePercent}%</span>. Allowed range 0–10%.
+                    </p>
+                  </div>
+                  <Button onClick={handleSaveFee} disabled={parseFloat(feeInput) === marketplaceFeePercent || feeInput.trim() === ''}>
+                    Save fee
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </div>
