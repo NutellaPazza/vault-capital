@@ -7,26 +7,7 @@ import {
   FileText, HandCoins, BarChart3, Globe, Lock
 } from 'lucide-react';
 
-const teamMembers = [
-  {
-    initials: 'MC',
-    name: 'Marco Cappelli',
-    role: 'CEO & Co-Founder',
-    bio: 'Serial entrepreneur with 10+ years in fintech and venture capital. Previously founded two B2B SaaS startups, one acquired. Deep expertise in deal structuring, investor relations, and platform scaling.',
-  },
-  {
-    initials: 'LR',
-    name: 'Laura Ricci',
-    role: 'COO & Co-Founder',
-    bio: 'Former investment banker at Goldman Sachs with expertise in M&A, deal structuring, and regulatory compliance. Led €500M+ in transactions across European markets.',
-  },
-  {
-    initials: 'AP',
-    name: 'Andrea Piras',
-    role: 'CTO',
-    bio: 'Full-stack engineer, ex-Revolut. Built scalable financial platforms handling millions of transactions. Expert in security, real-time systems, and financial infrastructure.',
-  },
-];
+// Team is not yet public.
 
 const features = [
   {
@@ -113,11 +94,16 @@ const AboutPage = () => (
     {/* Team */}
     <section className="mb-16">
       <h2 className="mb-4 text-center text-3xl font-bold">Our Team</h2>
-      <p className="mx-auto mb-8 max-w-2xl text-center text-muted-foreground">
-        A team of experienced operators combining deep expertise in finance, technology, and venture capital.
-      </p>
-      <div className="grid gap-6 md:grid-cols-3">
-        {teamMembers.map(m => (
+      <Card className="mx-auto max-w-3xl">
+        <CardContent className="p-8 text-center">
+          <p className="text-muted-foreground leading-relaxed">
+            Our team combines backgrounds in fintech, venture capital, and software engineering.
+            We are building VaultCapital because we believe retail investors deserve access to the
+            same opportunities as institutional ones.
+          </p>
+        </CardContent>
+      </Card>
+    </section>
           <Card key={m.name}>
             <CardContent className="p-6 text-center">
               <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-primary text-2xl font-bold text-primary-foreground">
