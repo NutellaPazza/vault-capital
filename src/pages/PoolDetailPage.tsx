@@ -7,14 +7,15 @@ import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { StatusBadge, CountdownTimer } from '@/components/common';
+import { StatusBadge, CountdownTimer, KnowledgeTestModal, hasCompletedKnowledgeTest } from '@/components/common';
 import { useAppStore } from '@/store/appStore';
 import { formatCurrency, formatCompactCurrency, formatPercent, formatDate } from '@/lib/formatters';
 import { toast } from '@/hooks/use-toast';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { 
   ArrowLeft, Users, Clock, ExternalLink, Info, CheckCircle,
   AlertTriangle, FileText, Linkedin, Award, Banknote, Scale,
-  Download, BarChart3, TrendingUp
+  Download, BarChart3, TrendingUp, ShieldAlert
 } from 'lucide-react';
 
 const PoolDetailPage = () => {
@@ -26,6 +27,7 @@ const PoolDetailPage = () => {
   const [isInvesting, setIsInvesting] = useState(false);
   const [isResolving, setIsResolving] = useState(false);
   const [now, setNow] = useState(() => Date.now());
+  const [showKnowledgeTest, setShowKnowledgeTest] = useState(false);
 
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000);
@@ -60,14 +62,12 @@ const PoolDetailPage = () => {
   const meetsMinimum = amount >= deal.min_ticket_eur;
   const canInvest = isLive && canAfford && meetsMinimum && amount > 0;
 
-  const handleInvest = async () => {
-    if (!canInvest) return;
-    
+  const performInvest = async () => {
     setIsInvesting(true);
     await new Promise(resolve => setTimeout(resolve, 800));
-    
+
     const success = invest(pool.id, amount);
-    
+
     if (success) {
       toast({
         title: 'Investment Successful!',
@@ -82,8 +82,17 @@ const PoolDetailPage = () => {
         variant: 'destructive',
       });
     }
-    
+
     setIsInvesting(false);
+  };
+
+  const handleInvest = async () => {
+    if (!canInvest) return;
+    if (!hasCompletedKnowledgeTest()) {
+      setShowKnowledgeTest(true);
+      return;
+    }
+    await performInvest();
   };
 
   // Extract key metrics from highlights
