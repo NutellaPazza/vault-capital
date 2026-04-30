@@ -327,9 +327,9 @@ const ApplyPage = () => {
 
         {/* Navigation */}
         <div className="mt-6 flex justify-between">
-          <Button variant="outline" onClick={handleBack} disabled={currentStep === 0}>
+          <Button variant="outline" onClick={handleBack}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
+            {currentStep === 0 ? 'Home' : 'Back'}
           </Button>
           {currentStep < STEPS.length - 1 ? (
             <Button onClick={handleNext}>
