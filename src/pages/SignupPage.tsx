@@ -497,7 +497,7 @@ const SignupPage = () => {
             )}
 
             {step === 1 && (
-              <Button onClick={handleStep1}>
+              <Button onClick={handleStep1} disabled={!name || !email || !passwordStrong}>
                 Continue <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             )}
