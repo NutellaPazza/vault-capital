@@ -177,6 +177,10 @@ const ApplyPage = () => {
   };
 
   const handleBack = () => {
+    if (currentStep === 0) {
+      navigate('/');
+      return;
+    }
     setCurrentStep(prev => Math.max(prev - 1, 0));
   };
 
