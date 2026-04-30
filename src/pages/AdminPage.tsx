@@ -12,14 +12,15 @@ import { ApplicationDetail } from '@/components/admin/ApplicationDetail';
 import { useAppStore } from '@/store/appStore';
 import { formatCurrency, formatCompactCurrency } from '@/lib/formatters';
 import { toast } from '@/hooks/use-toast';
-import { Settings, Zap, RefreshCw, FileText } from 'lucide-react';
+import { Settings, Zap, RefreshCw, FileText, Percent } from 'lucide-react';
 import { PoolStatus, StartupApplication } from '@/types';
 
 const AdminPage = () => {
-  const { isAdmin, pools, deals, positions, applications, forcePoolStatus, simulateExit, resetToInitialState } = useAppStore();
+  const { isAdmin, pools, deals, positions, applications, forcePoolStatus, simulateExit, resetToInitialState, marketplaceFeePercent, setMarketplaceFeePercent } = useAppStore();
   const [selectedPool, setSelectedPool] = useState('');
   const [exitMultiple, setExitMultiple] = useState('2.0');
   const [selectedApplication, setSelectedApplication] = useState<StartupApplication | null>(null);
+  const [feeInput, setFeeInput] = useState(marketplaceFeePercent.toString());
 
   if (!isAdmin) {
     return <Navigate to="/" replace />;
@@ -46,6 +47,18 @@ const AdminPage = () => {
   const handleReset = () => {
     resetToInitialState();
     toast({ title: 'Data Reset', description: 'All data restored to initial state.' });
+    setFeeInput('1');
+  };
+
+  const handleSaveFee = () => {
+    const value = parseFloat(feeInput);
+    if (isNaN(value) || value < 0 || value > 10) {
+      toast({ title: 'Invalid fee', description: 'Enter a value between 0 and 10%.', variant: 'destructive' });
+      setFeeInput(marketplaceFeePercent.toString());
+      return;
+    }
+    setMarketplaceFeePercent(value);
+    toast({ title: 'Marketplace fee updated', description: `New listings will use ${value}%. Existing listings keep their original fee.` });
   };
 
   const activePools = poolsWithDeals.filter(p => p.pool_status === 'active');
