@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Navigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,13 +22,7 @@ const AdminPage = () => {
   const [selectedApplication, setSelectedApplication] = useState<StartupApplication | null>(null);
 
   if (!isAdmin) {
-    return (
-      <div className="container flex flex-col items-center justify-center py-16">
-        <Settings className="mb-4 h-16 w-16 text-muted-foreground" />
-        <h2 className="mb-2 text-xl font-semibold">Admin Access Required</h2>
-        <p className="text-muted-foreground">Enable admin mode from the settings menu.</p>
-      </div>
-    );
+    return <Navigate to="/" replace />;
   }
 
   const poolsWithDeals = pools.map(p => ({ ...p, deal: deals.find(d => d.id === p.deal_id)! })).filter(p => p.deal);
