@@ -129,8 +129,8 @@ const SignupPage = () => {
       toast({ title: 'Invalid email', description: 'Please enter a valid email.', variant: 'destructive' });
       return;
     }
-    if (password.length < 6) {
-      toast({ title: 'Weak password', description: 'Password must be at least 6 characters.', variant: 'destructive' });
+    if (!passwordStrong) {
+      toast({ title: 'Weak password', description: 'Password does not meet all requirements.', variant: 'destructive' });
       return;
     }
     goNext();
