@@ -104,19 +104,6 @@ const AboutPage = () => (
         </CardContent>
       </Card>
     </section>
-          <Card key={m.name}>
-            <CardContent className="p-6 text-center">
-              <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-primary text-2xl font-bold text-primary-foreground">
-                {m.initials}
-              </div>
-              <h3 className="text-lg font-semibold">{m.name}</h3>
-              <p className="text-sm font-medium text-primary">{m.role}</p>
-              <p className="mt-3 text-sm text-muted-foreground">{m.bio}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </section>
 
     {/* Transparency & Reporting */}
     <section className="mb-16">
