@@ -359,7 +359,16 @@ const SignupPage = () => {
                 <Checkbox checked={agreeTerms} onCheckedChange={(v) => setAgreeTerms(v === true)} className="mt-0.5" />
                 <span>
                   I have read and agree to the{' '}
-                  <Link to="/terms" target="_blank" className="text-primary hover:underline">Terms of Service and Conflicts of Interest Policy</Link>.
+                  <a
+                    href="/terms"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    Terms of Service and Conflicts of Interest Policy
+                  </a>
+                  .
                 </span>
               </Label>
 
@@ -367,7 +376,15 @@ const SignupPage = () => {
                 <Checkbox checked={agreeRegulatory} onCheckedChange={(v) => setAgreeRegulatory(v === true)} className="mt-0.5" />
                 <span>
                   I have read the{' '}
-                  <Link to="/regulatory" target="_blank" className="text-primary hover:underline">Regulatory & Compliance page</Link>{' '}
+                  <a
+                    href="/regulatory"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    Regulatory & Compliance page
+                  </a>{' '}
                   and understand VaultCapital operates under ECSPR (Reg. EU 2020/1503).
                 </span>
               </Label>
@@ -378,6 +395,10 @@ const SignupPage = () => {
                   I confirm I am at least 18 years old and a resident of the European Union.
                 </span>
               </Label>
+
+              <p className="text-xs text-muted-foreground">
+                Links open in a new tab so you don't lose your progress.
+              </p>
             </div>
           )}
 
