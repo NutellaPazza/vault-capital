@@ -105,9 +105,21 @@ const ReturnSimulator = () => {
             </div>
           </div>
 
+          <div className="space-y-2 rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">
+            <p className="font-medium text-foreground">
+              Fees: 2% entry fee + 2% exit fee on profit only. No hidden charges.
+            </p>
+            <p>
+              This simulation is for illustrative purposes only. It does not represent a guarantee
+              or prediction of future returns. You may lose all invested capital.
+            </p>
+            <p className="text-[10px] uppercase tracking-wide text-muted-foreground/70">
+              Reference scenarios: −100% (total loss) · 0% (capital preserved) · 3x (positive exit).
+            </p>
+          </div>
+
           <p className="text-center text-xs text-muted-foreground">
-            This is a simulation only. Past performance does not guarantee future results.
-            Startup investments are high risk and you may lose your entire capital.
+            Past performance does not guarantee future results. Startup investments are high risk.
           </p>
         </CardContent>
       </Card>

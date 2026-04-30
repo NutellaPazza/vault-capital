@@ -17,6 +17,7 @@ import ProfilePage from "./pages/ProfilePage";
 import AdminPage from "./pages/AdminPage";
 import ApplyPage from "./pages/ApplyPage";
 import TermsPage from "./pages/TermsPage";
+import RegulatoryPage from "./pages/RegulatoryPage";
 import AboutPage from "./pages/AboutPage";
 import HowItWorksPage from "./pages/HowItWorksPage";
 import FaqPage from "./pages/FaqPage";
@@ -48,6 +49,7 @@ const App = () => (
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/terms" element={<TermsPage />} />
+            <Route path="/regulatory" element={<RegulatoryPage />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>

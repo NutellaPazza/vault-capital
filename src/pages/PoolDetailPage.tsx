@@ -7,14 +7,15 @@ import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { StatusBadge, CountdownTimer } from '@/components/common';
+import { StatusBadge, CountdownTimer, KnowledgeTestModal, hasCompletedKnowledgeTest } from '@/components/common';
 import { useAppStore } from '@/store/appStore';
 import { formatCurrency, formatCompactCurrency, formatPercent, formatDate } from '@/lib/formatters';
 import { toast } from '@/hooks/use-toast';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { 
   ArrowLeft, Users, Clock, ExternalLink, Info, CheckCircle,
   AlertTriangle, FileText, Linkedin, Award, Banknote, Scale,
-  Download, BarChart3, TrendingUp
+  Download, BarChart3, TrendingUp, ShieldAlert
 } from 'lucide-react';
 
 const PoolDetailPage = () => {
@@ -26,6 +27,7 @@ const PoolDetailPage = () => {
   const [isInvesting, setIsInvesting] = useState(false);
   const [isResolving, setIsResolving] = useState(false);
   const [now, setNow] = useState(() => Date.now());
+  const [showKnowledgeTest, setShowKnowledgeTest] = useState(false);
 
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000);
@@ -60,14 +62,12 @@ const PoolDetailPage = () => {
   const meetsMinimum = amount >= deal.min_ticket_eur;
   const canInvest = isLive && canAfford && meetsMinimum && amount > 0;
 
-  const handleInvest = async () => {
-    if (!canInvest) return;
-    
+  const performInvest = async () => {
     setIsInvesting(true);
     await new Promise(resolve => setTimeout(resolve, 800));
-    
+
     const success = invest(pool.id, amount);
-    
+
     if (success) {
       toast({
         title: 'Investment Successful!',
@@ -82,8 +82,17 @@ const PoolDetailPage = () => {
         variant: 'destructive',
       });
     }
-    
+
     setIsInvesting(false);
+  };
+
+  const handleInvest = async () => {
+    if (!canInvest) return;
+    if (!hasCompletedKnowledgeTest()) {
+      setShowKnowledgeTest(true);
+      return;
+    }
+    await performInvest();
   };
 
   // Extract key metrics from highlights
@@ -211,6 +220,9 @@ const PoolDetailPage = () => {
                   <CardDescription className="text-sm md:text-base">
                     {deal.industry} • {deal.sector_type} • {deal.country}
                   </CardDescription>
+                  <p className="mt-1.5 text-xs text-muted-foreground">
+                    This does not constitute financial advice or an investment recommendation.
+                  </p>
                 </div>
                 {isLive && (
                   <div className="rounded-lg bg-muted p-3 text-center">
@@ -664,6 +676,64 @@ const PoolDetailPage = () => {
                       </div>
                     )}
 
+                    {/* Reflection Period — ECSPR Art. 22 */}
+                    {(() => {
+                      const endMs = new Date(pool.end_datetime).getTime();
+                      const reflectionEndMs = Math.min(
+                        endMs,
+                        new Date(pool.start_datetime).getTime() + 4 * 24 * 60 * 60 * 1000,
+                      );
+                      const remainingMs = Math.max(0, reflectionEndMs - now);
+                      const days = Math.ceil(remainingMs / (24 * 60 * 60 * 1000));
+                      return (
+                        <div className="flex items-start gap-2 rounded-lg border border-primary/20 bg-primary/5 p-3 text-xs">
+                          <Clock className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                          <div className="flex-1">
+                            <p className="font-medium text-foreground">
+                              ⏱ Reflection period: {days} day{days === 1 ? '' : 's'} remaining to withdraw
+                            </p>
+                            <p className="mt-0.5 text-muted-foreground">
+                              ECSPR Article 22 — withdraw at any time during this window.
+                            </p>
+                          </div>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <button type="button" aria-label="More info">
+                                  <Info className="h-3.5 w-3.5 text-muted-foreground" />
+                                </button>
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-xs">
+                                <p className="text-xs">
+                                  Under ECSPR Article 22, you have 4 calendar days from your investment
+                                  to withdraw. After the vault closes, no withdrawal is possible — your
+                                  only exit is the resale board. Early withdrawal during the reflection
+                                  period incurs a 1% fee.
+                                </p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
+                      );
+                    })()}
+
+                    {/* Risk Disclosure — Read Before Investing */}
+                    <div className="rounded-lg border-2 border-warning/50 bg-warning/5 p-3">
+                      <div className="mb-2 flex items-center gap-2">
+                        <ShieldAlert className="h-4 w-4 text-warning" />
+                        <p className="text-sm font-semibold text-warning">
+                          Risk Disclosure — Read Before Investing
+                        </p>
+                      </div>
+                      <ul className="space-y-1.5 text-xs text-foreground/80">
+                        <li>• You may lose all of your invested capital. Startup investments carry a high risk of total loss.</li>
+                        <li>• This investment is illiquid. You cannot withdraw capital after the vault closes. Your only exit option is the resale board.</li>
+                        <li>• Past performance of other vaults is not indicative of future results.</li>
+                        <li>• This page contains factual information about this investment opportunity. It does not constitute financial advice or a personalized investment recommendation.</li>
+                        <li>• Non-sophisticated investors are subject to investment caps per ECSPR Article 21.</li>
+                      </ul>
+                    </div>
+
                     <Button 
                       className="w-full" 
                       size="lg" 
@@ -692,14 +762,24 @@ const PoolDetailPage = () => {
                         : 'This vault has ended'}
                     </p>
                     {pool.pool_status !== 'upcoming' && (
-                      <div className="mt-4 space-y-2">
-                        <Button variant="outline" className="w-full" asChild>
-                          <Link to="/portfolio">View your position</Link>
-                        </Button>
-                        <Button variant="ghost" className="w-full" asChild>
-                          <Link to="/marketplace">Browse resale board</Link>
-                        </Button>
-                      </div>
+                      <>
+                        <div className="mt-4 rounded-lg border border-muted bg-muted/40 p-3 text-left text-xs">
+                          <p className="font-medium text-foreground">
+                            This vault is closed. The reflection period has ended.
+                          </p>
+                          <p className="mt-1 text-muted-foreground">
+                            To exit your position, use the Resale Board.
+                          </p>
+                        </div>
+                        <div className="mt-4 space-y-2">
+                          <Button variant="outline" className="w-full" asChild>
+                            <Link to="/portfolio">View your position</Link>
+                          </Button>
+                          <Button variant="ghost" className="w-full" asChild>
+                            <Link to="/marketplace">Browse resale board</Link>
+                          </Button>
+                        </div>
+                      </>
                     )}
                   </div>
                 )}
@@ -708,6 +788,15 @@ const PoolDetailPage = () => {
           </div>
         </div>
       </div>
+
+      <KnowledgeTestModal
+        open={showKnowledgeTest}
+        onClose={() => setShowKnowledgeTest(false)}
+        onPass={() => {
+          setShowKnowledgeTest(false);
+          performInvest();
+        }}
+      />
     </div>
   );
 };

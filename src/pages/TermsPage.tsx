@@ -256,6 +256,64 @@ const TermsPage = () => {
             </CardContent>
           </Card>
 
+          {/* Conflicts of Interest — ECSPR Article 8 */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Scale className="h-5 w-5" />
+                8. Conflicts of Interest Policy
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 text-sm text-muted-foreground">
+              <p className="text-xs uppercase tracking-wide text-muted-foreground/80">
+                Disclosure required by ECSPR Article 8
+              </p>
+
+              <div>
+                <h4 className="mb-1 font-semibold text-foreground">Fee Structure & Alignment</h4>
+                <p>
+                  VaultCapital charges: 2% entry fee (deducted from invested amount at vault closing) +
+                  2% exit fee (charged on profit only — zero fee on loss) + 1% buyer fee on resale board
+                  transactions (charged to buyer, not seller). No holding fees. No hidden charges.
+                </p>
+                <p className="mt-2">
+                  The 2% exit fee applies only to profitable exits. VaultCapital earns nothing on
+                  negative outcomes. Our financial incentive is structurally aligned with investor success.
+                </p>
+              </div>
+
+              <div>
+                <h4 className="mb-1 font-semibold text-foreground">Startup Selection</h4>
+                <p>
+                  Startups are selected through a documented, objective due diligence process. Selection
+                  criteria are applied consistently across all applicants. VaultCapital does not receive
+                  fees from startups for listing on the platform.
+                </p>
+              </div>
+
+              <div>
+                <h4 className="mb-1 font-semibold text-foreground">Co-Investment Policy</h4>
+                <p>
+                  If VaultCapital or its team members co-invest in a vault, this will be disclosed in
+                  the vault's KIIS with the invested amount and terms. Platform co-investment will never
+                  occur on preferential terms compared to retail investors.
+                </p>
+              </div>
+
+              <div>
+                <h4 className="mb-1 font-semibold text-foreground">Reporting Conflicts</h4>
+                <p>
+                  Any actual or potential conflict of interest not covered above will be disclosed in
+                  the relevant vault's KIIS before the vault opens. Users may contact{' '}
+                  <a href="mailto:compliance@vaultcapital.eu" className="text-primary hover:underline">
+                    compliance@vaultcapital.eu
+                  </a>{' '}
+                  to report concerns.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Contact */}
           <Card>
             <CardContent className="py-6 text-center">
