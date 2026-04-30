@@ -215,7 +215,61 @@ const SignupPage = () => {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
-                <Input id="password" type="password" placeholder="At least 6 characters" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="At least 8 characters"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="new-password"
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(s => !s)}
+                    className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+
+                {password.length > 0 && (
+                  <div className="space-y-2 pt-1">
+                    <div className="flex items-center gap-2">
+                      <div className="flex flex-1 gap-1">
+                        {[1, 2, 3, 4].map(i => (
+                          <div
+                            key={i}
+                            className={`h-1.5 flex-1 rounded-full transition-colors ${i <= strengthBars ? strengthColor : 'bg-muted'}`}
+                          />
+                        ))}
+                      </div>
+                      <span className="min-w-[5.5rem] text-right text-xs font-medium text-muted-foreground">{strengthLabel}</span>
+                    </div>
+
+                    <ul className="space-y-1 text-xs">
+                      {[
+                        { ok: pwdChecks.length, label: 'At least 8 characters' },
+                        { ok: pwdChecks.upper, label: 'One uppercase letter' },
+                        { ok: pwdChecks.lower, label: 'One lowercase letter' },
+                        { ok: pwdChecks.number, label: 'One number' },
+                        { ok: pwdChecks.special, label: 'One special character' },
+                      ].map((r, i) => (
+                        <li key={i} className="flex items-center gap-2">
+                          {r.ok ? (
+                            <Check className="h-3.5 w-3.5 text-green-600" />
+                          ) : (
+                            <X className="h-3.5 w-3.5 text-red-500" />
+                          )}
+                          <span className={r.ok ? 'text-muted-foreground' : 'text-muted-foreground'}>{r.label}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
             </div>
           )}
