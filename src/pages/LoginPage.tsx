@@ -112,6 +112,8 @@ const LoginPage = () => {
           </p>
         </CardContent>
       </Card>
+
+      <ForgotPasswordModal open={forgotOpen} onOpenChange={setForgotOpen} defaultEmail={email} />
     </div>
   );
 };
