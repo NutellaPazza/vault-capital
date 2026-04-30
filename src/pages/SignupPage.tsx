@@ -426,6 +426,7 @@ const SignupPage = () => {
               <Button
                 onClick={handleStep3}
                 disabled={!allAnswered || (failed && !acknowledged)}
+                variant={failed && acknowledged ? 'destructive' : 'default'}
               >
                 {failed ? 'I Acknowledge. Continue' : 'Continue'}
                 <ArrowRight className="ml-2 h-4 w-4" />
