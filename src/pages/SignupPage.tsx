@@ -11,7 +11,15 @@ import { useAppStore } from '@/store/appStore';
 import { toast } from '@/hooks/use-toast';
 import { InvestorType } from '@/types';
 import { KNOWLEDGE_TEST_LS_KEY } from '@/components/common/KnowledgeTestModal';
-import { ArrowLeft, ArrowRight, AlertTriangle, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, ArrowRight, AlertTriangle, CheckCircle2, ShieldCheck, Eye, EyeOff, Check, X } from 'lucide-react';
+
+const passwordChecks = (pwd: string) => ({
+  length: pwd.length >= 8,
+  upper: /[A-Z]/.test(pwd),
+  lower: /[a-z]/.test(pwd),
+  number: /[0-9]/.test(pwd),
+  special: /[!@#$%^&*()_+\-=\[\]{}|;':",.<>?/]/.test(pwd),
+});
 
 const QUESTIONS = [
   {
@@ -65,6 +73,28 @@ const SignupPage = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+
+  const pwdChecks = passwordChecks(password);
+  const pwdMetCount = Object.values(pwdChecks).filter(Boolean).length;
+  const categoriesMet = [pwdChecks.upper, pwdChecks.lower, pwdChecks.number, pwdChecks.special].filter(Boolean).length;
+  const passwordStrong = pwdMetCount === 5;
+  let strengthBars = 0;
+  let strengthLabel = '';
+  let strengthColor = '';
+  if (password.length > 0) {
+    if (passwordStrong) {
+      strengthBars = 4; strengthLabel = 'Strong password'; strengthColor = 'bg-green-500';
+    } else if (pwdChecks.length && categoriesMet >= 2) {
+      strengthBars = 3; strengthLabel = 'Medium'; strengthColor = 'bg-yellow-500';
+    } else if (pwdChecks.length && categoriesMet >= 1) {
+      strengthBars = 2; strengthLabel = 'Weak'; strengthColor = 'bg-orange-500';
+    } else if (pwdChecks.length) {
+      strengthBars = 1; strengthLabel = 'Very weak'; strengthColor = 'bg-red-500';
+    } else {
+      strengthBars = 1; strengthLabel = 'Very weak'; strengthColor = 'bg-red-500';
+    }
+  }
 
   // Step 2
   const [investorType, setInvestorType] = useState<InvestorType>('non_sophisticated');
@@ -99,8 +129,8 @@ const SignupPage = () => {
       toast({ title: 'Invalid email', description: 'Please enter a valid email.', variant: 'destructive' });
       return;
     }
-    if (password.length < 6) {
-      toast({ title: 'Weak password', description: 'Password must be at least 6 characters.', variant: 'destructive' });
+    if (!passwordStrong) {
+      toast({ title: 'Weak password', description: 'Password does not meet all requirements.', variant: 'destructive' });
       return;
     }
     goNext();
@@ -185,7 +215,61 @@ const SignupPage = () => {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
-                <Input id="password" type="password" placeholder="At least 6 characters" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="At least 8 characters"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="new-password"
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(s => !s)}
+                    className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+
+                {password.length > 0 && (
+                  <div className="space-y-2 pt-1">
+                    <div className="flex items-center gap-2">
+                      <div className="flex flex-1 gap-1">
+                        {[1, 2, 3, 4].map(i => (
+                          <div
+                            key={i}
+                            className={`h-1.5 flex-1 rounded-full transition-colors ${i <= strengthBars ? strengthColor : 'bg-muted'}`}
+                          />
+                        ))}
+                      </div>
+                      <span className="min-w-[5.5rem] text-right text-xs font-medium text-muted-foreground">{strengthLabel}</span>
+                    </div>
+
+                    <ul className="space-y-1 text-xs">
+                      {[
+                        { ok: pwdChecks.length, label: 'At least 8 characters' },
+                        { ok: pwdChecks.upper, label: 'One uppercase letter' },
+                        { ok: pwdChecks.lower, label: 'One lowercase letter' },
+                        { ok: pwdChecks.number, label: 'One number' },
+                        { ok: pwdChecks.special, label: 'One special character' },
+                      ].map((r, i) => (
+                        <li key={i} className="flex items-center gap-2">
+                          {r.ok ? (
+                            <Check className="h-3.5 w-3.5 text-green-600" />
+                          ) : (
+                            <X className="h-3.5 w-3.5 text-red-500" />
+                          )}
+                          <span className={r.ok ? 'text-muted-foreground' : 'text-muted-foreground'}>{r.label}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -413,7 +497,7 @@ const SignupPage = () => {
             )}
 
             {step === 1 && (
-              <Button onClick={handleStep1}>
+              <Button onClick={handleStep1} disabled={!name || !email || !passwordStrong}>
                 Continue <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             )}
