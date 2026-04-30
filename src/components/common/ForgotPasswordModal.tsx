@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { toast } from '@/hooks/use-toast';
-import { ArrowLeft, ArrowRight, Mail, KeyRound, CheckCircle2, Eye, EyeOff, Check, X, Copy } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Mail, KeyRound, CheckCircle2, Eye, EyeOff, Check, X, Copy, RotateCcw, ShieldAlert } from 'lucide-react';
 
 const passwordChecks = (pwd: string) => ({
   length: pwd.length >= 8,
@@ -22,6 +22,10 @@ interface ForgotPasswordModalProps {
 }
 
 const TOTAL_STEPS = 3;
+export const MAX_CODE_ATTEMPTS = 5;
+export const RESEND_COOLDOWN_SECONDS = 30;
+
+const generateCode = () => Math.floor(100000 + Math.random() * 900000).toString();
 
 export const ForgotPasswordModal = ({ open, onOpenChange, defaultEmail = '' }: ForgotPasswordModalProps) => {
   const [step, setStep] = useState(1);
@@ -30,9 +34,36 @@ export const ForgotPasswordModal = ({ open, onOpenChange, defaultEmail = '' }: F
   const [email, setEmail] = useState(defaultEmail);
   const [mockCode, setMockCode] = useState('');
   const [codeInput, setCodeInput] = useState('');
+  const [attemptsLeft, setAttemptsLeft] = useState(MAX_CODE_ATTEMPTS);
+  const [locked, setLocked] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+
   const [newPassword, setNewPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [done, setDone] = useState(false);
+
+  const cooldownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const clearCooldownInterval = () => {
+    if (cooldownIntervalRef.current) {
+      clearInterval(cooldownIntervalRef.current);
+      cooldownIntervalRef.current = null;
+    }
+  };
+
+  const startCooldown = () => {
+    clearCooldownInterval();
+    setResendCooldown(RESEND_COOLDOWN_SECONDS);
+    cooldownIntervalRef.current = setInterval(() => {
+      setResendCooldown(prev => {
+        if (prev <= 1) {
+          clearCooldownInterval();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
 
   useEffect(() => {
     if (open) {
@@ -40,11 +71,17 @@ export const ForgotPasswordModal = ({ open, onOpenChange, defaultEmail = '' }: F
       setEmail(defaultEmail);
       setMockCode('');
       setCodeInput('');
+      setAttemptsLeft(MAX_CODE_ATTEMPTS);
+      setLocked(false);
+      setResendCooldown(0);
+      clearCooldownInterval();
       setNewPassword('');
       setShowPassword(false);
       setDone(false);
     }
   }, [open, defaultEmail]);
+
+  useEffect(() => () => clearCooldownInterval(), []);
 
   const checks = passwordChecks(newPassword);
   const passwordStrong = Object.values(checks).every(Boolean);
@@ -56,16 +93,59 @@ export const ForgotPasswordModal = ({ open, onOpenChange, defaultEmail = '' }: F
     }
     setIsLoading(true);
     await new Promise(r => setTimeout(r, 500));
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const code = generateCode();
     setMockCode(code);
+    setAttemptsLeft(MAX_CODE_ATTEMPTS);
+    setLocked(false);
+    setCodeInput('');
     setIsLoading(false);
     toast({ title: 'Reset link sent', description: `A reset code was sent to ${email}.` });
     setStep(2);
+    startCooldown();
+  };
+
+  const handleResendCode = async () => {
+    if (resendCooldown > 0 || locked) return;
+    setIsLoading(true);
+    await new Promise(r => setTimeout(r, 300));
+    const code = generateCode();
+    setMockCode(code);
+    setCodeInput('');
+    setAttemptsLeft(MAX_CODE_ATTEMPTS);
+    setIsLoading(false);
+    toast({ title: 'Code resent', description: `A new reset code was sent to ${email}.` });
+    startCooldown();
+  };
+
+  const handleStartOver = () => {
+    setStep(1);
+    setMockCode('');
+    setCodeInput('');
+    setAttemptsLeft(MAX_CODE_ATTEMPTS);
+    setLocked(false);
+    setResendCooldown(0);
+    clearCooldownInterval();
   };
 
   const handleVerifyCode = () => {
+    if (locked) return;
     if (codeInput.trim() !== mockCode) {
-      toast({ title: 'Invalid code', description: 'The code does not match. Try again.', variant: 'destructive' });
+      const next = attemptsLeft - 1;
+      setAttemptsLeft(next);
+      if (next <= 0) {
+        setLocked(true);
+        toast({
+          title: 'Too many attempts',
+          description: "You've reached the maximum number of attempts. Please start over.",
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Invalid code',
+          description: `The code does not match. ${next} attempt${next === 1 ? '' : 's'} remaining.`,
+          variant: 'destructive',
+        });
+      }
       return;
     }
     setStep(3);
@@ -180,33 +260,71 @@ export const ForgotPasswordModal = ({ open, onOpenChange, defaultEmail = '' }: F
                   <Copy className="h-3 w-3" /> Copy
                 </button>
               </div>
-              <div className="font-mono text-lg tracking-[0.4em] text-foreground">{mockCode}</div>
+              <div className="font-mono text-lg tracking-[0.4em] text-foreground" data-testid="mock-code">{mockCode}</div>
               <p className="mt-1 text-muted-foreground">
                 In production this would be sent by email. For the demo it's shown here.
               </p>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="fp-code">Verification code</Label>
-              <div className="relative">
-                <KeyRound className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  id="fp-code"
-                  inputMode="numeric"
-                  maxLength={6}
-                  placeholder="6-digit code"
-                  value={codeInput}
-                  onChange={(e) => setCodeInput(e.target.value.replace(/\D/g, ''))}
-                  className="pl-9 font-mono tracking-widest"
-                />
+
+            {locked ? (
+              <div
+                role="alert"
+                className="flex items-start gap-3 rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm"
+              >
+                <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
+                <div>
+                  <div className="font-medium text-destructive">Too many attempts</div>
+                  <div className="text-muted-foreground">
+                    You've reached the maximum of {MAX_CODE_ATTEMPTS} attempts. Start over to receive a new code.
+                  </div>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="space-y-2">
+                <Label htmlFor="fp-code">Verification code</Label>
+                <div className="relative">
+                  <KeyRound className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    id="fp-code"
+                    inputMode="numeric"
+                    maxLength={6}
+                    placeholder="6-digit code"
+                    value={codeInput}
+                    onChange={(e) => setCodeInput(e.target.value.replace(/\D/g, ''))}
+                    className="pl-9 font-mono tracking-widest"
+                    disabled={locked}
+                  />
+                </div>
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span data-testid="attempts-left">
+                    {attemptsLeft} of {MAX_CODE_ATTEMPTS} attempts remaining
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleResendCode}
+                    disabled={resendCooldown > 0 || isLoading}
+                    className="font-medium text-primary hover:underline disabled:cursor-not-allowed disabled:text-muted-foreground disabled:no-underline"
+                    data-testid="resend-button"
+                  >
+                    {resendCooldown > 0 ? `Resend code in ${resendCooldown}s` : 'Resend code'}
+                  </button>
+                </div>
+              </div>
+            )}
+
             <div className="flex items-center justify-between gap-2 pt-2">
-              <Button variant="outline" onClick={() => setStep(1)}>
+              <Button variant="outline" onClick={() => setStep(1)} disabled={isLoading}>
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back
               </Button>
-              <Button onClick={handleVerifyCode} disabled={codeInput.length !== 6}>
-                Verify <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+              {locked ? (
+                <Button onClick={handleStartOver} variant="destructive">
+                  <RotateCcw className="mr-2 h-4 w-4" /> Start over
+                </Button>
+              ) : (
+                <Button onClick={handleVerifyCode} disabled={codeInput.length !== 6 || isLoading}>
+                  Verify <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              )}
             </div>
           </div>
         )}
