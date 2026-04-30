@@ -11,7 +11,15 @@ import { useAppStore } from '@/store/appStore';
 import { toast } from '@/hooks/use-toast';
 import { InvestorType } from '@/types';
 import { KNOWLEDGE_TEST_LS_KEY } from '@/components/common/KnowledgeTestModal';
-import { ArrowLeft, ArrowRight, AlertTriangle, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, ArrowRight, AlertTriangle, CheckCircle2, ShieldCheck, Eye, EyeOff, Check, X } from 'lucide-react';
+
+const passwordChecks = (pwd: string) => ({
+  length: pwd.length >= 8,
+  upper: /[A-Z]/.test(pwd),
+  lower: /[a-z]/.test(pwd),
+  number: /[0-9]/.test(pwd),
+  special: /[!@#$%^&*()_+\-=\[\]{}|;':",.<>?/]/.test(pwd),
+});
 
 const QUESTIONS = [
   {
