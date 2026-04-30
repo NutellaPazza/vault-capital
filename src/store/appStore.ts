@@ -47,6 +47,7 @@ interface AppState {
   applications: StartupApplication[];
   offers: MarketplaceOffer[];
   toastedNotificationIds: string[];
+  marketplaceFeePercent: number;
   
   // Actions - Auth
   login: (email: string, password: string) => boolean;
@@ -73,7 +74,8 @@ interface AppState {
   cancelListing: (listingId: string) => void;
   buyListing: (listingId: string) => boolean;
   updateListing: (listingId: string, updates: { ask_price_eur?: number; percent_of_position_for_sale?: number }) => void;
-  
+  setMarketplaceFeePercent: (percent: number) => void;
+
   // Actions - Offers
   createOffer: (listingId: string, offerPrice: number, message?: string) => void;
   acceptOffer: (offerId: string) => boolean;
@@ -120,6 +122,7 @@ export const useAppStore = create<AppState>()(
       applications: [],
       offers: initialOffers,
       toastedNotificationIds: [],
+      marketplaceFeePercent: 1.0,
       
       // Auth actions
       login: (email, _password) => {
@@ -579,7 +582,7 @@ export const useAppStore = create<AppState>()(
             ask_price_eur: askPrice,
             created_at: new Date().toISOString(),
             status: 'active',
-            fee_marketplace_percent: 1.0,
+            fee_marketplace_percent: get().marketplaceFeePercent,
           };
           
           return {
