@@ -618,6 +618,11 @@ export const useAppStore = create<AppState>()(
         }));
       },
 
+      setMarketplaceFeePercent: (percent) => {
+        const clamped = Math.max(0, Math.min(10, Number.isFinite(percent) ? percent : 1));
+        set({ marketplaceFeePercent: Math.round(clamped * 100) / 100 });
+      },
+
       // Offer actions
       createOffer: (listingId, offerPrice, message) => {
         const state = get();
