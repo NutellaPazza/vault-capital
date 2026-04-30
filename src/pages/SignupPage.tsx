@@ -150,7 +150,7 @@ const SignupPage = () => {
     },
     3: {
       title: 'Knowledge & Experience Assessment',
-      subtitle: 'Required by EU Crowdfunding Regulation before your first investment. If you don\u2019t pass, you can still invest after acknowledging the risk warning.',
+      subtitle: 'Required by EU Crowdfunding Regulation before your first investment. If you don’t pass, you can still invest after acknowledging the risk warning.',
     },
     4: { title: 'Almost done', subtitle: 'Review and confirm to create your account.' },
   };
@@ -222,10 +222,10 @@ const SignupPage = () => {
                     Approximate net worth (optional. Used to calculate your investment cap)
                   </Label>
                   <p className="text-xs text-muted-foreground">
-                    Non-sophisticated investors are capped at max(\u20AC1,000 or 5% of net worth) per vault per ECSPR Art. 21.
+                    Non-sophisticated investors are capped at max(€1,000 or 5% of net worth) per vault per ECSPR Art. 21.
                   </p>
                   <div className="relative">
-                    <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-muted-foreground">\u20AC</span>
+                    <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-muted-foreground">€</span>
                     <Input
                       id="net_worth"
                       type="number"
@@ -285,7 +285,7 @@ const SignupPage = () => {
                   <div className="flex items-start gap-3 rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-sm">
                     <AlertTriangle className="mt-0.5 h-5 w-5 text-amber-600" />
                     <div>
-                      <div className="font-medium text-amber-700 dark:text-amber-400">You didn\u2019t pass the assessment</div>
+                      <div className="font-medium text-amber-700 dark:text-amber-400">You didn’t pass the assessment</div>
                       <div className="text-muted-foreground">You can still proceed, but you must acknowledge the risk warning below.</div>
                     </div>
                   </div>
