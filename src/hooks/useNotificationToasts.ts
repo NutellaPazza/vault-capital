@@ -27,12 +27,19 @@ const labelForLink = (link?: string) => {
   return 'Open';
 };
 
+type LinkError = {
+  scope: 'marketplace-listing' | 'marketplace-pool' | 'vault' | 'unknown';
+  title: string;
+  description: string;
+};
+
 /**
  * Validate that a notification link can actually be opened in the current
- * session. Returns null if the route is reachable, or a human-readable reason
- * string when it is not.
+ * session. Returns null if the route is reachable, or a structured error
+ * (title + description + scope) when it is not, so the toast layer can
+ * surface a context-specific message.
  */
-const validateLink = (link: string): string | null => {
+const validateLink = (link: string): LinkError | null => {
   try {
     const [pathRaw, queryRaw = ''] = link.split('?');
     const path = pathRaw.split('#')[0];
@@ -41,37 +48,63 @@ const validateLink = (link: string): string | null => {
 
     if (path.startsWith('/pool/')) {
       const poolId = path.slice('/pool/'.length);
-      if (!poolId) return 'This vault is no longer available.';
-      const pool = pools.find(p => p.id === poolId);
-      if (!pool) return 'This vault is no longer available.';
+      const pool = poolId ? pools.find(p => p.id === poolId) : undefined;
+      if (!pool) {
+        return {
+          scope: 'vault',
+          title: 'Vault unavailable',
+          description: 'This vault is no longer available.',
+        };
+      }
       return null;
     }
 
     if (path === '/marketplace') {
-      // Optional deep links: ?listing=<id> or ?pool=<id>
       const listingId = query.get('listing');
       if (listingId) {
         const listing = listings.find(l => l.id === listingId);
-        if (!listing) return 'This listing no longer exists on the Resale board.';
+        if (!listing) {
+          return {
+            scope: 'marketplace-listing',
+            title: 'Listing not found',
+            description: 'This listing no longer exists on the Resale board.',
+          };
+        }
         if (listing.status !== 'active') {
-          return listing.status === 'sold'
-            ? 'This listing has already been sold.'
-            : 'This listing is no longer active.';
+          return {
+            scope: 'marketplace-listing',
+            title: listing.status === 'sold' ? 'Listing already sold' : 'Listing no longer active',
+            description:
+              listing.status === 'sold'
+                ? 'Another investor has already purchased this position.'
+                : 'The seller withdrew or closed this listing.',
+          };
         }
       }
       const poolId = query.get('pool');
       if (poolId && !pools.find(p => p.id === poolId)) {
-        return 'This vault is no longer available on the Resale board.';
+        return {
+          scope: 'marketplace-pool',
+          title: 'Vault unavailable on Resale board',
+          description: 'This vault is no longer listed on the Resale board.',
+        };
       }
       return null;
     }
 
     if (KNOWN_STATIC_ROUTES.has(path)) return null;
 
-    // Unknown / unsupported path
-    return 'This page is not available right now.';
+    return {
+      scope: 'unknown',
+      title: 'Page unavailable',
+      description: 'This page is not available right now.',
+    };
   } catch {
-    return 'This page is not available right now.';
+    return {
+      scope: 'unknown',
+      title: 'Page unavailable',
+      description: 'This page is not available right now.',
+    };
   }
 };
 
