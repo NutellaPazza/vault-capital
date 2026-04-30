@@ -171,11 +171,11 @@ export const useNotificationToasts = () => {
                   // Defer to the next tick so the loading state is visible
                   // even when validation is synchronous.
                   setTimeout(() => {
-                    const reason = validateLink(link);
-                    if (reason) {
-                      toast.error('Page unavailable', {
+                    const error = validateLink(link);
+                    if (error) {
+                      toast.error(error.title, {
                         id: loadingId,
-                        description: reason,
+                        description: error.description,
                       });
                       // Still mark as read — the user acknowledged the alert.
                       markNotificationRead(n.id);
@@ -186,7 +186,11 @@ export const useNotificationToasts = () => {
                     try {
                       navRef.current(link);
                       markNotificationRead(n.id);
-                      toast.dismiss(loadingId);
+                      toast.success('Opened', {
+                        id: loadingId,
+                        description: actionLabel ?? 'Page opened.',
+                        duration: 1500,
+                      });
                       toast.dismiss(toastId);
                     } catch (err) {
                       console.error('Notification navigation failed', err);
