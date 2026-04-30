@@ -1,6 +1,7 @@
 // VaultCapital Type Definitions
 
 export type RiskProfile = 'conservative' | 'balanced' | 'aggressive';
+export type InvestorType = 'non_sophisticated' | 'sophisticated';
 export type KYCStatus = 'not_started' | 'pending' | 'verified';
 export type DealStage = 'pre-seed' | 'seed' | 'series-a';
 export type DealStatus = 'upcoming' | 'live' | 'filled' | 'failed' | 'closed';
@@ -25,6 +26,8 @@ export interface User {
     industries: string[];
     stages: DealStage[];
   };
+  investor_type?: InvestorType;
+  net_worth?: number;
 }
 
 export interface DealFounder {
