@@ -73,6 +73,28 @@ const SignupPage = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+
+  const pwdChecks = passwordChecks(password);
+  const pwdMetCount = Object.values(pwdChecks).filter(Boolean).length;
+  const categoriesMet = [pwdChecks.upper, pwdChecks.lower, pwdChecks.number, pwdChecks.special].filter(Boolean).length;
+  const passwordStrong = pwdMetCount === 5;
+  let strengthBars = 0;
+  let strengthLabel = '';
+  let strengthColor = '';
+  if (password.length > 0) {
+    if (passwordStrong) {
+      strengthBars = 4; strengthLabel = 'Strong password'; strengthColor = 'bg-green-500';
+    } else if (pwdChecks.length && categoriesMet >= 2) {
+      strengthBars = 3; strengthLabel = 'Medium'; strengthColor = 'bg-yellow-500';
+    } else if (pwdChecks.length && categoriesMet >= 1) {
+      strengthBars = 2; strengthLabel = 'Weak'; strengthColor = 'bg-orange-500';
+    } else if (pwdChecks.length) {
+      strengthBars = 1; strengthLabel = 'Very weak'; strengthColor = 'bg-red-500';
+    } else {
+      strengthBars = 1; strengthLabel = 'Very weak'; strengthColor = 'bg-red-500';
+    }
+  }
 
   // Step 2
   const [investorType, setInvestorType] = useState<InvestorType>('non_sophisticated');
