@@ -70,6 +70,7 @@ const MarketplacePage = () => {
   const [filterStage, setFilterStage] = useState<string[]>([]);
   const [filterCountry, setFilterCountry] = useState<string[]>([]);
   const [filterSector, setFilterSector] = useState<string[]>([]);
+  const [filterPool, setFilterPool] = useState<string[]>([]);
   const [filterPercentRange, setFilterPercentRange] = useState<string>('');
   const [filterPriceRange, setFilterPriceRange] = useState<string>('');
   const [filterDaysRange, setFilterDaysRange] = useState<string>('');
