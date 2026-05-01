@@ -260,29 +260,29 @@ const AboutPage = () => {
 
       {/* SECTION 4 — Team */}
       <section className="border-b border-border bg-background">
-        <div className="container px-4 py-16 md:px-6 md:py-24">
+        <div className="container px-4 py-12 sm:py-16 md:px-6 md:py-24">
           <div className="mx-auto max-w-3xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">Meet the team</h2>
-            <p className="mt-4 text-base text-muted-foreground md:text-lg">
+            <h2 className="text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">Meet the team</h2>
+            <p className="mt-3 text-sm text-muted-foreground sm:mt-4 sm:text-base md:text-lg">
               Four students building the infrastructure that did not exist.
             </p>
           </div>
 
-          <div className="mx-auto mt-12 grid max-w-5xl gap-6 md:grid-cols-2">
+          <div className="mx-auto mt-8 grid max-w-5xl gap-4 sm:mt-12 sm:gap-6 md:grid-cols-2">
             {team.map((m) => (
               <Card key={m.name} className="transition-shadow hover:shadow-md">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4">
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-foreground">
+                <CardContent className="p-5 sm:p-6">
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-base font-bold text-primary-foreground sm:h-14 sm:w-14 sm:text-lg">
                       {m.initials}
                     </div>
                     <div className="min-w-0">
-                      <h3 className="text-lg font-semibold leading-tight">{m.name}</h3>
-                      <p className="text-sm font-medium text-primary">{m.role}</p>
+                      <h3 className="text-base font-semibold leading-tight sm:text-lg">{m.name}</h3>
+                      <p className="text-xs font-medium text-primary sm:text-sm">{m.role}</p>
                     </div>
                   </div>
-                  <p className="mt-4 text-sm text-muted-foreground">{m.university}</p>
-                  <ul className="mt-4 space-y-2">
+                  <p className="mt-3 text-xs text-muted-foreground sm:mt-4 sm:text-sm">{m.university}</p>
+                  <ul className="mt-3 space-y-1.5 sm:mt-4 sm:space-y-2">
                     {m.points.map((p) => (
                       <li key={p} className="flex items-start gap-2 text-sm">
                         <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
