@@ -1107,11 +1107,15 @@ const PortfolioPage = () => {
                             const canList = pool?.pool_status === 'active' && !position.is_listed_on_market;
 
                             return (
-                              <TableRow key={position.id}>
+                              <TableRow
+                                key={position.id}
+                                className="cursor-pointer"
+                                onClick={() => setDrillPositionId(position.id)}
+                              >
                                 <TableCell>
-                                  <Link to={`/pool/${position.pool_id}`} className="font-medium hover:underline">
+                                  <span className="font-medium hover:underline">
                                     {position.deal.startup_name}
-                                  </Link>
+                                  </span>
                                   <p className="text-xs text-muted-foreground">{position.deal.industry} · {position.deal.stage}</p>
                                 </TableCell>
                                 <TableCell>
