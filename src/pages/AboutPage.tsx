@@ -166,13 +166,13 @@ const AboutPage = () => {
 
       {/* SECTION 2 — The Problem */}
       <section className="border-b border-border bg-background">
-        <div className="container px-4 py-16 md:px-6 md:py-24">
-          <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
+        <div className="container px-4 py-12 sm:py-16 md:px-6 md:py-24">
+          <div className="grid gap-8 lg:grid-cols-2 lg:gap-16">
             <div>
-              <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+              <h2 className="text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">
                 The access gap is real.
               </h2>
-              <div className="mt-6 space-y-4 text-base leading-relaxed text-muted-foreground md:text-lg">
+              <div className="mt-4 space-y-3 text-sm leading-relaxed text-muted-foreground sm:mt-6 sm:space-y-4 sm:text-base md:text-lg">
                 <p>
                   There is over €10 trillion sitting in European household deposits. Meanwhile,
                   the best private market deals, the ones that generate outsized returns, are
@@ -186,14 +186,14 @@ const AboutPage = () => {
                 </p>
               </div>
             </div>
-            <div className="grid gap-4">
+            <div className="grid gap-3 sm:gap-4">
               {stats.map((s) => (
                 <Card key={s.value} className="border-l-4 border-l-primary">
-                  <CardContent className="p-6">
-                    <p className="text-3xl font-bold tracking-tight text-primary md:text-4xl">
+                  <CardContent className="p-4 sm:p-6">
+                    <p className="text-2xl font-bold tracking-tight text-primary sm:text-3xl md:text-4xl">
                       {s.value}
                     </p>
-                    <p className="mt-2 text-sm text-muted-foreground md:text-base">{s.label}</p>
+                    <p className="mt-1.5 text-xs text-muted-foreground sm:mt-2 sm:text-sm md:text-base">{s.label}</p>
                   </CardContent>
                 </Card>
               ))}
