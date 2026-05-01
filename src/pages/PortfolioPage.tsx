@@ -9,8 +9,10 @@ import {
   TrendingUp, TrendingDown, ExternalLink, Store, PieChart, ShoppingBag, Info,
   ArrowUpRight, ArrowDownRight, AlertTriangle, CheckCircle2, Calendar, Clock,
   Download, FileText, ChevronDown, Search, Filter, ArrowUpDown, Minus, Activity,
-  Banknote, Receipt, Target,
+  Banknote, Receipt, Target, Sparkles, X, Bell, Wallet, BarChart3, Percent,
 } from 'lucide-react';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Slider } from '@/components/ui/slider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import {
@@ -90,6 +92,15 @@ const PortfolioPage = () => {
   const [hideListed, setHideListed] = useState(false);
   const [sortKey, setSortKey] = useState<SortKey>('pnl_pct');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+
+  // Drill-down drawer
+  const [drillPositionId, setDrillPositionId] = useState<string | null>(null);
+
+  // What-if simulator
+  const [whatIfPct, setWhatIfPct] = useState(50);
+
+  // Dismissed alerts (session)
+  const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(new Set());
 
   // ---- Aggregate metrics ----
   const totalInvested = positions.reduce((sum, p) => sum + p.invested_eur, 0);
@@ -240,6 +251,141 @@ const PortfolioPage = () => {
   const myActiveListings = listings.filter(l =>
     l.seller_user_id === positions[0]?.user_id && l.status === 'active'
   );
+
+  // ---- Smart alerts ----
+  const alerts = useMemo(() => {
+    const list: Array<{
+      id: string;
+      severity: 'info' | 'warning' | 'critical' | 'success';
+      icon: typeof Bell;
+      title: string;
+      description: string;
+      action?: { label: string; href?: string; onClick?: () => void };
+    }> = [];
+
+    // High concentration
+    if (diversification.concentration > 60 && diversification.topName) {
+      list.push({
+        id: 'concentration',
+        severity: 'warning',
+        icon: AlertTriangle,
+        title: 'High concentration risk',
+        description: `${diversification.topName} represents ${formatPercent(diversification.concentration, 0)} of your portfolio. Consider diversifying.`,
+        action: { label: 'Explore vaults', href: '/explore' },
+      });
+    }
+
+    // Vault closing in <48h
+    const now = Date.now();
+    positions.forEach(p => {
+      const pool = pools.find(po => po.id === p.pool_id);
+      if (!pool || pool.pool_status !== 'active') return;
+      const hoursLeft = (new Date(pool.end_datetime).getTime() - now) / (1000 * 60 * 60);
+      if (hoursLeft > 0 && hoursLeft < 48) {
+        list.push({
+          id: `closing-${p.pool_id}`,
+          severity: 'info',
+          icon: Clock,
+          title: `${p.deal.startup_name} Vault closing soon`,
+          description: `Closes in ${Math.round(hoursLeft)}h. Allocation will be locked.`,
+          action: { label: 'Open vault', href: `/pool/${p.pool_id}` },
+        });
+      }
+    });
+
+    // Listing expiring (<7 days)
+    listings
+      .filter(l => l.status === 'active' && l.seller_user_id === positions[0]?.user_id)
+      .forEach(l => {
+        const exp = new Date(l.created_at).getTime() + 1000 * 60 * 60 * 24 * 30;
+        const daysLeft = (exp - now) / (1000 * 60 * 60 * 24);
+        if (daysLeft > 0 && daysLeft < 7) {
+          const deal = deals.find(d => pools.find(po => po.id === l.pool_id)?.deal_id === d.id);
+          list.push({
+            id: `listing-${l.id}`,
+            severity: 'warning',
+            icon: Store,
+            title: 'Resale listing expiring',
+            description: `Your ${deal?.startup_name ?? 'listing'} expires in ${Math.ceil(daysLeft)}d at ${formatCompactCurrency(l.ask_price_eur)}.`,
+            action: { label: 'Manage', href: '/marketplace' },
+          });
+        }
+      });
+
+    // Big underperformer (-20% or worse)
+    const losers = positions.filter(p => {
+      const pct = p.invested_eur > 0
+        ? ((p.current_estimated_value_eur - p.invested_eur) / p.invested_eur) * 100
+        : 0;
+      return pct < -20;
+    });
+    if (losers.length > 0) {
+      list.push({
+        id: 'underperformer',
+        severity: 'critical',
+        icon: TrendingDown,
+        title: `${losers.length} position${losers.length > 1 ? 's' : ''} underperforming`,
+        description: `${losers.map(p => p.deal.startup_name).join(', ')} dropped over 20% from entry.`,
+      });
+    }
+
+    // Strong performer (+50% or more)
+    const winners = positions.filter(p => {
+      const pct = p.invested_eur > 0
+        ? ((p.current_estimated_value_eur - p.invested_eur) / p.invested_eur) * 100
+        : 0;
+      return pct > 50 && !p.is_listed_on_market && p.pool.pool_status === 'active';
+    });
+    if (winners.length > 0) {
+      list.push({
+        id: 'winner',
+        severity: 'success',
+        icon: Sparkles,
+        title: `Take profit opportunity`,
+        description: `${winners[0].deal.startup_name} is up significantly. Consider partial sale on Resale Board.`,
+      });
+    }
+
+    return list.filter(a => !dismissedAlerts.has(a.id));
+  }, [positions, pools, listings, deals, diversification, dismissedAlerts]);
+
+  // ---- What-if simulator: sell whatIfPct of all active, listable positions ----
+  const whatIf = useMemo(() => {
+    const listable = positions.filter(p =>
+      p.pool.pool_status === 'active' && !p.is_listed_on_market
+    );
+    const totalListableValue = listable.reduce((s, p) => s + p.current_estimated_value_eur, 0);
+    const totalListableInvested = listable.reduce((s, p) => s + p.invested_eur, 0);
+    const sellValue = totalListableValue * (whatIfPct / 100);
+    const sellInvested = totalListableInvested * (whatIfPct / 100);
+    const grossPnl = sellValue - sellInvested;
+    const carry = grossPnl > 0 ? grossPnl * 0.02 : 0; // 2% carry on profit
+    const netCash = sellValue - carry;
+    const remainingValue = totalValue - sellValue;
+    return {
+      listableCount: listable.length,
+      totalListableValue,
+      sellValue,
+      grossPnl,
+      carry,
+      netCash,
+      remainingValue,
+    };
+  }, [positions, whatIfPct, totalValue]);
+
+  // ---- Drill-down position data ----
+  const drillPosition = useMemo(() => {
+    if (!drillPositionId) return null;
+    return positions.find(p => p.id === drillPositionId) ?? null;
+  }, [drillPositionId, positions]);
+
+  const drillTransactions = useMemo(() => {
+    if (!drillPosition) return [];
+    return transactions
+      .filter(t => t.meta?.pool_id === drillPosition.pool_id)
+      .slice()
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  }, [drillPosition, transactions]);
 
   // ---- Filtered + sorted positions ----
   const filteredPositions = useMemo(() => {
@@ -399,6 +545,53 @@ const PortfolioPage = () => {
 
       {positions.length > 0 ? (
         <>
+          {/* ============ SMART ALERTS ============ */}
+          {alerts.length > 0 && (
+            <motion.div
+              className="mb-4 space-y-2 md:mb-6"
+              initial="hidden" animate="visible" variants={fadeUp} custom={sectionIndex++}
+            >
+              {alerts.map(a => {
+                const Icon = a.icon;
+                const styles = {
+                  info: 'border-primary/30 bg-primary/5 text-primary',
+                  warning: 'border-warning/40 bg-warning/10 text-warning-foreground',
+                  critical: 'border-destructive/40 bg-destructive/10 text-destructive',
+                  success: 'border-success/40 bg-success/10 text-success',
+                }[a.severity];
+                return (
+                  <div key={a.id} className={`flex items-start gap-3 rounded-lg border p-3 md:p-3.5 ${styles}`}>
+                    <Icon className="mt-0.5 h-4 w-4 shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-semibold md:text-sm">{a.title}</p>
+                      <p className="mt-0.5 text-[11px] text-foreground/80 md:text-xs">{a.description}</p>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-1">
+                      {a.action && (
+                        a.action.href ? (
+                          <Button variant="ghost" size="sm" className="h-7 text-[11px] md:text-xs" asChild>
+                            <Link to={a.action.href}>{a.action.label}</Link>
+                          </Button>
+                        ) : (
+                          <Button variant="ghost" size="sm" className="h-7 text-[11px] md:text-xs" onClick={a.action.onClick}>
+                            {a.action.label}
+                          </Button>
+                        )
+                      )}
+                      <button
+                        onClick={() => setDismissedAlerts(prev => new Set(prev).add(a.id))}
+                        className="rounded p-1 text-muted-foreground transition-colors hover:bg-background/50 hover:text-foreground"
+                        aria-label="Dismiss"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </motion.div>
+          )}
+
           {/* ============ 1. KPI HERO + CHARTS ============ */}
           <motion.div
             className="mb-4 grid gap-3 md:mb-6 md:gap-6 lg:grid-cols-5"
@@ -672,6 +865,90 @@ const PortfolioPage = () => {
             </Card>
           </motion.div>
 
+          {/* ============ WHAT-IF SIMULATOR ============ */}
+          {whatIf.listableCount > 0 && (
+            <motion.div
+              className="mb-4 md:mb-6"
+              initial="hidden" animate="visible" variants={fadeUp} custom={sectionIndex++}
+            >
+              <Card className="overflow-hidden">
+                <CardHeader className="px-4 pb-2 pt-4 md:px-6 md:pb-3 md:pt-6">
+                  <CardTitle className="flex items-center gap-2 text-sm md:text-base">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    What-if simulator
+                    <IllustrativeTag />
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="px-4 pb-4 md:px-6 md:pb-6">
+                  <div className="grid gap-4 md:grid-cols-5 md:gap-6">
+                    {/* Slider control */}
+                    <div className="md:col-span-2">
+                      <div className="mb-2 flex items-end justify-between">
+                        <p className="text-xs text-muted-foreground md:text-sm">
+                          If you sold this share of your{' '}
+                          <span className="font-medium text-foreground">{whatIf.listableCount}</span> listable position{whatIf.listableCount > 1 ? 's' : ''}:
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Slider
+                          value={[whatIfPct]}
+                          onValueChange={([v]) => setWhatIfPct(v)}
+                          min={0}
+                          max={100}
+                          step={5}
+                          className="flex-1"
+                        />
+                        <div className="flex h-9 w-16 shrink-0 items-center justify-center rounded-md border bg-muted/50 text-sm font-bold tabular-nums">
+                          {whatIfPct}%
+                        </div>
+                      </div>
+                      <div className="mt-2 flex justify-between text-[10px] text-muted-foreground">
+                        <span>Hold</span>
+                        <span>Half</span>
+                        <span>Sell all</span>
+                      </div>
+                    </div>
+
+                    {/* Results grid */}
+                    <div className="grid grid-cols-2 gap-2 md:col-span-3 md:grid-cols-4">
+                      <div className="rounded-lg border p-2.5 md:p-3">
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground md:text-[11px]">Sold value</p>
+                        <p className="mt-1 text-sm font-bold tabular-nums md:text-base">{formatCompactCurrency(whatIf.sellValue)}</p>
+                      </div>
+                      <div className="rounded-lg border p-2.5 md:p-3">
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground md:text-[11px]">Gross P&L</p>
+                        <p className={`mt-1 text-sm font-bold tabular-nums md:text-base ${whatIf.grossPnl >= 0 ? 'text-success' : 'text-destructive'}`}>
+                          {whatIf.grossPnl >= 0 ? '+' : ''}{formatCompactCurrency(whatIf.grossPnl)}
+                        </p>
+                      </div>
+                      <div className="rounded-lg border p-2.5 md:p-3">
+                        <p className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-muted-foreground md:text-[11px]">
+                          <Percent className="h-2.5 w-2.5" /> Carry (2%)
+                        </p>
+                        <p className="mt-1 text-sm font-bold tabular-nums text-muted-foreground md:text-base">
+                          -{formatCompactCurrency(whatIf.carry)}
+                        </p>
+                      </div>
+                      <div className="rounded-lg border-2 border-primary/30 bg-primary/5 p-2.5 md:p-3">
+                        <p className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-primary md:text-[11px]">
+                          <Wallet className="h-2.5 w-2.5" /> Net cash
+                        </p>
+                        <p className="mt-1 text-sm font-bold tabular-nums text-primary md:text-base">
+                          {formatCompactCurrency(whatIf.netCash)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="mt-3 text-[10px] text-muted-foreground md:text-xs">
+                    Simulation assumes listings sell at current estimated value. Actual outcomes depend on buyer demand on the Resale Board.
+                    Remaining portfolio value: <span className="font-medium text-foreground">{formatCompactCurrency(whatIf.remainingValue)}</span>.
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+
           {/* ============ 4. POSITIONS WITH FILTERS + 6. ACTIVITY SIDEBAR ============ */}
           <motion.div
             className="mb-4 grid gap-3 md:mb-6 md:gap-6 lg:grid-cols-3"
@@ -757,7 +1034,12 @@ const PortfolioPage = () => {
                         const canList = pool?.pool_status === 'active' && !position.is_listed_on_market;
 
                         return (
-                          <Link key={position.id} to={`/pool/${position.pool_id}`} className="block">
+                          <button
+                            key={position.id}
+                            type="button"
+                            onClick={() => setDrillPositionId(position.id)}
+                            className="block w-full text-left"
+                          >
                             <div className="rounded-lg border p-3 transition-colors hover:bg-muted/50">
                               <div className="mb-2 flex items-start justify-between gap-2">
                                 <div className="min-w-0 flex-1">
@@ -791,13 +1073,13 @@ const PortfolioPage = () => {
                                   size="sm"
                                   variant="secondary"
                                   className="mt-2 h-9 w-full text-xs"
-                                  onClick={(e) => { e.preventDefault(); openListingDialog(position.id, position.current_estimated_value_eur); }}
+                                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); openListingDialog(position.id, position.current_estimated_value_eur); }}
                                 >
                                   <Store className="mr-1 h-3.5 w-3.5" /> Sell on Resale Board
                                 </Button>
                               )}
                             </div>
-                          </Link>
+                          </button>
                         );
                       })}
                     </div>
@@ -825,11 +1107,15 @@ const PortfolioPage = () => {
                             const canList = pool?.pool_status === 'active' && !position.is_listed_on_market;
 
                             return (
-                              <TableRow key={position.id}>
+                              <TableRow
+                                key={position.id}
+                                className="cursor-pointer"
+                                onClick={() => setDrillPositionId(position.id)}
+                              >
                                 <TableCell>
-                                  <Link to={`/pool/${position.pool_id}`} className="font-medium hover:underline">
+                                  <span className="font-medium hover:underline">
                                     {position.deal.startup_name}
-                                  </Link>
+                                  </span>
                                   <p className="text-xs text-muted-foreground">{position.deal.industry} · {position.deal.stage}</p>
                                 </TableCell>
                                 <TableCell>
@@ -855,7 +1141,11 @@ const PortfolioPage = () => {
                                 </TableCell>
                                 <TableCell className="text-center">
                                   {position.is_listed_on_market ? (
-                                    <Link to="/marketplace" className="rounded bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground hover:bg-accent/80">
+                                    <Link
+                                      to="/marketplace"
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="rounded bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground hover:bg-accent/80"
+                                    >
                                       Yes
                                     </Link>
                                   ) : (
@@ -864,7 +1154,7 @@ const PortfolioPage = () => {
                                 </TableCell>
                                 <TableCell className="text-right">
                                   <div className="flex justify-end gap-1">
-                                    <Button variant="outline" size="sm" asChild>
+                                    <Button variant="outline" size="sm" asChild onClick={(e) => e.stopPropagation()}>
                                       <Link to={`/pool/${position.pool_id}`}>
                                         <ExternalLink className="h-3.5 w-3.5" />
                                       </Link>
@@ -873,7 +1163,7 @@ const PortfolioPage = () => {
                                       <Button
                                         size="sm"
                                         variant="secondary"
-                                        onClick={() => openListingDialog(position.id, position.current_estimated_value_eur)}
+                                        onClick={(e) => { e.stopPropagation(); openListingDialog(position.id, position.current_estimated_value_eur); }}
                                       >
                                         <Store className="mr-1 h-3.5 w-3.5" /> Sell
                                       </Button>
@@ -1030,6 +1320,141 @@ const PortfolioPage = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* ============ POSITION DRILL-DOWN DRAWER ============ */}
+      <Sheet open={!!drillPositionId} onOpenChange={(open) => !open && setDrillPositionId(null)}>
+        <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-md md:max-w-lg">
+          {drillPosition && (() => {
+            const dp = drillPosition;
+            const gain = dp.current_estimated_value_eur - dp.invested_eur;
+            const gainPct = dp.invested_eur > 0 ? (gain / dp.invested_eur) * 100 : 0;
+            const portfolioShare = totalInvested > 0 ? (dp.invested_eur / totalInvested) * 100 : 0;
+            const pool = pools.find(p => p.id === dp.pool_id);
+            const canList = pool?.pool_status === 'active' && !dp.is_listed_on_market;
+            const exitDate = new Date(new Date(dp.created_at).getTime() + 1000 * 60 * 60 * 24 * 540);
+            const positionFees = dp.invested_eur * 0.02; // 2% entry
+            const projectedCarry = gain > 0 ? gain * 0.02 : 0;
+
+            return (
+              <>
+                <SheetHeader className="pr-6">
+                  <SheetTitle className="flex items-center gap-2 text-lg">
+                    {dp.deal.startup_name}
+                    <StatusBadge status={dp.pool.pool_status} />
+                  </SheetTitle>
+                  <SheetDescription>
+                    {dp.deal.industry} · {dp.deal.stage} · Entered {formatDate(dp.created_at)}
+                  </SheetDescription>
+                </SheetHeader>
+
+                <div className="mt-5 space-y-5">
+                  {/* Hero P&L */}
+                  <div className="rounded-xl border bg-muted/30 p-4">
+                    <p className="text-xs text-muted-foreground">Estimated value</p>
+                    <p className="mt-0.5 text-3xl font-bold tabular-nums">
+                      {formatCurrency(dp.current_estimated_value_eur, false)}
+                    </p>
+                    <div className={`mt-1 flex items-center gap-1 text-sm font-medium ${gain >= 0 ? 'text-success' : 'text-destructive'}`}>
+                      {gain >= 0 ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />}
+                      {gain >= 0 ? '+' : ''}{formatCurrency(gain, false)} ({formatPercent(gainPct, 1)})
+                    </div>
+                  </div>
+
+                  {/* Key facts grid */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="rounded-lg border p-3">
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Invested</p>
+                      <p className="mt-1 text-sm font-bold tabular-nums">{formatCurrency(dp.invested_eur, false)}</p>
+                    </div>
+                    <div className="rounded-lg border p-3">
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">SPV ownership</p>
+                      <p className="mt-1 text-sm font-bold tabular-nums">{formatPercent(dp.ownership_percent_of_spv, 3)}</p>
+                    </div>
+                    <div className="rounded-lg border p-3">
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Portfolio share</p>
+                      <p className="mt-1 text-sm font-bold tabular-nums">{formatPercent(portfolioShare, 1)}</p>
+                    </div>
+                    <div className="rounded-lg border p-3">
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Entry fee paid</p>
+                      <p className="mt-1 text-sm font-bold tabular-nums">{formatCurrency(positionFees, false)}</p>
+                    </div>
+                  </div>
+
+                  {/* Exit forecast */}
+                  <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
+                    <p className="flex items-center gap-1.5 text-xs font-semibold text-primary">
+                      <Target className="h-3.5 w-3.5" />
+                      Estimated exit window
+                    </p>
+                    <p className="mt-1 text-sm font-medium">{formatDate(exitDate.toISOString())}</p>
+                    <p className="mt-0.5 text-[11px] text-muted-foreground">
+                      Indicative target. Projected carry on current gain: {formatCurrency(projectedCarry, false)}.
+                    </p>
+                  </div>
+
+                  {/* Mini transaction history */}
+                  <div>
+                    <h4 className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      <BarChart3 className="h-3.5 w-3.5" />
+                      Position history
+                    </h4>
+                    {drillTransactions.length === 0 ? (
+                      <p className="rounded border bg-muted/30 p-3 text-center text-xs text-muted-foreground">
+                        No related transactions yet.
+                      </p>
+                    ) : (
+                      <ul className="divide-y rounded-lg border">
+                        {drillTransactions.slice(0, 8).map(t => {
+                          const Icon = txIcon(t.type);
+                          return (
+                            <li key={t.id} className="flex items-center gap-3 px-3 py-2">
+                              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-muted">
+                                <Icon className="h-3.5 w-3.5 text-muted-foreground" />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <p className="truncate text-xs font-medium">{txLabel(t)}</p>
+                                <p className="text-[10px] text-muted-foreground">{formatDate(t.timestamp)}</p>
+                              </div>
+                              <span className={`shrink-0 text-xs font-semibold tabular-nums ${
+                                t.amount_eur > 0 ? 'text-success' : t.amount_eur < 0 ? 'text-destructive' : 'text-muted-foreground'
+                              }`}>
+                                {t.amount_eur > 0 ? '+' : ''}{formatCompactCurrency(t.amount_eur)}
+                              </span>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex flex-col gap-2 border-t pt-4 sm:flex-row">
+                    <Button variant="outline" className="flex-1" asChild>
+                      <Link to={`/pool/${dp.pool_id}`} onClick={() => setDrillPositionId(null)}>
+                        <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
+                        Open vault page
+                      </Link>
+                    </Button>
+                    {canList && (
+                      <Button
+                        variant="default"
+                        className="flex-1"
+                        onClick={() => {
+                          openListingDialog(dp.id, dp.current_estimated_value_eur);
+                          setDrillPositionId(null);
+                        }}
+                      >
+                        <Store className="mr-1.5 h-3.5 w-3.5" />
+                        List on Resale Board
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </>
+            );
+          })()}
+        </SheetContent>
+      </Sheet>
 
       {/* Listing Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
