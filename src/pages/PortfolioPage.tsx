@@ -252,6 +252,141 @@ const PortfolioPage = () => {
     l.seller_user_id === positions[0]?.user_id && l.status === 'active'
   );
 
+  // ---- Smart alerts ----
+  const alerts = useMemo(() => {
+    const list: Array<{
+      id: string;
+      severity: 'info' | 'warning' | 'critical' | 'success';
+      icon: typeof Bell;
+      title: string;
+      description: string;
+      action?: { label: string; href?: string; onClick?: () => void };
+    }> = [];
+
+    // High concentration
+    if (diversification.concentration > 60 && diversification.topName) {
+      list.push({
+        id: 'concentration',
+        severity: 'warning',
+        icon: AlertTriangle,
+        title: 'High concentration risk',
+        description: `${diversification.topName} represents ${formatPercent(diversification.concentration, 0)} of your portfolio. Consider diversifying.`,
+        action: { label: 'Explore vaults', href: '/explore' },
+      });
+    }
+
+    // Vault closing in <48h
+    const now = Date.now();
+    positions.forEach(p => {
+      const pool = pools.find(po => po.id === p.pool_id);
+      if (!pool || pool.pool_status !== 'active') return;
+      const hoursLeft = (new Date(pool.end_datetime).getTime() - now) / (1000 * 60 * 60);
+      if (hoursLeft > 0 && hoursLeft < 48) {
+        list.push({
+          id: `closing-${p.pool_id}`,
+          severity: 'info',
+          icon: Clock,
+          title: `${p.deal.startup_name} Vault closing soon`,
+          description: `Closes in ${Math.round(hoursLeft)}h. Allocation will be locked.`,
+          action: { label: 'Open vault', href: `/pool/${p.pool_id}` },
+        });
+      }
+    });
+
+    // Listing expiring (<7 days)
+    listings
+      .filter(l => l.status === 'active' && l.seller_user_id === positions[0]?.user_id)
+      .forEach(l => {
+        const exp = new Date(l.created_at).getTime() + 1000 * 60 * 60 * 24 * 30;
+        const daysLeft = (exp - now) / (1000 * 60 * 60 * 24);
+        if (daysLeft > 0 && daysLeft < 7) {
+          const deal = deals.find(d => pools.find(po => po.id === l.pool_id)?.deal_id === d.id);
+          list.push({
+            id: `listing-${l.id}`,
+            severity: 'warning',
+            icon: Store,
+            title: 'Resale listing expiring',
+            description: `Your ${deal?.startup_name ?? 'listing'} expires in ${Math.ceil(daysLeft)}d at ${formatCompactCurrency(l.ask_price_eur)}.`,
+            action: { label: 'Manage', href: '/marketplace' },
+          });
+        }
+      });
+
+    // Big underperformer (-20% or worse)
+    const losers = positions.filter(p => {
+      const pct = p.invested_eur > 0
+        ? ((p.current_estimated_value_eur - p.invested_eur) / p.invested_eur) * 100
+        : 0;
+      return pct < -20;
+    });
+    if (losers.length > 0) {
+      list.push({
+        id: 'underperformer',
+        severity: 'critical',
+        icon: TrendingDown,
+        title: `${losers.length} position${losers.length > 1 ? 's' : ''} underperforming`,
+        description: `${losers.map(p => p.deal.startup_name).join(', ')} dropped over 20% from entry.`,
+      });
+    }
+
+    // Strong performer (+50% or more)
+    const winners = positions.filter(p => {
+      const pct = p.invested_eur > 0
+        ? ((p.current_estimated_value_eur - p.invested_eur) / p.invested_eur) * 100
+        : 0;
+      return pct > 50 && !p.is_listed_on_market && p.pool.pool_status === 'active';
+    });
+    if (winners.length > 0) {
+      list.push({
+        id: 'winner',
+        severity: 'success',
+        icon: Sparkles,
+        title: `Take profit opportunity`,
+        description: `${winners[0].deal.startup_name} is up significantly. Consider partial sale on Resale Board.`,
+      });
+    }
+
+    return list.filter(a => !dismissedAlerts.has(a.id));
+  }, [positions, pools, listings, deals, diversification, dismissedAlerts]);
+
+  // ---- What-if simulator: sell whatIfPct of all active, listable positions ----
+  const whatIf = useMemo(() => {
+    const listable = positions.filter(p =>
+      p.pool.pool_status === 'active' && !p.is_listed_on_market
+    );
+    const totalListableValue = listable.reduce((s, p) => s + p.current_estimated_value_eur, 0);
+    const totalListableInvested = listable.reduce((s, p) => s + p.invested_eur, 0);
+    const sellValue = totalListableValue * (whatIfPct / 100);
+    const sellInvested = totalListableInvested * (whatIfPct / 100);
+    const grossPnl = sellValue - sellInvested;
+    const carry = grossPnl > 0 ? grossPnl * 0.02 : 0; // 2% carry on profit
+    const netCash = sellValue - carry;
+    const remainingValue = totalValue - sellValue;
+    return {
+      listableCount: listable.length,
+      totalListableValue,
+      sellValue,
+      grossPnl,
+      carry,
+      netCash,
+      remainingValue,
+    };
+  }, [positions, whatIfPct, totalValue]);
+
+  // ---- Drill-down position data ----
+  const drillPosition = useMemo(() => {
+    if (!drillPositionId) return null;
+    return positions.find(p => p.id === drillPositionId) ?? null;
+  }, [drillPositionId, positions]);
+
+  const drillTransactions = useMemo(() => {
+    if (!drillPosition) return [];
+    return transactions
+      .filter(t => t.meta?.pool_id === drillPosition.pool_id || t.meta?.position_id === drillPosition.id)
+      .slice()
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  }, [drillPosition, transactions]);
+
   // ---- Filtered + sorted positions ----
   const filteredPositions = useMemo(() => {
     let list = [...positions];
