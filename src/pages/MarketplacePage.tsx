@@ -25,7 +25,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 
-type SortOption = 'newest' | 'lowest_price' | 'highest_percent' | 'most_viewed' | 'oldest';
+type SortOption = 'newest' | 'oldest' | 'lowest_price' | 'highest_price' | 'highest_percent' | 'lowest_percent' | 'most_viewed';
 
 const MarketplacePage = () => {
   const location = useLocation();
@@ -70,6 +70,7 @@ const MarketplacePage = () => {
   const [filterStage, setFilterStage] = useState<string[]>([]);
   const [filterCountry, setFilterCountry] = useState<string[]>([]);
   const [filterSector, setFilterSector] = useState<string[]>([]);
+  const [filterPool, setFilterPool] = useState<string[]>([]);
   const [filterPercentRange, setFilterPercentRange] = useState<string>('');
   const [filterPriceRange, setFilterPriceRange] = useState<string>('');
   const [filterDaysRange, setFilterDaysRange] = useState<string>('');
@@ -114,9 +115,14 @@ const MarketplacePage = () => {
   const availableStages = useMemo(() => [...new Set(allListings.map(l => l.deal.stage))], [allListings]);
   const availableCountries = useMemo(() => [...new Set(allListings.map(l => l.deal.country))], [allListings]);
   const availableSectors = useMemo(() => [...new Set(allListings.map(l => l.deal.sector_type))], [allListings]);
+  const availablePools = useMemo(() => {
+    const map = new Map<string, string>();
+    allListings.forEach(l => map.set(l.pool_id, l.deal.startup_name));
+    return Array.from(map.entries()).map(([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name));
+  }, [allListings]);
 
   // Active filter count
-  const activeFilterCount = [filterStage.length > 0, filterCountry.length > 0, filterSector.length > 0, !!filterPercentRange, !!filterPriceRange, !!filterDaysRange].filter(Boolean).length;
+  const activeFilterCount = [filterStage.length > 0, filterCountry.length > 0, filterSector.length > 0, filterPool.length > 0, !!filterPercentRange, !!filterPriceRange, !!filterDaysRange].filter(Boolean).length;
 
   // Filtered + sorted buyable listings
   const buyableListings = useMemo(() => {
@@ -126,6 +132,7 @@ const MarketplacePage = () => {
       if (filterStage.length > 0 && !filterStage.includes(l.deal.stage)) return false;
       if (filterCountry.length > 0 && !filterCountry.includes(l.deal.country)) return false;
       if (filterSector.length > 0 && !filterSector.includes(l.deal.sector_type)) return false;
+      if (filterPool.length > 0 && !filterPool.includes(l.pool_id)) return false;
       if (filterPercentRange) {
         const p = l.percent_of_position_for_sale;
         if (filterPercentRange === '0-25' && p > 25) return false;
@@ -153,22 +160,28 @@ const MarketplacePage = () => {
       case 'newest':
         result.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
         break;
+      case 'oldest':
+        result.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+        break;
       case 'lowest_price':
         result.sort((a, b) => a.ask_price_eur - b.ask_price_eur);
+        break;
+      case 'highest_price':
+        result.sort((a, b) => b.ask_price_eur - a.ask_price_eur);
         break;
       case 'highest_percent':
         result.sort((a, b) => b.percent_of_position_for_sale - a.percent_of_position_for_sale);
         break;
+      case 'lowest_percent':
+        result.sort((a, b) => a.percent_of_position_for_sale - b.percent_of_position_for_sale);
+        break;
       case 'most_viewed':
         result.sort((a, b) => getViewCount(b.id) - getViewCount(a.id));
-        break;
-      case 'oldest':
-        result.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
         break;
     }
 
     return result;
-  }, [allListings, currentUser, search, filterStage, filterCountry, filterSector, filterPercentRange, filterPriceRange, filterDaysRange, sortBy]);
+  }, [allListings, currentUser, search, filterStage, filterCountry, filterSector, filterPool, filterPercentRange, filterPriceRange, filterDaysRange, sortBy]);
 
   // Current user's listings (all statuses)
   const myActiveListings = listings.filter(l => l.seller_user_id === currentUser?.id && l.status === 'active');
@@ -256,6 +269,7 @@ const MarketplacePage = () => {
     setFilterStage([]);
     setFilterCountry([]);
     setFilterSector([]);
+    setFilterPool([]);
     setFilterPercentRange('');
     setFilterPriceRange('');
     setFilterDaysRange('');
@@ -520,11 +534,13 @@ const MarketplacePage = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="newest">Newest</SelectItem>
-                      <SelectItem value="lowest_price">Lowest price</SelectItem>
-                      <SelectItem value="highest_percent">Highest % for sale</SelectItem>
+                      <SelectItem value="newest">Date: newest first</SelectItem>
+                      <SelectItem value="oldest">Date: oldest first</SelectItem>
+                      <SelectItem value="lowest_price">Price: low to high</SelectItem>
+                      <SelectItem value="highest_price">Price: high to low</SelectItem>
+                      <SelectItem value="highest_percent">% for sale: high to low</SelectItem>
+                      <SelectItem value="lowest_percent">% for sale: low to high</SelectItem>
                       <SelectItem value="most_viewed">Most viewed</SelectItem>
-                      <SelectItem value="oldest">Oldest listings</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -779,6 +795,19 @@ const MarketplacePage = () => {
                   {availableSectors.map(s => (
                     <Button key={s} variant={filterSector.includes(s) ? 'default' : 'outline'} size="sm" onClick={() => toggleFilter(filterSector, s, setFilterSector)} className="text-xs">
                       {s}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            )}
+            {/* Pool */}
+            {availablePools.length > 0 && (
+              <div>
+                <Label className="mb-2 block text-sm font-medium">Pool</Label>
+                <div className="flex flex-wrap gap-2">
+                  {availablePools.map(p => (
+                    <Button key={p.id} variant={filterPool.includes(p.id) ? 'default' : 'outline'} size="sm" onClick={() => toggleFilter(filterPool, p.id, setFilterPool)} className="text-xs">
+                      {p.name}
                     </Button>
                   ))}
                 </div>
