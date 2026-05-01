@@ -800,6 +800,19 @@ const MarketplacePage = () => {
                 </div>
               </div>
             )}
+            {/* Pool */}
+            {availablePools.length > 0 && (
+              <div>
+                <Label className="mb-2 block text-sm font-medium">Pool</Label>
+                <div className="flex flex-wrap gap-2">
+                  {availablePools.map(p => (
+                    <Button key={p.id} variant={filterPool.includes(p.id) ? 'default' : 'outline'} size="sm" onClick={() => toggleFilter(filterPool, p.id, setFilterPool)} className="text-xs">
+                      {p.name}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            )}
             {/* % for sale */}
             <div>
               <Label className="mb-2 block text-sm font-medium">% for sale</Label>
