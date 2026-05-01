@@ -147,15 +147,15 @@ const AboutPage = () => {
             backgroundSize: '24px 24px',
           }}
         />
-        <div className="container relative px-4 py-20 md:px-6 md:py-32">
+        <div className="container relative px-4 py-14 sm:py-20 md:px-6 md:py-32">
           <div className="mx-auto max-w-3xl text-center">
-            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-primary sm:text-xs">
               Our Story
             </span>
-            <h1 className="mt-4 text-4xl font-bold leading-tight tracking-tight md:text-6xl">
+            <h1 className="mt-3 text-3xl font-bold leading-[1.1] tracking-tight sm:mt-4 sm:text-4xl md:text-6xl">
               Venture investing for the rest of us.
             </h1>
-            <p className="mt-6 text-base leading-relaxed text-background/70 md:text-lg">
+            <p className="mt-4 text-sm leading-relaxed text-background/70 sm:mt-6 sm:text-base md:text-lg">
               We are a team of four Bocconi and Federico II students who got tired of watching
               the best startup deals go exclusively to VCs and wealthy insiders. So we built
               the infrastructure to change that.
