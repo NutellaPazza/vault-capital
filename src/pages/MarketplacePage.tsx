@@ -115,9 +115,14 @@ const MarketplacePage = () => {
   const availableStages = useMemo(() => [...new Set(allListings.map(l => l.deal.stage))], [allListings]);
   const availableCountries = useMemo(() => [...new Set(allListings.map(l => l.deal.country))], [allListings]);
   const availableSectors = useMemo(() => [...new Set(allListings.map(l => l.deal.sector_type))], [allListings]);
+  const availablePools = useMemo(() => {
+    const map = new Map<string, string>();
+    allListings.forEach(l => map.set(l.pool_id, l.deal.startup_name));
+    return Array.from(map.entries()).map(([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name));
+  }, [allListings]);
 
   // Active filter count
-  const activeFilterCount = [filterStage.length > 0, filterCountry.length > 0, filterSector.length > 0, !!filterPercentRange, !!filterPriceRange, !!filterDaysRange].filter(Boolean).length;
+  const activeFilterCount = [filterStage.length > 0, filterCountry.length > 0, filterSector.length > 0, filterPool.length > 0, !!filterPercentRange, !!filterPriceRange, !!filterDaysRange].filter(Boolean).length;
 
   // Filtered + sorted buyable listings
   const buyableListings = useMemo(() => {
