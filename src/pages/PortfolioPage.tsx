@@ -1034,7 +1034,12 @@ const PortfolioPage = () => {
                         const canList = pool?.pool_status === 'active' && !position.is_listed_on_market;
 
                         return (
-                          <Link key={position.id} to={`/pool/${position.pool_id}`} className="block">
+                          <button
+                            key={position.id}
+                            type="button"
+                            onClick={() => setDrillPositionId(position.id)}
+                            className="block w-full text-left"
+                          >
                             <div className="rounded-lg border p-3 transition-colors hover:bg-muted/50">
                               <div className="mb-2 flex items-start justify-between gap-2">
                                 <div className="min-w-0 flex-1">
@@ -1068,13 +1073,13 @@ const PortfolioPage = () => {
                                   size="sm"
                                   variant="secondary"
                                   className="mt-2 h-9 w-full text-xs"
-                                  onClick={(e) => { e.preventDefault(); openListingDialog(position.id, position.current_estimated_value_eur); }}
+                                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); openListingDialog(position.id, position.current_estimated_value_eur); }}
                                 >
                                   <Store className="mr-1 h-3.5 w-3.5" /> Sell on Resale Board
                                 </Button>
                               )}
                             </div>
-                          </Link>
+                          </button>
                         );
                       })}
                     </div>
