@@ -9,8 +9,10 @@ import {
   TrendingUp, TrendingDown, ExternalLink, Store, PieChart, ShoppingBag, Info,
   ArrowUpRight, ArrowDownRight, AlertTriangle, CheckCircle2, Calendar, Clock,
   Download, FileText, ChevronDown, Search, Filter, ArrowUpDown, Minus, Activity,
-  Banknote, Receipt, Target,
+  Banknote, Receipt, Target, Sparkles, X, Bell, Wallet, BarChart3, Percent,
 } from 'lucide-react';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Slider } from '@/components/ui/slider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import {
