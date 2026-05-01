@@ -534,11 +534,13 @@ const MarketplacePage = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="newest">Newest</SelectItem>
-                      <SelectItem value="lowest_price">Lowest price</SelectItem>
-                      <SelectItem value="highest_percent">Highest % for sale</SelectItem>
+                      <SelectItem value="newest">Date: newest first</SelectItem>
+                      <SelectItem value="oldest">Date: oldest first</SelectItem>
+                      <SelectItem value="lowest_price">Price: low to high</SelectItem>
+                      <SelectItem value="highest_price">Price: high to low</SelectItem>
+                      <SelectItem value="highest_percent">% for sale: high to low</SelectItem>
+                      <SelectItem value="lowest_percent">% for sale: low to high</SelectItem>
                       <SelectItem value="most_viewed">Most viewed</SelectItem>
-                      <SelectItem value="oldest">Oldest listings</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
