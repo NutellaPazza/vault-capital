@@ -1141,7 +1141,11 @@ const PortfolioPage = () => {
                                 </TableCell>
                                 <TableCell className="text-center">
                                   {position.is_listed_on_market ? (
-                                    <Link to="/marketplace" className="rounded bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground hover:bg-accent/80">
+                                    <Link
+                                      to="/marketplace"
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="rounded bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground hover:bg-accent/80"
+                                    >
                                       Yes
                                     </Link>
                                   ) : (
@@ -1150,7 +1154,7 @@ const PortfolioPage = () => {
                                 </TableCell>
                                 <TableCell className="text-right">
                                   <div className="flex justify-end gap-1">
-                                    <Button variant="outline" size="sm" asChild>
+                                    <Button variant="outline" size="sm" asChild onClick={(e) => e.stopPropagation()}>
                                       <Link to={`/pool/${position.pool_id}`}>
                                         <ExternalLink className="h-3.5 w-3.5" />
                                       </Link>
@@ -1159,7 +1163,7 @@ const PortfolioPage = () => {
                                       <Button
                                         size="sm"
                                         variant="secondary"
-                                        onClick={() => openListingDialog(position.id, position.current_estimated_value_eur)}
+                                        onClick={(e) => { e.stopPropagation(); openListingDialog(position.id, position.current_estimated_value_eur); }}
                                       >
                                         <Store className="mr-1 h-3.5 w-3.5" /> Sell
                                       </Button>
