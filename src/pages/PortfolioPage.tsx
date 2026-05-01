@@ -93,6 +93,15 @@ const PortfolioPage = () => {
   const [sortKey, setSortKey] = useState<SortKey>('pnl_pct');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
+  // Drill-down drawer
+  const [drillPositionId, setDrillPositionId] = useState<string | null>(null);
+
+  // What-if simulator
+  const [whatIfPct, setWhatIfPct] = useState(50);
+
+  // Dismissed alerts (session)
+  const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(new Set());
+
   // ---- Aggregate metrics ----
   const totalInvested = positions.reduce((sum, p) => sum + p.invested_eur, 0);
   const totalValue = positions.reduce((sum, p) => sum + p.current_estimated_value_eur, 0);
