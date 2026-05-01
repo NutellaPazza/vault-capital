@@ -1321,6 +1321,141 @@ const PortfolioPage = () => {
         </Card>
       )}
 
+      {/* ============ POSITION DRILL-DOWN DRAWER ============ */}
+      <Sheet open={!!drillPositionId} onOpenChange={(open) => !open && setDrillPositionId(null)}>
+        <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-md md:max-w-lg">
+          {drillPosition && (() => {
+            const dp = drillPosition;
+            const gain = dp.current_estimated_value_eur - dp.invested_eur;
+            const gainPct = dp.invested_eur > 0 ? (gain / dp.invested_eur) * 100 : 0;
+            const portfolioShare = totalInvested > 0 ? (dp.invested_eur / totalInvested) * 100 : 0;
+            const pool = pools.find(p => p.id === dp.pool_id);
+            const canList = pool?.pool_status === 'active' && !dp.is_listed_on_market;
+            const exitDate = new Date(new Date(dp.created_at).getTime() + 1000 * 60 * 60 * 24 * 540);
+            const positionFees = dp.invested_eur * 0.02; // 2% entry
+            const projectedCarry = gain > 0 ? gain * 0.02 : 0;
+
+            return (
+              <>
+                <SheetHeader className="pr-6">
+                  <SheetTitle className="flex items-center gap-2 text-lg">
+                    {dp.deal.startup_name}
+                    <StatusBadge status={dp.pool.pool_status} />
+                  </SheetTitle>
+                  <SheetDescription>
+                    {dp.deal.industry} · {dp.deal.stage} · Entered {formatDate(dp.created_at)}
+                  </SheetDescription>
+                </SheetHeader>
+
+                <div className="mt-5 space-y-5">
+                  {/* Hero P&L */}
+                  <div className="rounded-xl border bg-muted/30 p-4">
+                    <p className="text-xs text-muted-foreground">Estimated value</p>
+                    <p className="mt-0.5 text-3xl font-bold tabular-nums">
+                      {formatCurrency(dp.current_estimated_value_eur, false)}
+                    </p>
+                    <div className={`mt-1 flex items-center gap-1 text-sm font-medium ${gain >= 0 ? 'text-success' : 'text-destructive'}`}>
+                      {gain >= 0 ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />}
+                      {gain >= 0 ? '+' : ''}{formatCurrency(gain, false)} ({formatPercent(gainPct, 1)})
+                    </div>
+                  </div>
+
+                  {/* Key facts grid */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="rounded-lg border p-3">
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Invested</p>
+                      <p className="mt-1 text-sm font-bold tabular-nums">{formatCurrency(dp.invested_eur, false)}</p>
+                    </div>
+                    <div className="rounded-lg border p-3">
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">SPV ownership</p>
+                      <p className="mt-1 text-sm font-bold tabular-nums">{formatPercent(dp.ownership_percent_of_spv, 3)}</p>
+                    </div>
+                    <div className="rounded-lg border p-3">
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Portfolio share</p>
+                      <p className="mt-1 text-sm font-bold tabular-nums">{formatPercent(portfolioShare, 1)}</p>
+                    </div>
+                    <div className="rounded-lg border p-3">
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Entry fee paid</p>
+                      <p className="mt-1 text-sm font-bold tabular-nums">{formatCurrency(positionFees, false)}</p>
+                    </div>
+                  </div>
+
+                  {/* Exit forecast */}
+                  <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
+                    <p className="flex items-center gap-1.5 text-xs font-semibold text-primary">
+                      <Target className="h-3.5 w-3.5" />
+                      Estimated exit window
+                    </p>
+                    <p className="mt-1 text-sm font-medium">{formatDate(exitDate.toISOString())}</p>
+                    <p className="mt-0.5 text-[11px] text-muted-foreground">
+                      Indicative target. Projected carry on current gain: {formatCurrency(projectedCarry, false)}.
+                    </p>
+                  </div>
+
+                  {/* Mini transaction history */}
+                  <div>
+                    <h4 className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      <BarChart3 className="h-3.5 w-3.5" />
+                      Position history
+                    </h4>
+                    {drillTransactions.length === 0 ? (
+                      <p className="rounded border bg-muted/30 p-3 text-center text-xs text-muted-foreground">
+                        No related transactions yet.
+                      </p>
+                    ) : (
+                      <ul className="divide-y rounded-lg border">
+                        {drillTransactions.slice(0, 8).map(t => {
+                          const Icon = txIcon(t.type);
+                          return (
+                            <li key={t.id} className="flex items-center gap-3 px-3 py-2">
+                              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-muted">
+                                <Icon className="h-3.5 w-3.5 text-muted-foreground" />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <p className="truncate text-xs font-medium">{txLabel(t)}</p>
+                                <p className="text-[10px] text-muted-foreground">{formatDate(t.timestamp)}</p>
+                              </div>
+                              <span className={`shrink-0 text-xs font-semibold tabular-nums ${
+                                t.amount_eur > 0 ? 'text-success' : t.amount_eur < 0 ? 'text-destructive' : 'text-muted-foreground'
+                              }`}>
+                                {t.amount_eur > 0 ? '+' : ''}{formatCompactCurrency(t.amount_eur)}
+                              </span>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex flex-col gap-2 border-t pt-4 sm:flex-row">
+                    <Button variant="outline" className="flex-1" asChild>
+                      <Link to={`/pool/${dp.pool_id}`} onClick={() => setDrillPositionId(null)}>
+                        <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
+                        Open vault page
+                      </Link>
+                    </Button>
+                    {canList && (
+                      <Button
+                        variant="default"
+                        className="flex-1"
+                        onClick={() => {
+                          openListingDialog(dp.id, dp.current_estimated_value_eur);
+                          setDrillPositionId(null);
+                        }}
+                      >
+                        <Store className="mr-1.5 h-3.5 w-3.5" />
+                        List on Resale Board
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </>
+            );
+          })()}
+        </SheetContent>
+      </Sheet>
+
       {/* Listing Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
