@@ -299,12 +299,12 @@ const AboutPage = () => {
 
       {/* SECTION 5 — Moat */}
       <section className="border-b border-border bg-muted/30">
-        <div className="container px-4 py-16 md:px-6 md:py-24">
+        <div className="container px-4 py-12 sm:py-16 md:px-6 md:py-24">
           <div className="mx-auto max-w-3xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+            <h2 className="text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">
               The complexity is our moat.
             </h2>
-            <p className="mt-4 text-base text-muted-foreground md:text-lg">
+            <p className="mt-3 text-sm text-muted-foreground sm:mt-4 sm:text-base md:text-lg">
               Navigating ECSPR, AIFMD, MiFID II, and secondary market regulation simultaneously
               is genuinely hard. We spent months mapping every regulatory risk and designing
               around it. Whoever gets this right first builds a structural advantage that is
@@ -312,16 +312,16 @@ const AboutPage = () => {
             </p>
           </div>
 
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
+          <div className="mt-8 grid gap-4 sm:mt-12 sm:gap-6 md:grid-cols-3">
             {moat.map((m) => {
               const Icon = m.icon;
               return (
                 <Card key={m.title} className="border border-border">
-                  <CardContent className="p-6">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                      <Icon className="h-6 w-6 text-primary" />
+                  <CardContent className="p-5 sm:p-6">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 sm:h-12 sm:w-12">
+                      <Icon className="h-5 w-5 text-primary sm:h-6 sm:w-6" />
                     </div>
-                    <h3 className="mt-4 text-lg font-semibold">{m.title}</h3>
+                    <h3 className="mt-3 text-base font-semibold sm:mt-4 sm:text-lg">{m.title}</h3>
                     <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{m.body}</p>
                   </CardContent>
                 </Card>
