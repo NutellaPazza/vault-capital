@@ -25,7 +25,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 
-type SortOption = 'newest' | 'lowest_price' | 'highest_percent' | 'most_viewed' | 'oldest';
+type SortOption = 'newest' | 'oldest' | 'lowest_price' | 'highest_price' | 'highest_percent' | 'lowest_percent' | 'most_viewed';
 
 const MarketplacePage = () => {
   const location = useLocation();
