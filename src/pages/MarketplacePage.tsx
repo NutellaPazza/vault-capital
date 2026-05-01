@@ -132,6 +132,7 @@ const MarketplacePage = () => {
       if (filterStage.length > 0 && !filterStage.includes(l.deal.stage)) return false;
       if (filterCountry.length > 0 && !filterCountry.includes(l.deal.country)) return false;
       if (filterSector.length > 0 && !filterSector.includes(l.deal.sector_type)) return false;
+      if (filterPool.length > 0 && !filterPool.includes(l.pool_id)) return false;
       if (filterPercentRange) {
         const p = l.percent_of_position_for_sale;
         if (filterPercentRange === '0-25' && p > 25) return false;
