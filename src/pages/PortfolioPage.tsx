@@ -382,7 +382,7 @@ const PortfolioPage = () => {
   const drillTransactions = useMemo(() => {
     if (!drillPosition) return [];
     return transactions
-      .filter(t => t.meta?.pool_id === drillPosition.pool_id || t.meta?.position_id === drillPosition.id)
+      .filter(t => t.meta?.pool_id === drillPosition.pool_id)
       .slice()
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
   }, [drillPosition, transactions]);
