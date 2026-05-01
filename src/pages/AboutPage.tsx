@@ -333,15 +333,15 @@ const AboutPage = () => {
 
       {/* SECTION 6 — CTA */}
       <section className="bg-foreground text-background">
-        <div className="container px-4 py-20 md:px-6 md:py-28">
+        <div className="container px-4 py-14 sm:py-20 md:px-6 md:py-28">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight md:text-5xl">
+            <h2 className="text-2xl font-bold tracking-tight sm:text-3xl md:text-5xl">
               Invest in the companies of the future.
             </h2>
-            <p className="mt-4 text-base text-background/70 md:text-lg">
+            <p className="mt-3 text-sm text-background/70 sm:mt-4 sm:text-base md:text-lg">
               Starting from €100. No wealth requirements. No gatekeeping.
             </p>
-            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <div className="mt-6 flex flex-col items-stretch justify-center gap-3 sm:mt-8 sm:flex-row sm:items-center">
               <Button asChild size="lg" className="gap-2">
                 <Link to="/explore">
                   Browse Live Vaults
