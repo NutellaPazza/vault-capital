@@ -269,6 +269,7 @@ const MarketplacePage = () => {
     setFilterStage([]);
     setFilterCountry([]);
     setFilterSector([]);
+    setFilterPool([]);
     setFilterPercentRange('');
     setFilterPriceRange('');
     setFilterDaysRange('');
