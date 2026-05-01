@@ -147,15 +147,15 @@ const AboutPage = () => {
             backgroundSize: '24px 24px',
           }}
         />
-        <div className="container relative px-4 py-20 md:px-6 md:py-32">
+        <div className="container relative px-4 py-14 sm:py-20 md:px-6 md:py-32">
           <div className="mx-auto max-w-3xl text-center">
-            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-primary sm:text-xs">
               Our Story
             </span>
-            <h1 className="mt-4 text-4xl font-bold leading-tight tracking-tight md:text-6xl">
+            <h1 className="mt-3 text-3xl font-bold leading-[1.1] tracking-tight sm:mt-4 sm:text-4xl md:text-6xl">
               Venture investing for the rest of us.
             </h1>
-            <p className="mt-6 text-base leading-relaxed text-background/70 md:text-lg">
+            <p className="mt-4 text-sm leading-relaxed text-background/70 sm:mt-6 sm:text-base md:text-lg">
               We are a team of four Bocconi and Federico II students who got tired of watching
               the best startup deals go exclusively to VCs and wealthy insiders. So we built
               the infrastructure to change that.
@@ -166,13 +166,13 @@ const AboutPage = () => {
 
       {/* SECTION 2 — The Problem */}
       <section className="border-b border-border bg-background">
-        <div className="container px-4 py-16 md:px-6 md:py-24">
-          <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
+        <div className="container px-4 py-12 sm:py-16 md:px-6 md:py-24">
+          <div className="grid gap-8 lg:grid-cols-2 lg:gap-16">
             <div>
-              <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+              <h2 className="text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">
                 The access gap is real.
               </h2>
-              <div className="mt-6 space-y-4 text-base leading-relaxed text-muted-foreground md:text-lg">
+              <div className="mt-4 space-y-3 text-sm leading-relaxed text-muted-foreground sm:mt-6 sm:space-y-4 sm:text-base md:text-lg">
                 <p>
                   There is over €10 trillion sitting in European household deposits. Meanwhile,
                   the best private market deals, the ones that generate outsized returns, are
@@ -186,14 +186,14 @@ const AboutPage = () => {
                 </p>
               </div>
             </div>
-            <div className="grid gap-4">
+            <div className="grid gap-3 sm:gap-4">
               {stats.map((s) => (
                 <Card key={s.value} className="border-l-4 border-l-primary">
-                  <CardContent className="p-6">
-                    <p className="text-3xl font-bold tracking-tight text-primary md:text-4xl">
+                  <CardContent className="p-4 sm:p-6">
+                    <p className="text-2xl font-bold tracking-tight text-primary sm:text-3xl md:text-4xl">
                       {s.value}
                     </p>
-                    <p className="mt-2 text-sm text-muted-foreground md:text-base">{s.label}</p>
+                    <p className="mt-1.5 text-xs text-muted-foreground sm:mt-2 sm:text-sm md:text-base">{s.label}</p>
                   </CardContent>
                 </Card>
               ))}
@@ -204,18 +204,18 @@ const AboutPage = () => {
 
       {/* SECTION 3 — Our Solution */}
       <section className="border-b border-border bg-muted/30">
-        <div className="container px-4 py-16 md:px-6 md:py-24">
+        <div className="container px-4 py-12 sm:py-16 md:px-6 md:py-24">
           <div className="mx-auto max-w-3xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+            <h2 className="text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">
               Structured access. Not crowdfunding.
             </h2>
-            <p className="mt-4 text-base text-muted-foreground md:text-lg">
+            <p className="mt-3 text-sm text-muted-foreground sm:mt-4 sm:text-base md:text-lg">
               Most platforms give retail investors unstructured exposure to startups.
               We give them institutional-grade infrastructure at retail scale.
             </p>
           </div>
 
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
+          <div className="mt-8 grid gap-4 sm:mt-12 sm:gap-6 md:grid-cols-3">
             {comparison.map((col) => {
               const Icon = col.icon;
               return (
@@ -227,7 +227,7 @@ const AboutPage = () => {
                       : 'border border-border'
                   }
                 >
-                  <CardContent className="flex h-full flex-col p-6">
+                  <CardContent className="flex h-full flex-col p-5 sm:p-6">
                     <div className="mb-4 flex items-center gap-3">
                       <div
                         className={`flex h-10 w-10 items-center justify-center rounded-full ${
@@ -236,9 +236,9 @@ const AboutPage = () => {
                       >
                         <Icon className={`h-5 w-5 ${col.iconClass}`} />
                       </div>
-                      <h3 className="text-lg font-semibold">{col.title}</h3>
+                      <h3 className="text-base font-semibold sm:text-lg">{col.title}</h3>
                     </div>
-                    <ul className="space-y-3">
+                    <ul className="space-y-2.5 sm:space-y-3">
                       {col.points.map((p) => (
                         <li key={p} className="flex items-start gap-2 text-sm text-muted-foreground">
                           <span
@@ -260,29 +260,29 @@ const AboutPage = () => {
 
       {/* SECTION 4 — Team */}
       <section className="border-b border-border bg-background">
-        <div className="container px-4 py-16 md:px-6 md:py-24">
+        <div className="container px-4 py-12 sm:py-16 md:px-6 md:py-24">
           <div className="mx-auto max-w-3xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">Meet the team</h2>
-            <p className="mt-4 text-base text-muted-foreground md:text-lg">
+            <h2 className="text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">Meet the team</h2>
+            <p className="mt-3 text-sm text-muted-foreground sm:mt-4 sm:text-base md:text-lg">
               Four students building the infrastructure that did not exist.
             </p>
           </div>
 
-          <div className="mx-auto mt-12 grid max-w-5xl gap-6 md:grid-cols-2">
+          <div className="mx-auto mt-8 grid max-w-5xl gap-4 sm:mt-12 sm:gap-6 md:grid-cols-2">
             {team.map((m) => (
               <Card key={m.name} className="transition-shadow hover:shadow-md">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4">
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-foreground">
+                <CardContent className="p-5 sm:p-6">
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-base font-bold text-primary-foreground sm:h-14 sm:w-14 sm:text-lg">
                       {m.initials}
                     </div>
                     <div className="min-w-0">
-                      <h3 className="text-lg font-semibold leading-tight">{m.name}</h3>
-                      <p className="text-sm font-medium text-primary">{m.role}</p>
+                      <h3 className="text-base font-semibold leading-tight sm:text-lg">{m.name}</h3>
+                      <p className="text-xs font-medium text-primary sm:text-sm">{m.role}</p>
                     </div>
                   </div>
-                  <p className="mt-4 text-sm text-muted-foreground">{m.university}</p>
-                  <ul className="mt-4 space-y-2">
+                  <p className="mt-3 text-xs text-muted-foreground sm:mt-4 sm:text-sm">{m.university}</p>
+                  <ul className="mt-3 space-y-1.5 sm:mt-4 sm:space-y-2">
                     {m.points.map((p) => (
                       <li key={p} className="flex items-start gap-2 text-sm">
                         <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
@@ -299,12 +299,12 @@ const AboutPage = () => {
 
       {/* SECTION 5 — Moat */}
       <section className="border-b border-border bg-muted/30">
-        <div className="container px-4 py-16 md:px-6 md:py-24">
+        <div className="container px-4 py-12 sm:py-16 md:px-6 md:py-24">
           <div className="mx-auto max-w-3xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+            <h2 className="text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">
               The complexity is our moat.
             </h2>
-            <p className="mt-4 text-base text-muted-foreground md:text-lg">
+            <p className="mt-3 text-sm text-muted-foreground sm:mt-4 sm:text-base md:text-lg">
               Navigating ECSPR, AIFMD, MiFID II, and secondary market regulation simultaneously
               is genuinely hard. We spent months mapping every regulatory risk and designing
               around it. Whoever gets this right first builds a structural advantage that is
@@ -312,16 +312,16 @@ const AboutPage = () => {
             </p>
           </div>
 
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
+          <div className="mt-8 grid gap-4 sm:mt-12 sm:gap-6 md:grid-cols-3">
             {moat.map((m) => {
               const Icon = m.icon;
               return (
                 <Card key={m.title} className="border border-border">
-                  <CardContent className="p-6">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                      <Icon className="h-6 w-6 text-primary" />
+                  <CardContent className="p-5 sm:p-6">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 sm:h-12 sm:w-12">
+                      <Icon className="h-5 w-5 text-primary sm:h-6 sm:w-6" />
                     </div>
-                    <h3 className="mt-4 text-lg font-semibold">{m.title}</h3>
+                    <h3 className="mt-3 text-base font-semibold sm:mt-4 sm:text-lg">{m.title}</h3>
                     <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{m.body}</p>
                   </CardContent>
                 </Card>
@@ -333,15 +333,15 @@ const AboutPage = () => {
 
       {/* SECTION 6 — CTA */}
       <section className="bg-foreground text-background">
-        <div className="container px-4 py-20 md:px-6 md:py-28">
+        <div className="container px-4 py-14 sm:py-20 md:px-6 md:py-28">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight md:text-5xl">
+            <h2 className="text-2xl font-bold tracking-tight sm:text-3xl md:text-5xl">
               Invest in the companies of the future.
             </h2>
-            <p className="mt-4 text-base text-background/70 md:text-lg">
+            <p className="mt-3 text-sm text-background/70 sm:mt-4 sm:text-base md:text-lg">
               Starting from €100. No wealth requirements. No gatekeeping.
             </p>
-            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <div className="mt-6 flex flex-col items-stretch justify-center gap-3 sm:mt-8 sm:flex-row sm:items-center">
               <Button asChild size="lg" className="gap-2">
                 <Link to="/explore">
                   Browse Live Vaults
