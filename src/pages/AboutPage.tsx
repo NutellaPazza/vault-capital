@@ -204,18 +204,18 @@ const AboutPage = () => {
 
       {/* SECTION 3 — Our Solution */}
       <section className="border-b border-border bg-muted/30">
-        <div className="container px-4 py-16 md:px-6 md:py-24">
+        <div className="container px-4 py-12 sm:py-16 md:px-6 md:py-24">
           <div className="mx-auto max-w-3xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+            <h2 className="text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">
               Structured access. Not crowdfunding.
             </h2>
-            <p className="mt-4 text-base text-muted-foreground md:text-lg">
+            <p className="mt-3 text-sm text-muted-foreground sm:mt-4 sm:text-base md:text-lg">
               Most platforms give retail investors unstructured exposure to startups.
               We give them institutional-grade infrastructure at retail scale.
             </p>
           </div>
 
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
+          <div className="mt-8 grid gap-4 sm:mt-12 sm:gap-6 md:grid-cols-3">
             {comparison.map((col) => {
               const Icon = col.icon;
               return (
@@ -227,7 +227,7 @@ const AboutPage = () => {
                       : 'border border-border'
                   }
                 >
-                  <CardContent className="flex h-full flex-col p-6">
+                  <CardContent className="flex h-full flex-col p-5 sm:p-6">
                     <div className="mb-4 flex items-center gap-3">
                       <div
                         className={`flex h-10 w-10 items-center justify-center rounded-full ${
@@ -236,9 +236,9 @@ const AboutPage = () => {
                       >
                         <Icon className={`h-5 w-5 ${col.iconClass}`} />
                       </div>
-                      <h3 className="text-lg font-semibold">{col.title}</h3>
+                      <h3 className="text-base font-semibold sm:text-lg">{col.title}</h3>
                     </div>
-                    <ul className="space-y-3">
+                    <ul className="space-y-2.5 sm:space-y-3">
                       {col.points.map((p) => (
                         <li key={p} className="flex items-start gap-2 text-sm text-muted-foreground">
                           <span
