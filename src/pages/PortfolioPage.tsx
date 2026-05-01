@@ -545,6 +545,53 @@ const PortfolioPage = () => {
 
       {positions.length > 0 ? (
         <>
+          {/* ============ SMART ALERTS ============ */}
+          {alerts.length > 0 && (
+            <motion.div
+              className="mb-4 space-y-2 md:mb-6"
+              initial="hidden" animate="visible" variants={fadeUp} custom={sectionIndex++}
+            >
+              {alerts.map(a => {
+                const Icon = a.icon;
+                const styles = {
+                  info: 'border-primary/30 bg-primary/5 text-primary',
+                  warning: 'border-warning/40 bg-warning/10 text-warning-foreground',
+                  critical: 'border-destructive/40 bg-destructive/10 text-destructive',
+                  success: 'border-success/40 bg-success/10 text-success',
+                }[a.severity];
+                return (
+                  <div key={a.id} className={`flex items-start gap-3 rounded-lg border p-3 md:p-3.5 ${styles}`}>
+                    <Icon className="mt-0.5 h-4 w-4 shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-semibold md:text-sm">{a.title}</p>
+                      <p className="mt-0.5 text-[11px] text-foreground/80 md:text-xs">{a.description}</p>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-1">
+                      {a.action && (
+                        a.action.href ? (
+                          <Button variant="ghost" size="sm" className="h-7 text-[11px] md:text-xs" asChild>
+                            <Link to={a.action.href}>{a.action.label}</Link>
+                          </Button>
+                        ) : (
+                          <Button variant="ghost" size="sm" className="h-7 text-[11px] md:text-xs" onClick={a.action.onClick}>
+                            {a.action.label}
+                          </Button>
+                        )
+                      )}
+                      <button
+                        onClick={() => setDismissedAlerts(prev => new Set(prev).add(a.id))}
+                        className="rounded p-1 text-muted-foreground transition-colors hover:bg-background/50 hover:text-foreground"
+                        aria-label="Dismiss"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </motion.div>
+          )}
+
           {/* ============ 1. KPI HERO + CHARTS ============ */}
           <motion.div
             className="mb-4 grid gap-3 md:mb-6 md:gap-6 lg:grid-cols-5"
