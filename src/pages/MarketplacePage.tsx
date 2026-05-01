@@ -160,22 +160,28 @@ const MarketplacePage = () => {
       case 'newest':
         result.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
         break;
+      case 'oldest':
+        result.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+        break;
       case 'lowest_price':
         result.sort((a, b) => a.ask_price_eur - b.ask_price_eur);
+        break;
+      case 'highest_price':
+        result.sort((a, b) => b.ask_price_eur - a.ask_price_eur);
         break;
       case 'highest_percent':
         result.sort((a, b) => b.percent_of_position_for_sale - a.percent_of_position_for_sale);
         break;
+      case 'lowest_percent':
+        result.sort((a, b) => a.percent_of_position_for_sale - b.percent_of_position_for_sale);
+        break;
       case 'most_viewed':
         result.sort((a, b) => getViewCount(b.id) - getViewCount(a.id));
-        break;
-      case 'oldest':
-        result.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
         break;
     }
 
     return result;
-  }, [allListings, currentUser, search, filterStage, filterCountry, filterSector, filterPercentRange, filterPriceRange, filterDaysRange, sortBy]);
+  }, [allListings, currentUser, search, filterStage, filterCountry, filterSector, filterPool, filterPercentRange, filterPriceRange, filterDaysRange, sortBy]);
 
   // Current user's listings (all statuses)
   const myActiveListings = listings.filter(l => l.seller_user_id === currentUser?.id && l.status === 'active');
