@@ -2,160 +2,366 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
-  Users, Building2, PieChart, Eye, Shield, Banknote,
-  Briefcase, CheckCircle, ArrowLeft, Scale, Vote, Coins,
-  FileText, HandCoins, BarChart3, Globe, Lock
+  ArrowLeft, ArrowRight, Check, X, Lock, Shield, Link2, Users,
 } from 'lucide-react';
 
-// Team is not yet public.
-
-const features = [
+const stats = [
   {
-    icon: Users,
-    title: 'Pooled Investment',
-    description: 'Invest alongside hundreds of other investors. Lower minimums (from €100), shared due diligence, and professional deal management. You get access to deals that would normally require €50K+ minimums.',
+    value: '€10T+',
+    label: 'EU household deposits sitting in low-yield savings (ECB, Q3 2025)',
   },
   {
-    icon: Building2,
-    title: 'Curated Deals',
-    description: 'Access pre-negotiated terms with vetted startups. Our team conducts thorough due diligence, negotiates favorable terms, and only presents deals that meet our strict criteria.',
+    value: '€100',
+    label: 'Minimum investment on VaultCapital. The same deals, a fraction of the ticket',
   },
   {
-    icon: PieChart,
-    title: 'Secondary Market',
-    description: 'Trade your positions on our marketplace. Unlike traditional startup investments that lock your capital for years, our secondary market provides liquidity when you need it.',
-  },
-  {
-    icon: Eye,
-    title: 'Full Transparency',
-    description: 'Regular company updates, real-time portfolio tracking, detailed risk disclosures before every investment, and complete visibility into fees and structures.',
-  },
-  {
-    icon: Globe,
-    title: 'European Focus',
-    description: 'We focus on the most promising startups across Europe — from pre-seed to Series A. Access opportunities in Italy, Germany, Netherlands, France, and beyond.',
-  },
-  {
-    icon: Lock,
-    title: 'Security First',
-    description: 'KYC-verified investors, segregated SPV accounts, and professional fund administration. Your investment is held in a regulated legal structure.',
+    value: '€10B',
+    label: 'Estimated serviceable market for retail-accessible private startup exposure',
   },
 ];
 
-const AboutPage = () => (
-  <div className="container py-8">
-    <Button variant="ghost" size="sm" className="mb-6" asChild>
-      <Link to="/"><ArrowLeft className="mr-1 h-4 w-4" /> Back to Home</Link>
-    </Button>
+const comparison = [
+  {
+    title: 'Traditional Crowdfunding',
+    icon: X,
+    iconClass: 'text-muted-foreground',
+    highlight: false,
+    points: [
+      'No pre-negotiated deal terms',
+      'No legal structure protecting investors',
+      'No secondary market',
+      'Fragmented cap table for startups',
+    ],
+  },
+  {
+    title: 'VaultCapital',
+    icon: Check,
+    iconClass: 'text-primary',
+    highlight: true,
+    points: [
+      'Pre-negotiated standardized terms',
+      'SPV structure with ring-fenced liability',
+      'Resale board for secondary liquidity',
+      'One clean cap table entry for the startup',
+      'ECSPR-regulated under Consob authorization',
+    ],
+  },
+  {
+    title: 'VC / PE Funds',
+    icon: Lock,
+    iconClass: 'text-muted-foreground',
+    highlight: false,
+    points: [
+      'Structured and professional',
+      'Minimum €50,000+ ticket',
+      'Accredited investors only',
+      'No retail access',
+    ],
+  },
+];
 
-    {/* Hero */}
-    <div className="mb-16 text-center">
-      <h1 className="mb-4 text-4xl font-bold">About VaultCapital</h1>
-      <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-        We're building the future of retail startup investing. Private market deals, 
-        accessible to everyone, managed with institutional-grade professionalism.
-      </p>
-    </div>
+const team = [
+  {
+    initials: 'GD',
+    name: 'Giovanni De Stasio',
+    role: 'Founder & Team Leader',
+    university: 'Bocconi University. BSc Economics & Finance',
+    points: [
+      'Python development and quantitative financial modeling',
+      'Built a multi-model options pricer from scratch',
+      'Contributed to €700K startup fundraising and partnership discussions',
+      'B2B pipeline development and deal negotiation',
+    ],
+  },
+  {
+    initials: 'MR',
+    name: 'Michele Rubinaccio',
+    role: 'Co-Founder',
+    university: 'Bocconi University. BSc Management / Federico II',
+    points: [
+      "Pursuing two bachelor's degrees simultaneously",
+      'B2B pipeline development and commercial negotiation',
+      'Startup deal sourcing and investor relations',
+    ],
+  },
+  {
+    initials: 'GF',
+    name: 'Gianluigi Ferrara',
+    role: 'Co-Founder',
+    university: 'Federico II. Informatic Engineering',
+    points: [
+      'Python and C++ development',
+      'Full-stack web design and product engineering',
+      '2nd place, Math Olympics. Campania region',
+    ],
+  },
+  {
+    initials: 'MM',
+    name: 'Michele Migliucci',
+    role: 'Co-Founder',
+    university: 'Vanvitelli. Mathematics',
+    points: [
+      'Python and C++ development',
+      'Quantitative modeling and algorithmic systems',
+      '1st place, Math Olympics. Campania region',
+    ],
+  },
+];
 
-    {/* Mission */}
-    <section className="mb-16">
-      <Card className="bg-gradient-to-br from-card to-accent/20">
-        <CardContent className="p-8">
-          <h2 className="mb-4 text-2xl font-bold">Our Mission</h2>
-          <p className="text-lg text-muted-foreground leading-relaxed">
-            Startup investing has historically been reserved for wealthy individuals and institutional investors 
-            with €50,000+ minimums. VaultCapital democratizes access by pooling capital from many investors 
-            into professionally managed SPVs, allowing anyone to participate from just €100. We handle the 
-            legal structure, due diligence, governance, and exit management — so you can focus on choosing 
-            the startups you believe in.
-          </p>
-        </CardContent>
-      </Card>
-    </section>
+const moat = [
+  {
+    icon: Shield,
+    title: 'Regulatory First',
+    body: 'We designed for ECSPR compliance from day one. License application, SPV structure, investor protections, KIIS documentation. Not bolted on after the fact.',
+  },
+  {
+    icon: Link2,
+    title: 'Aligned Incentives',
+    body: 'We charge a 2% exit fee only on profit. If investors lose money, we earn nothing. Our revenue is structurally tied to investor success.',
+  },
+  {
+    icon: Users,
+    title: 'Founder-Built',
+    body: 'Every product decision comes from people who understand both the financial markets and the code. No middle layer between vision and execution.',
+  },
+];
 
-    {/* Why VaultCapital */}
-    <section className="mb-16">
-      <h2 className="mb-8 text-center text-3xl font-bold">Why VaultCapital?</h2>
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {features.map(f => (
-          <Card key={f.title}>
-            <CardContent className="p-6">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                <f.icon className="h-6 w-6 text-primary" />
+const AboutPage = () => {
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Back link */}
+      <div className="container px-4 pt-6 md:px-6">
+        <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground">
+          <ArrowLeft className="h-4 w-4" />
+          Back to home
+        </Link>
+      </div>
+
+      {/* SECTION 1 — Hero */}
+      <section className="relative overflow-hidden bg-foreground text-background mt-6">
+        <div
+          className="absolute inset-0 opacity-[0.07]"
+          style={{
+            backgroundImage:
+              'radial-gradient(circle at 1px 1px, hsl(var(--background)) 1px, transparent 0)',
+            backgroundSize: '24px 24px',
+          }}
+        />
+        <div className="container relative px-4 py-20 md:px-6 md:py-32">
+          <div className="mx-auto max-w-3xl text-center">
+            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+              Our Story
+            </span>
+            <h1 className="mt-4 text-4xl font-bold leading-tight tracking-tight md:text-6xl">
+              Venture investing for the rest of us.
+            </h1>
+            <p className="mt-6 text-base leading-relaxed text-background/70 md:text-lg">
+              We are a team of four Bocconi and Federico II students who got tired of watching
+              the best startup deals go exclusively to VCs and wealthy insiders. So we built
+              the infrastructure to change that.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 2 — The Problem */}
+      <section className="border-b border-border bg-background">
+        <div className="container px-4 py-16 md:px-6 md:py-24">
+          <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
+            <div>
+              <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+                The access gap is real.
+              </h2>
+              <div className="mt-6 space-y-4 text-base leading-relaxed text-muted-foreground md:text-lg">
+                <p>
+                  There is over €10 trillion sitting in European household deposits. Meanwhile,
+                  the best private market deals, the ones that generate outsized returns, are
+                  accessible only to institutional investors and high-net-worth individuals
+                  who can write €50,000+ checks. Retail investors are locked out. Not because
+                  they lack the interest or the capital, but because the infrastructure to
+                  include them has never existed.
+                </p>
+                <p className="font-medium text-foreground">
+                  We are building that infrastructure.
+                </p>
               </div>
-              <h3 className="mb-2 text-lg font-semibold">{f.title}</h3>
-              <p className="text-sm text-muted-foreground">{f.description}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </section>
+            </div>
+            <div className="grid gap-4">
+              {stats.map((s) => (
+                <Card key={s.value} className="border-l-4 border-l-primary">
+                  <CardContent className="p-6">
+                    <p className="text-3xl font-bold tracking-tight text-primary md:text-4xl">
+                      {s.value}
+                    </p>
+                    <p className="mt-2 text-sm text-muted-foreground md:text-base">{s.label}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
 
-    {/* Team */}
-    <section className="mb-16">
-      <h2 className="mb-4 text-center text-3xl font-bold">Our Team</h2>
-      <Card className="mx-auto max-w-3xl">
-        <CardContent className="p-8 text-center">
-          <p className="text-muted-foreground leading-relaxed">
-            Our team combines backgrounds in fintech, venture capital, and software engineering.
-            We are building VaultCapital because we believe retail investors deserve access to the
-            same opportunities as institutional ones.
-          </p>
-        </CardContent>
-      </Card>
-    </section>
+      {/* SECTION 3 — Our Solution */}
+      <section className="border-b border-border bg-muted/30">
+        <div className="container px-4 py-16 md:px-6 md:py-24">
+          <div className="mx-auto max-w-3xl text-center">
+            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+              Structured access. Not crowdfunding.
+            </h2>
+            <p className="mt-4 text-base text-muted-foreground md:text-lg">
+              Most platforms give retail investors unstructured exposure to startups.
+              We give them institutional-grade infrastructure at retail scale.
+            </p>
+          </div>
 
-    {/* Transparency & Reporting */}
-    <section className="mb-16">
-      <h2 className="mb-8 text-center text-3xl font-bold">Transparency & Reporting</h2>
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <Card>
-          <CardContent className="p-6">
-            <Briefcase className="mb-3 h-8 w-8 text-primary" />
-            <h3 className="mb-2 font-semibold">Company Updates</h3>
-            <p className="text-sm text-muted-foreground">
-              Startups in our portfolio provide regular updates — quarterly reports, milestone announcements, 
-              and key business developments. You'll always know what's happening with your investments.
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <BarChart3 className="mb-3 h-8 w-8 text-primary" />
-            <h3 className="mb-2 font-semibold">Portfolio Visibility</h3>
-            <p className="text-sm text-muted-foreground">
-              Real-time tracking of your investments, estimated valuations, P&L, and ownership percentages. 
-              Full visibility into every position in your portfolio dashboard.
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <Shield className="mb-3 h-8 w-8 text-primary" />
-            <h3 className="mb-2 font-semibold">Risk Disclosure</h3>
-            <p className="text-sm text-muted-foreground">
-              Clear, upfront information on risks before every investment. We never hide the fact that 
-              startup investing is high-risk — we just make it accessible and transparent.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    </section>
+          <div className="mt-12 grid gap-6 md:grid-cols-3">
+            {comparison.map((col) => {
+              const Icon = col.icon;
+              return (
+                <Card
+                  key={col.title}
+                  className={
+                    col.highlight
+                      ? 'border-2 border-primary shadow-lg md:scale-[1.02]'
+                      : 'border border-border'
+                  }
+                >
+                  <CardContent className="flex h-full flex-col p-6">
+                    <div className="mb-4 flex items-center gap-3">
+                      <div
+                        className={`flex h-10 w-10 items-center justify-center rounded-full ${
+                          col.highlight ? 'bg-primary/10' : 'bg-muted'
+                        }`}
+                      >
+                        <Icon className={`h-5 w-5 ${col.iconClass}`} />
+                      </div>
+                      <h3 className="text-lg font-semibold">{col.title}</h3>
+                    </div>
+                    <ul className="space-y-3">
+                      {col.points.map((p) => (
+                        <li key={p} className="flex items-start gap-2 text-sm text-muted-foreground">
+                          <span
+                            className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${
+                              col.highlight ? 'bg-primary' : 'bg-muted-foreground/40'
+                            }`}
+                          />
+                          <span>{p}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      </section>
 
-    {/* CTA */}
-    <section className="rounded-2xl bg-primary p-12 text-center text-primary-foreground">
-      <h2 className="mb-4 text-3xl font-bold">Ready to Start?</h2>
-      <p className="mb-8 text-primary-foreground/80">Join a growing community of investors accessing private startup deals.</p>
-      <div className="flex justify-center gap-4">
-        <Button size="lg" variant="secondary" asChild>
-          <Link to="/signup">Create Free Account</Link>
-        </Button>
-        <Button size="lg" variant="outline" className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10" asChild>
-          <Link to="/how-it-works">How It Works</Link>
-        </Button>
-      </div>
-    </section>
-  </div>
-);
+      {/* SECTION 4 — Team */}
+      <section className="border-b border-border bg-background">
+        <div className="container px-4 py-16 md:px-6 md:py-24">
+          <div className="mx-auto max-w-3xl text-center">
+            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">Meet the team</h2>
+            <p className="mt-4 text-base text-muted-foreground md:text-lg">
+              Four students building the infrastructure that did not exist.
+            </p>
+          </div>
+
+          <div className="mx-auto mt-12 grid max-w-5xl gap-6 md:grid-cols-2">
+            {team.map((m) => (
+              <Card key={m.name} className="transition-shadow hover:shadow-md">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-foreground">
+                      {m.initials}
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="text-lg font-semibold leading-tight">{m.name}</h3>
+                      <p className="text-sm font-medium text-primary">{m.role}</p>
+                    </div>
+                  </div>
+                  <p className="mt-4 text-sm text-muted-foreground">{m.university}</p>
+                  <ul className="mt-4 space-y-2">
+                    {m.points.map((p) => (
+                      <li key={p} className="flex items-start gap-2 text-sm">
+                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                        <span className="text-muted-foreground">{p}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 5 — Moat */}
+      <section className="border-b border-border bg-muted/30">
+        <div className="container px-4 py-16 md:px-6 md:py-24">
+          <div className="mx-auto max-w-3xl text-center">
+            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+              The complexity is our moat.
+            </h2>
+            <p className="mt-4 text-base text-muted-foreground md:text-lg">
+              Navigating ECSPR, AIFMD, MiFID II, and secondary market regulation simultaneously
+              is genuinely hard. We spent months mapping every regulatory risk and designing
+              around it. Whoever gets this right first builds a structural advantage that is
+              very hard to replicate.
+            </p>
+          </div>
+
+          <div className="mt-12 grid gap-6 md:grid-cols-3">
+            {moat.map((m) => {
+              const Icon = m.icon;
+              return (
+                <Card key={m.title} className="border border-border">
+                  <CardContent className="p-6">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
+                      <Icon className="h-6 w-6 text-primary" />
+                    </div>
+                    <h3 className="mt-4 text-lg font-semibold">{m.title}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{m.body}</p>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 6 — CTA */}
+      <section className="bg-foreground text-background">
+        <div className="container px-4 py-20 md:px-6 md:py-28">
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="text-3xl font-bold tracking-tight md:text-5xl">
+              Invest in the companies of the future.
+            </h2>
+            <p className="mt-4 text-base text-background/70 md:text-lg">
+              Starting from €100. No wealth requirements. No gatekeeping.
+            </p>
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Button asChild size="lg" className="gap-2">
+                <Link to="/explore">
+                  Browse Live Vaults
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="border-background/30 bg-transparent text-background hover:bg-background hover:text-foreground"
+              >
+                <Link to="/how-it-works">How It Works</Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+};
 
 export default AboutPage;
