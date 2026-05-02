@@ -463,6 +463,36 @@ const DashboardPage = () => {
           </CardContent>
         </Card>
       </motion.section>
+
+      {/* Deposit Dialog (used by empty-state Add Funds) */}
+      <Dialog open={isDepositOpen} onOpenChange={setIsDepositOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Deposit Funds</DialogTitle>
+            <DialogDescription>Add money to your VaultCapital wallet (simulated).</DialogDescription>
+          </DialogHeader>
+          <div className="py-2">
+            <div className="space-y-2">
+              <Label htmlFor="dash-deposit-amount">Amount (EUR)</Label>
+              <Input
+                id="dash-deposit-amount"
+                type="number"
+                placeholder="e.g. 1000"
+                value={depositAmount}
+                onChange={(e) => setDepositAmount(e.target.value)}
+                min={1}
+                step={100}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDepositOpen(false)}>Cancel</Button>
+            <Button onClick={handleDeposit} disabled={isProcessing}>
+              {isProcessing ? 'Processing...' : 'Deposit'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
