@@ -29,6 +29,11 @@ interface Props {
 export const FormStepBasics = ({ data, updateData, errors }: Props) => {
   return (
     <div className="space-y-6">
+      <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-xs text-muted-foreground md:text-sm">
+        Applications are reviewed on a rolling basis. We typically respond within 5 business days.
+        Applying does not guarantee listing on the platform.
+      </div>
+
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="startup_name">Startup Name *</Label>

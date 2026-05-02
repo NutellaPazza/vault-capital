@@ -1,7 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { CheckCircle, Home, Copy } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { CheckCircle2, Home, Clock, FileText, Mail } from 'lucide-react';
 
 interface Props {
   applicationId: string;
@@ -9,53 +8,69 @@ interface Props {
 }
 
 export const ApplicationSuccess = ({ applicationId, onBackHome }: Props) => {
-  const copyId = () => {
-    navigator.clipboard.writeText(applicationId);
-    toast({ title: 'Copied!', description: 'Application ID copied to clipboard.' });
-  };
+  const infoCards = [
+    {
+      icon: Clock,
+      title: 'What happens next?',
+      body: 'Our team reviews your application against our deal criteria. If selected, we will contact you to schedule a 30-minute call.',
+    },
+    {
+      icon: FileText,
+      title: 'What we look for',
+      body: 'European startups, pre-seed to Series A, raising €100K-€2M, with at least one clear market validation signal.',
+    },
+    {
+      icon: Mail,
+      title: 'Questions?',
+      body: 'Contact us at apply@vaultcapital.eu — we respond within 48 hours.',
+    },
+  ];
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md text-center">
-        <CardContent className="pt-8">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/20">
-            <CheckCircle className="h-8 w-8 text-primary" />
-          </div>
-          
-          <h1 className="mb-2 text-2xl font-bold">Application Received!</h1>
-          <p className="mb-6 text-muted-foreground">
-            Thank you for your submission. Our team will review your application.
-          </p>
-
-          <div className="mb-6 rounded-lg border bg-muted/30 p-4">
-            <p className="mb-1 text-sm text-muted-foreground">Your Application ID</p>
-            <div className="flex items-center justify-center gap-2">
-              <code className="text-lg font-mono font-semibold text-primary">{applicationId}</code>
-              <Button variant="ghost" size="icon" onClick={copyId} className="h-8 w-8">
-                <Copy className="h-4 w-4" />
-              </Button>
+      <div className="w-full max-w-3xl">
+        <Card className="border-success/20 bg-gradient-to-br from-card to-success/5">
+          <CardContent className="flex flex-col items-center px-6 py-10 text-center md:px-10 md:py-12">
+            <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-success/15">
+              <CheckCircle2 className="h-10 w-10 text-success" strokeWidth={2} />
             </div>
-          </div>
+            <h1 className="text-2xl font-bold md:text-3xl">Application submitted</h1>
+            <p className="mt-2 max-w-xl text-sm text-muted-foreground md:text-base">
+              We have received your application and will review it within 5 business days.
+            </p>
 
-          <div className="mb-6 rounded-lg border border-primary/20 bg-primary/5 p-4 text-left">
-            <h3 className="mb-2 font-medium">Next Steps</h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>• Our team will review your application within 5-7 business days</li>
-              <li>• If we're interested, we'll reach out via the email you provided</li>
-              <li>• Shortlisted startups will receive a follow-up call</li>
-            </ul>
-          </div>
+            <div className="mt-6 inline-flex items-center gap-2 rounded-lg border bg-muted/40 px-4 py-2 font-mono text-sm">
+              <span className="text-muted-foreground">Application ID:</span>
+              <span className="font-semibold text-foreground">{applicationId}</span>
+            </div>
+          </CardContent>
+        </Card>
 
-          <p className="mb-6 text-xs text-muted-foreground">
-            <em>This is a demo. No real submissions are processed.</em>
-          </p>
+        <div className="mt-6 grid gap-4 md:grid-cols-3">
+          {infoCards.map(({ icon: Icon, title, body }) => (
+            <Card key={title}>
+              <CardContent className="p-5">
+                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                  <Icon className="h-5 w-5 text-primary" />
+                </div>
+                <h3 className="mb-1 text-sm font-semibold md:text-base">{title}</h3>
+                <p className="text-xs text-muted-foreground md:text-sm">{body}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
 
-          <Button onClick={onBackHome} className="w-full">
+        <div className="mt-6 flex justify-center">
+          <Button onClick={onBackHome} size="lg">
             <Home className="mr-2 h-4 w-4" />
             Back to Home
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+
+        <p className="mt-6 text-center text-xs text-muted-foreground">
+          <em>This is a demo. No real submissions are processed.</em>
+        </p>
+      </div>
     </div>
   );
 };

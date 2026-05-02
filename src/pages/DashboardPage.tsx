@@ -1,13 +1,20 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+} from '@/components/ui/dialog';
 import { PoolCard, CountdownTimer } from '@/components/common';
 import { useAppStore } from '@/store/appStore';
 import { formatCurrency, formatCompactCurrency, formatPercent, formatDate } from '@/lib/formatters';
-import { 
-  Wallet, TrendingUp, PieChart, ArrowRight, Clock, 
-  Newspaper, Store, BarChart3 
+import { toast } from '@/hooks/use-toast';
+import {
+  Wallet, TrendingUp, PieChart, ArrowRight, Clock,
+  Newspaper, Store, BarChart3, Search, ShieldCheck, Sparkles,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -21,11 +28,30 @@ const fadeUp = {
 };
 
 const DashboardPage = () => {
-  const { 
-    currentUser, getLivePools, getUpcomingPools, getPositionsWithPools, 
-    notifications, deals, listings, offers, pools 
+  const {
+    currentUser, getLivePools, getUpcomingPools, getPositionsWithPools,
+    notifications, deals, listings, offers, pools, deposit,
   } = useAppStore();
-  
+
+  const [isDepositOpen, setIsDepositOpen] = useState(false);
+  const [depositAmount, setDepositAmount] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handleDeposit = async () => {
+    const amount = parseFloat(depositAmount);
+    if (isNaN(amount) || amount <= 0) {
+      toast({ title: 'Invalid amount', description: 'Enter a valid amount greater than 0.', variant: 'destructive' });
+      return;
+    }
+    setIsProcessing(true);
+    await new Promise(r => setTimeout(r, 600));
+    deposit(amount);
+    toast({ title: 'Deposit successful', description: `${formatCurrency(amount)} added to your wallet.` });
+    setIsDepositOpen(false);
+    setDepositAmount('');
+    setIsProcessing(false);
+  };
+
   const livePools = getLivePools();
   const upcomingPools = getUpcomingPools();
   const positions = getPositionsWithPools();
@@ -194,46 +220,107 @@ const DashboardPage = () => {
         </motion.section>
       )}
 
-      <div className="grid gap-4 md:gap-6 lg:grid-cols-2">
-        {/* Portfolio Performance */}
-        {positions.length > 0 && (
-          <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} variants={fadeUp} custom={sectionIndex++}>
-            <Card>
-              <CardHeader className="px-4 pb-2 pt-4 md:px-6 md:pb-3 md:pt-6">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base md:text-lg">Portfolio Performance</CardTitle>
-                  <Button variant="ghost" size="sm" className="h-7 text-xs md:h-9 md:text-sm" asChild>
-                    <Link to="/portfolio">View All</Link>
+      {positions.length === 0 ? (
+        <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} variants={fadeUp} custom={sectionIndex++}>
+          <Card className="border-primary/20 bg-gradient-to-br from-card to-accent/20">
+            <CardHeader className="px-4 pt-5 md:px-6 md:pt-6">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" />
+                <CardTitle className="text-lg md:text-xl">Welcome to VaultCapital</CardTitle>
+              </div>
+              <p className="mt-1 text-sm text-muted-foreground md:text-base">
+                Your portfolio is empty. Here is how to get started.
+              </p>
+            </CardHeader>
+            <CardContent className="px-4 pb-5 md:px-6 md:pb-6">
+              <div className="grid gap-3 md:grid-cols-3 md:gap-4">
+                <div className="flex flex-col gap-3 rounded-lg border bg-background p-4">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                    <Search className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-sm font-semibold md:text-base">Browse live vaults</h3>
+                    <p className="mt-1 text-xs text-muted-foreground md:text-sm">
+                      Explore curated startup deals, each with pre-negotiated terms and a full KIIS document.
+                    </p>
+                  </div>
+                  <Button size="sm" asChild>
+                    <Link to="/explore">Browse Vaults</Link>
                   </Button>
                 </div>
-              </CardHeader>
-              <CardContent className="space-y-2 px-4 md:space-y-3 md:px-6">
-                {positions.map(pos => {
-                  const pnl = pos.current_estimated_value_eur - pos.invested_eur;
-                  const pnlPercent = (pnl / pos.invested_eur) * 100;
-                  return (
-                    <Link key={pos.id} to={`/pool/${pos.pool_id}`} className="block">
-                      <div className="flex items-center justify-between gap-3 rounded-lg border p-2.5 transition-colors hover:bg-muted/50 md:p-3">
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-medium md:text-base">{pos.deal.startup_name}</p>
-                          <p className="truncate text-[10px] text-muted-foreground md:text-xs">
-                            {pos.deal.industry} • {pos.deal.country}
-                          </p>
-                        </div>
-                        <div className="shrink-0 text-right">
-                          <p className="text-sm font-medium md:text-base">{formatCurrency(pos.current_estimated_value_eur, false)}</p>
-                          <p className={`text-[10px] font-medium md:text-xs ${pnl >= 0 ? 'text-success' : 'text-destructive'}`}>
-                            {pnl >= 0 ? '+' : ''}{formatCurrency(pnl, false)} ({pnl >= 0 ? '+' : ''}{formatPercent(pnlPercent, 1)})
-                          </p>
-                        </div>
+
+                <div className="flex flex-col gap-3 rounded-lg border bg-background p-4">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
+                    <ShieldCheck className="h-5 w-5 text-accent-foreground" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-sm font-semibold md:text-base">Complete your profile</h3>
+                    <p className="mt-1 text-xs text-muted-foreground md:text-sm">
+                      Make sure your investor profile and knowledge assessment are up to date.
+                    </p>
+                  </div>
+                  <Button size="sm" variant="outline" asChild>
+                    <Link to="/profile">My Profile</Link>
+                  </Button>
+                </div>
+
+                <div className="flex flex-col gap-3 rounded-lg border bg-background p-4">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-success/10">
+                    <Wallet className="h-5 w-5 text-success" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-sm font-semibold md:text-base">Fund your wallet</h3>
+                    <p className="mt-1 text-xs text-muted-foreground md:text-sm">
+                      Add funds to your wallet to invest. Minimum investment is €100.
+                    </p>
+                  </div>
+                  <Button size="sm" variant="outline" onClick={() => setIsDepositOpen(true)}>
+                    Add Funds
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.section>
+      ) : (
+      <div className="grid gap-4 md:gap-6 lg:grid-cols-2">
+        {/* Portfolio Performance */}
+        <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} variants={fadeUp} custom={sectionIndex++}>
+          <Card>
+            <CardHeader className="px-4 pb-2 pt-4 md:px-6 md:pb-3 md:pt-6">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base md:text-lg">Portfolio Performance</CardTitle>
+                <Button variant="ghost" size="sm" className="h-7 text-xs md:h-9 md:text-sm" asChild>
+                  <Link to="/portfolio">View All</Link>
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-2 px-4 md:space-y-3 md:px-6">
+              {positions.map(pos => {
+                const pnl = pos.current_estimated_value_eur - pos.invested_eur;
+                const pnlPercent = (pnl / pos.invested_eur) * 100;
+                return (
+                  <Link key={pos.id} to={`/pool/${pos.pool_id}`} className="block">
+                    <div className="flex items-center justify-between gap-3 rounded-lg border p-2.5 transition-colors hover:bg-muted/50 md:p-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium md:text-base">{pos.deal.startup_name}</p>
+                        <p className="truncate text-[10px] text-muted-foreground md:text-xs">
+                          {pos.deal.industry} • {pos.deal.country}
+                        </p>
                       </div>
-                    </Link>
-                  );
-                })}
-              </CardContent>
-            </Card>
-          </motion.section>
-        )}
+                      <div className="shrink-0 text-right">
+                        <p className="text-sm font-medium md:text-base">{formatCurrency(pos.current_estimated_value_eur, false)}</p>
+                        <p className={`text-[10px] font-medium md:text-xs ${pnl >= 0 ? 'text-success' : 'text-destructive'}`}>
+                          {pnl >= 0 ? '+' : ''}{formatCurrency(pnl, false)} ({pnl >= 0 ? '+' : ''}{formatPercent(pnlPercent, 1)})
+                        </p>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </CardContent>
+          </Card>
+        </motion.section>
 
         {/* Company Updates Feed */}
         {companyUpdates.length > 0 && (
@@ -261,6 +348,7 @@ const DashboardPage = () => {
           </motion.section>
         )}
       </div>
+      )}
 
       {/* Marketplace Activity */}
       {(myListings.length > 0 || myPendingOffers.length > 0) && (
@@ -375,6 +463,36 @@ const DashboardPage = () => {
           </CardContent>
         </Card>
       </motion.section>
+
+      {/* Deposit Dialog (used by empty-state Add Funds) */}
+      <Dialog open={isDepositOpen} onOpenChange={setIsDepositOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Deposit Funds</DialogTitle>
+            <DialogDescription>Add money to your VaultCapital wallet (simulated).</DialogDescription>
+          </DialogHeader>
+          <div className="py-2">
+            <div className="space-y-2">
+              <Label htmlFor="dash-deposit-amount">Amount (EUR)</Label>
+              <Input
+                id="dash-deposit-amount"
+                type="number"
+                placeholder="e.g. 1000"
+                value={depositAmount}
+                onChange={(e) => setDepositAmount(e.target.value)}
+                min={1}
+                step={100}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDepositOpen(false)}>Cancel</Button>
+            <Button onClick={handleDeposit} disabled={isProcessing}>
+              {isProcessing ? 'Processing...' : 'Deposit'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
