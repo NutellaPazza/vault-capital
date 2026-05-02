@@ -119,7 +119,14 @@ const PortfolioPage = () => {
   const unrealizedGain = totalValue - totalInvested;
   const unrealizedPercent = totalInvested > 0 ? (unrealizedGain / totalInvested) * 100 : 0;
 
-  // MoM delta (illustrative: from last two points of mock series)
+  // Value-over-time series anchored to real numbers
+  const portfolioValueData = useMemo(
+    () => buildValueSeries(totalInvested, totalValue),
+    [totalInvested, totalValue]
+  );
+
+  // MoM delta — derived from the synthetic series (same source as the chart),
+  // so the hero badge and the chart agree.
   const lastMonth = portfolioValueData[portfolioValueData.length - 2]?.value ?? totalValue;
   const momAbs = totalValue - lastMonth;
   const momPct = lastMonth > 0 ? (momAbs / lastMonth) * 100 : 0;
