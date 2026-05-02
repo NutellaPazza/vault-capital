@@ -1241,6 +1241,88 @@ const PortfolioPage = () => {
               </CardContent>
             </Card>
           </motion.div>
+
+          {/* ============ WHAT-IF SIMULATOR (secondary tool, lower in the page) ============ */}
+          {whatIf.listableCount > 0 && (
+            <motion.div
+              className="mt-4 md:mt-6"
+              initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }}
+              variants={fadeUp} custom={sectionIndex++}
+            >
+              <Card className="overflow-hidden border-dashed">
+                <CardHeader className="px-4 pb-2 pt-4 md:px-6 md:pb-3 md:pt-6">
+                  <CardTitle className="flex items-center gap-2 text-sm md:text-base">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    What-if simulator
+                    <IllustrativeTag />
+                  </CardTitle>
+                  <p className="text-[11px] text-muted-foreground md:text-xs">
+                    Optional tool. Simulate a partial exit on the Resale Board.
+                  </p>
+                </CardHeader>
+                <CardContent className="px-4 pb-4 md:px-6 md:pb-6">
+                  <div className="grid gap-4 md:grid-cols-5 md:gap-6">
+                    <div className="md:col-span-2">
+                      <p className="mb-2 text-xs text-muted-foreground md:text-sm">
+                        If you sold this share of your{' '}
+                        <span className="font-medium text-foreground">{whatIf.listableCount}</span> listable position{whatIf.listableCount > 1 ? 's' : ''}:
+                      </p>
+                      <div className="flex items-center gap-3">
+                        <Slider
+                          value={[whatIfPct]}
+                          onValueChange={([v]) => setWhatIfPct(v)}
+                          min={0} max={100} step={5}
+                          className="flex-1"
+                        />
+                        <div className="flex h-9 w-16 shrink-0 items-center justify-center rounded-md border bg-muted/50 text-sm font-bold tabular-nums">
+                          {whatIfPct}%
+                        </div>
+                      </div>
+                      <div className="mt-2 flex justify-between text-[10px] text-muted-foreground">
+                        <span>Hold</span>
+                        <span>Half</span>
+                        <span>Sell all</span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 md:col-span-3 md:grid-cols-4">
+                      <div className="rounded-lg border p-2.5 md:p-3">
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground md:text-[11px]">Sold value</p>
+                        <p className="mt-1 text-sm font-bold tabular-nums md:text-base">{formatCompactCurrency(whatIf.sellValue)}</p>
+                      </div>
+                      <div className="rounded-lg border p-2.5 md:p-3">
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground md:text-[11px]">Gross P&L</p>
+                        <p className={`mt-1 text-sm font-bold tabular-nums md:text-base ${whatIf.grossPnl >= 0 ? 'text-success' : 'text-destructive'}`}>
+                          {whatIf.grossPnl >= 0 ? '+' : ''}{formatCompactCurrency(whatIf.grossPnl)}
+                        </p>
+                      </div>
+                      <div className="rounded-lg border p-2.5 md:p-3">
+                        <p className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-muted-foreground md:text-[11px]">
+                          <Percent className="h-2.5 w-2.5" /> Carry (2%)
+                        </p>
+                        <p className="mt-1 text-sm font-bold tabular-nums text-muted-foreground md:text-base">
+                          -{formatCompactCurrency(whatIf.carry)}
+                        </p>
+                      </div>
+                      <div className="rounded-lg border-2 border-primary/30 bg-primary/5 p-2.5 md:p-3">
+                        <p className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-primary md:text-[11px]">
+                          <Wallet className="h-2.5 w-2.5" /> Net cash
+                        </p>
+                        <p className="mt-1 text-sm font-bold tabular-nums text-primary md:text-base">
+                          {formatCompactCurrency(whatIf.netCash)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="mt-3 text-[10px] text-muted-foreground md:text-xs">
+                    Simulation assumes listings sell at current estimated value. Actual outcomes depend on buyer demand on the Resale Board.
+                    Remaining portfolio value: <span className="font-medium text-foreground">{formatCompactCurrency(whatIf.remainingValue)}</span>.
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
         </>
       ) : (
         <Card>
