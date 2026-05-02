@@ -883,7 +883,7 @@ const PortfolioPage = () => {
             </Card>
           </motion.div>
 
-          {/* What-if simulator moved below — see after P&L summary */}
+          
 
           {/* ============ 4. POSITIONS WITH FILTERS + 6. ACTIVITY SIDEBAR ============ */}
           <motion.div
