@@ -31,15 +31,26 @@ import {
 } from 'recharts';
 import { motion } from 'framer-motion';
 
-// Mock value-over-time series (kept illustrative)
-const portfolioValueData = [
-  { month: 'Sep', value: 10000 },
-  { month: 'Oct', value: 10200 },
-  { month: 'Nov', value: 10800 },
-  { month: 'Dec', value: 11100 },
-  { month: 'Jan', value: 11900 },
-  { month: 'Feb', value: 12500 },
-];
+// Build a synthetic value-over-time series anchored on the user's actual
+// invested amount (start) and current estimated value (end). Keeps the
+// hero sparkline and the "Portfolio overview" chart consistent with the
+// real numbers shown elsewhere on the page.
+const buildValueSeries = (invested: number, currentValue: number) => {
+  const months = ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb'];
+  const start = invested > 0 ? invested : currentValue;
+  const end = currentValue > 0 ? currentValue : invested;
+  if (start === 0 && end === 0) {
+    return months.map(m => ({ month: m, value: 0 }));
+  }
+  // Smooth interpolation with a tiny deterministic wobble so the line
+  // doesn't look perfectly straight. No randomness — stays stable.
+  const wobble = [0, 0.012, -0.008, 0.018, -0.006, 0];
+  return months.map((m, i) => {
+    const t = i / (months.length - 1);
+    const base = start + (end - start) * t;
+    return { month: m, value: Math.round(base * (1 + wobble[i])) };
+  });
+};
 
 const DONUT_COLORS = [
   'hsl(24, 90%, 55%)',
