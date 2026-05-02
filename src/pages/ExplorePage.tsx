@@ -148,7 +148,7 @@ const ExplorePage = () => {
     setTargetRange(null);
     setAcceleratorOnly(false);
     setSearch('');
-    setSortBy('');
+    setSortBy('ending_soon');
   };
 
   const hasFilters = activeFilterCount > 0 || search;
