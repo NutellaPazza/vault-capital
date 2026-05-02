@@ -28,11 +28,30 @@ const fadeUp = {
 };
 
 const DashboardPage = () => {
-  const { 
-    currentUser, getLivePools, getUpcomingPools, getPositionsWithPools, 
-    notifications, deals, listings, offers, pools 
+  const {
+    currentUser, getLivePools, getUpcomingPools, getPositionsWithPools,
+    notifications, deals, listings, offers, pools, deposit,
   } = useAppStore();
-  
+
+  const [isDepositOpen, setIsDepositOpen] = useState(false);
+  const [depositAmount, setDepositAmount] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handleDeposit = async () => {
+    const amount = parseFloat(depositAmount);
+    if (isNaN(amount) || amount <= 0) {
+      toast({ title: 'Invalid amount', description: 'Enter a valid amount greater than 0.', variant: 'destructive' });
+      return;
+    }
+    setIsProcessing(true);
+    await new Promise(r => setTimeout(r, 600));
+    deposit(amount);
+    toast({ title: 'Deposit successful', description: `${formatCurrency(amount)} added to your wallet.` });
+    setIsDepositOpen(false);
+    setDepositAmount('');
+    setIsProcessing(false);
+  };
+
   const livePools = getLivePools();
   const upcomingPools = getUpcomingPools();
   const positions = getPositionsWithPools();
