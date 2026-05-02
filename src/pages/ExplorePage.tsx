@@ -362,6 +362,28 @@ const ExplorePage = () => {
         </CardContent>
       </Card>
 
+      {/* Count + Clear all bar */}
+      <div className="mb-3 flex items-center justify-between gap-3 md:mb-4">
+        <p className="text-xs text-muted-foreground md:text-sm">
+          Showing <span className="font-semibold text-foreground">{poolsWithDeals.length}</span>{' '}
+          {poolsWithDeals.length === 1 ? 'vault' : 'vaults'}
+        </p>
+        {hasFilters && (
+          <Button variant="ghost" size="sm" className="h-7 gap-1 text-xs" onClick={clearFilters}>
+            <X className="h-3.5 w-3.5" /> Clear all filters
+          </Button>
+        )}
+      </div>
+
+      {/* No-live banner: when overall (unfiltered) live count is 0 */}
+      {pools.filter(p => p.pool_status === 'live').length === 0 && (
+        <Card className="mb-4 border-primary/20 bg-primary/5">
+          <CardContent className="p-4 text-sm text-muted-foreground md:text-base">
+            No live vaults right now. Check back soon or browse upcoming vaults below.
+          </CardContent>
+        </Card>
+      )}
+
       {/* Pool Grid */}
       {poolsWithDeals.length > 0 ? (
         <motion.div
@@ -370,35 +392,59 @@ const ExplorePage = () => {
           animate="visible"
           variants={{ visible: { transition: { staggerChildren: 0.07 } } }}
         >
-          {poolsWithDeals.map((pool, i) => pool && (
+          {poolsWithDeals.map((pool) => pool && (
             <motion.div
               key={pool.id}
+              className="relative"
               variants={{
                 hidden: { opacity: 0, y: 16 },
                 visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] as const } },
               }}
             >
+              {isNewPool(pool.start_datetime) && (
+                <span className="pointer-events-none absolute right-2 top-2 z-10 rounded-full bg-success px-2 py-0.5 text-[10px] font-semibold text-success-foreground shadow-sm">
+                  NEW
+                </span>
+              )}
               <PoolCard pool={pool} />
             </motion.div>
           ))}
         </motion.div>
       ) : (
         <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <Search className="mb-4 h-12 w-12 text-muted-foreground" />
-            <h3 className="mb-2 font-semibold">No vaults found</h3>
-            <p className="text-center text-sm text-muted-foreground">
-              {hasFilters 
-                ? 'Try adjusting your filters or search terms' 
-                : 'Check back soon for new investment opportunities'}
+          <CardContent className="flex flex-col items-center justify-center py-16">
+            <Search className="mb-4 h-12 w-12 text-muted-foreground" strokeWidth={1.5} />
+            <h3 className="mb-2 text-base font-semibold md:text-lg">No vaults match your filters</h3>
+            <p className="max-w-md text-center text-sm text-muted-foreground">
+              Try adjusting the filters or clearing them to see all live vaults.
             </p>
             {hasFilters && (
-              <Button variant="outline" className="mt-4" onClick={clearFilters}>
-                Clear Filters
+              <Button className="mt-5" onClick={clearFilters}>
+                Clear all filters
               </Button>
             )}
           </CardContent>
         </Card>
+      )}
+
+      {/* Upcoming section when no live vaults exist at all */}
+      {pools.filter(p => p.pool_status === 'live').length === 0 && (
+        (() => {
+          const upcoming = pools
+            .map(p => ({ ...p, deal: deals.find(d => d.id === p.deal_id) }))
+            .filter((p): p is typeof p & { deal: NonNullable<typeof p.deal> } => p.pool_status === 'upcoming' && !!p.deal);
+          if (upcoming.length === 0) return null;
+          return (
+            <section className="mt-8">
+              <h2 className="mb-3 text-lg font-semibold md:mb-4 md:text-xl">Upcoming Vaults</h2>
+              <div className="grid gap-3 sm:grid-cols-2 md:gap-6 lg:grid-cols-3">
+                {upcoming.map(pool => (
+                  <PoolCard key={pool.id} pool={pool} />
+                ))}
+              </div>
+            </section>
+          );
+        })()
       )}
     </div>
   );
