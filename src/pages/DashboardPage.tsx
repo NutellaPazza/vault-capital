@@ -1,13 +1,20 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+} from '@/components/ui/dialog';
 import { PoolCard, CountdownTimer } from '@/components/common';
 import { useAppStore } from '@/store/appStore';
 import { formatCurrency, formatCompactCurrency, formatPercent, formatDate } from '@/lib/formatters';
-import { 
-  Wallet, TrendingUp, PieChart, ArrowRight, Clock, 
-  Newspaper, Store, BarChart3 
+import { toast } from '@/hooks/use-toast';
+import {
+  Wallet, TrendingUp, PieChart, ArrowRight, Clock,
+  Newspaper, Store, BarChart3, Search, ShieldCheck, Sparkles,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
