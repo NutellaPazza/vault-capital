@@ -45,6 +45,12 @@ const TARGET_RANGES = [
 
 type SortOption = 'most_funded' | 'ending_soon' | 'newest' | 'lowest_ticket';
 
+const NEW_VAULT_DAYS = 7;
+const isNewPool = (startIso: string) => {
+  const ageMs = Date.now() - new Date(startIso).getTime();
+  return ageMs >= 0 && ageMs <= NEW_VAULT_DAYS * 24 * 60 * 60 * 1000;
+};
+
 const ExplorePage = () => {
   const { pools, deals } = useAppStore();
   const [search, setSearch] = useState('');
@@ -55,7 +61,7 @@ const ExplorePage = () => {
   const [ticketRange, setTicketRange] = useState<number | null>(null);
   const [targetRange, setTargetRange] = useState<number | null>(null);
   const [acceleratorOnly, setAcceleratorOnly] = useState(false);
-  const [sortBy, setSortBy] = useState<SortOption | ''>('');
+  const [sortBy, setSortBy] = useState<SortOption>('ending_soon');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   const activeFilterCount = stageFilters.length + statusFilters.length + countryFilters.length + sectorFilters.length
