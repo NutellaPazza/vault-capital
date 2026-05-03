@@ -222,7 +222,7 @@ const ApplyPage = () => {
   };
 
   if (submittedAppId) {
-    return <ApplicationSuccess applicationId={submittedAppId} onBackHome={() => navigate('/')} />;
+    return <ApplicationSuccess applicationId={submittedAppId} contactEmail={formData.contact_email} onBackHome={() => navigate('/')} />;
   }
 
   const progress = ((currentStep + 1) / STEPS.length) * 100;

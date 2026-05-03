@@ -5,6 +5,7 @@ import HowItWorks from '@/components/landing/HowItWorks';
 import ReturnSimulator from '@/components/landing/ReturnSimulator';
 import StartupCta from '@/components/landing/StartupCta';
 import RiskDisclaimer from '@/components/landing/RiskDisclaimer';
+import SocialProof from '@/components/landing/SocialProof';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   Users, FileText, Network, Tag, Receipt,
@@ -84,6 +85,7 @@ const LandingPage = () => {
         </div>
       </section>
 
+      <SocialProof />
       <HowItWorks />
       <ReturnSimulator />
 
