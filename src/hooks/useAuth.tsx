@@ -51,11 +51,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const loadProfile = async (userId: string) => {
-    const [{ data: profile }, { data: roles }, { data: dbDeals }, { data: dbPools }] = await Promise.all([
+    const [
+      { data: profile },
+      { data: roles },
+      { data: dbDeals },
+      { data: dbPools },
+      { data: dbPositions },
+      { data: dbTx },
+      { data: dbNotifs },
+    ] = await Promise.all([
       supabase.from('profiles').select('*').eq('user_id', userId).maybeSingle(),
       supabase.from('user_roles').select('role').eq('user_id', userId),
       supabase.from('deals').select('*'),
       supabase.from('pools').select('*'),
+      supabase.from('positions').select('*').eq('user_id', userId),
+      supabase.from('transactions').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
+      supabase.from('notifications').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
     ]);
 
     if (!profile) return;
@@ -102,17 +113,48 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       pool_status: p.pool_status,
     }));
 
+    const mappedPositions = (dbPositions || []).map((p: any) => ({
+      id: p.id,
+      user_id: p.user_id,
+      pool_id: p.pool_id,
+      invested_eur: Number(p.invested_eur),
+      ownership_percent_of_spv: Number(p.ownership_percent_of_spv),
+      current_estimated_value_eur: Number(p.current_estimated_value_eur),
+      lockup: p.lockup,
+      is_listed_on_market: p.is_listed_on_market,
+      created_at: p.created_at,
+    }));
+
+    const mappedTransactions = (dbTx || []).map((t: any) => ({
+      id: t.id,
+      user_id: t.user_id,
+      type: t.type,
+      amount_eur: Number(t.amount_eur),
+      timestamp: t.created_at,
+      meta: t.meta || {},
+    }));
+
+    const mappedNotifications = (dbNotifs || []).map((n: any) => ({
+      id: n.id,
+      user_id: n.user_id,
+      title: n.title,
+      message: n.message,
+      read: n.read,
+      created_at: n.created_at,
+      type: n.type,
+      link: n.link || undefined,
+    }));
+
     useAppStore.setState({
       isAuthenticated: true,
       isAdmin,
       demoMode: false,
-      // Real users: vaults from DB, no mock user data
       deals: mappedDeals,
       pools: mappedPools,
-      positions: [],
+      positions: mappedPositions,
       listings: [],
-      transactions: [],
-      notifications: [],
+      transactions: mappedTransactions,
+      notifications: mappedNotifications,
       offers: [],
       allUsers: [],
       toastedNotificationIds: [],

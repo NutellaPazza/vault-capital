@@ -524,6 +524,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      place_investment: {
+        Args: { _amount: number; _pool_id: string }
+        Returns: Json
+      }
     }
     Enums: {
       app_role: "admin" | "user"
