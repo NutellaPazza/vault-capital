@@ -255,8 +255,15 @@ export const useAppStore = create<AppState>()(
             timestamp,
             meta: { notes: 'Deposit' },
           };
-          // Persist to Supabase
-          supabase.from('profiles').update({ wallet_balance_eur: newBalance }).eq('user_id', state.currentUser.id).then(() => {});
+          if (!state.demoMode) {
+            supabase.from('profiles').update({ wallet_balance_eur: newBalance }).eq('user_id', state.currentUser.id).then(() => {});
+            (supabase.from('transactions') as any).insert({
+              user_id: state.currentUser.id,
+              type: 'deposit',
+              amount_eur: amount,
+              meta: { notes: 'Deposit' },
+            }).then(() => {});
+          }
           return {
             currentUser: { ...state.currentUser, wallet_balance_eur: newBalance },
             transactions: [newTransaction, ...state.transactions],
@@ -281,7 +288,15 @@ export const useAppStore = create<AppState>()(
             timestamp,
             meta: { notes: 'Withdrawal' },
           };
-          supabase.from('profiles').update({ wallet_balance_eur: newBalance }).eq('user_id', state.currentUser.id).then(() => {});
+          if (!state.demoMode) {
+            supabase.from('profiles').update({ wallet_balance_eur: newBalance }).eq('user_id', state.currentUser.id).then(() => {});
+            (supabase.from('transactions') as any).insert({
+              user_id: state.currentUser.id,
+              type: 'withdraw',
+              amount_eur: -amount,
+              meta: { notes: 'Withdrawal' },
+            }).then(() => {});
+          }
           return {
             currentUser: { ...state.currentUser, wallet_balance_eur: newBalance },
             transactions: [newTransaction, ...state.transactions],
@@ -306,6 +321,13 @@ export const useAppStore = create<AppState>()(
         const timestamp = new Date().toISOString();
         const deal = state.deals.find(d => d.id === pool.deal_id);
         
+        // Real backend call (fire-and-forget; optimistic update below)
+        if (!state.demoMode) {
+          (supabase.rpc as any)('place_investment', { _pool_id: poolId, _amount: amount }).then(({ error }: any) => {
+            if (error) console.error('place_investment failed', error);
+          });
+        }
+
         set(state => {
           if (!state.currentUser) return state;
           
