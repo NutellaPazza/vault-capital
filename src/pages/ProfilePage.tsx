@@ -4,14 +4,16 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useAppStore } from '@/store/appStore';
+import { useAuth } from '@/hooks/useAuth';
 import { User, LogOut, Shield, Bell } from 'lucide-react';
 
 const ProfilePage = () => {
   const navigate = useNavigate();
-  const { currentUser, logout, updateUserProfile } = useAppStore();
+  const { currentUser, updateUserProfile } = useAppStore();
+  const { signOut } = useAuth();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await signOut();
     navigate('/');
   };
 
