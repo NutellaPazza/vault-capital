@@ -23,6 +23,7 @@ import HowItWorksPage from "./pages/HowItWorksPage";
 import FaqPage from "./pages/FaqPage";
 import NotFound from "./pages/NotFound";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
+import TryDemoPage from "./pages/TryDemoPage";
 import { AuthProvider } from "@/hooks/useAuth";
 
 const queryClient = new QueryClient();
