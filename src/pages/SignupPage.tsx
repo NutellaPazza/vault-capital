@@ -381,20 +381,34 @@ const SignupPage = () => {
                   </p>
                   <RadioGroup
                     value={answers[i] || ''}
-                    onValueChange={(v) => setAnswers(prev => ({ ...prev, [i]: v }))}
+                    onValueChange={(v) => {
+                      if (answers[i]) return; // lock once answered
+                      setAnswers(prev => ({ ...prev, [i]: v }));
+                    }}
                     className="space-y-1.5"
                   >
-                    {q.options.map(opt => (
-                      <Label
-                        key={opt.value}
-                        htmlFor={`q${i}-${opt.value}`}
-                        className="flex cursor-pointer items-center gap-3 rounded-lg border p-3 text-sm font-normal hover:bg-muted/50 [&:has([data-state=checked])]:border-primary"
-                      >
-                        <RadioGroupItem id={`q${i}-${opt.value}`} value={opt.value} />
-                        <span>{opt.label}</span>
-                      </Label>
-                    ))}
+                    {q.options.map(opt => {
+                      const isLocked = !!answers[i];
+                      const isSelected = answers[i] === opt.value;
+                      return (
+                        <Label
+                          key={opt.value}
+                          htmlFor={`q${i}-${opt.value}`}
+                          className={`flex items-center gap-3 rounded-lg border p-3 text-sm font-normal [&:has([data-state=checked])]:border-primary ${
+                            isLocked
+                              ? `cursor-not-allowed ${isSelected ? 'opacity-100' : 'opacity-50'}`
+                              : 'cursor-pointer hover:bg-muted/50'
+                          }`}
+                        >
+                          <RadioGroupItem id={`q${i}-${opt.value}`} value={opt.value} disabled={isLocked} />
+                          <span>{opt.label}</span>
+                        </Label>
+                      );
+                    })}
                   </RadioGroup>
+                  {answers[i] && (
+                    <p className="text-xs text-muted-foreground pl-1">Answer locked.</p>
+                  )}
                 </div>
               ))}
 
