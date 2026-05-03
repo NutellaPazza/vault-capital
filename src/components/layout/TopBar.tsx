@@ -69,9 +69,11 @@ export const TopBar = () => {
           {/* Wallet Balance */}
           {currentUser &&
           <Link to="/wallet">
-              <Button variant="ghost" size="sm" className="gap-1.5">
+              <Button variant={currentUser.wallet_balance_eur > 0 ? 'ghost' : 'default'} size="sm" className="gap-1.5">
                 <Wallet className="h-4 w-4" />
-                <span className="font-medium">{formatCompactCurrency(currentUser.wallet_balance_eur)}</span>
+                <span className="font-medium">
+                  {currentUser.wallet_balance_eur > 0 ? formatCompactCurrency(currentUser.wallet_balance_eur) : 'Add funds'}
+                </span>
               </Button>
             </Link>
           }
