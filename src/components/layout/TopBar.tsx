@@ -155,14 +155,11 @@ export const TopBar = () => {
               <DropdownMenuItem asChild>
                 <Link to="/wallet">Wallet</Link>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={toggleAdmin}>
-                {isAdmin ? 'Exit Admin Mode' : 'Enable Admin Mode'}
-              </DropdownMenuItem>
-              {isAdmin &&
-              <DropdownMenuItem asChild>
+              {isAdmin && !demoMode && (
+                <DropdownMenuItem asChild>
                   <Link to="/admin">Admin Panel</Link>
                 </DropdownMenuItem>
-              }
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
