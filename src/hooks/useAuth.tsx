@@ -51,22 +51,64 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const loadProfile = async (userId: string) => {
-    const [{ data: profile }, { data: roles }] = await Promise.all([
+    const [{ data: profile }, { data: roles }, { data: dbDeals }, { data: dbPools }] = await Promise.all([
       supabase.from('profiles').select('*').eq('user_id', userId).maybeSingle(),
       supabase.from('user_roles').select('role').eq('user_id', userId),
+      supabase.from('deals').select('*'),
+      supabase.from('pools').select('*'),
     ]);
 
     if (!profile) return;
 
     const isAdmin = !!roles?.some(r => r.role === 'admin');
 
+    const mappedDeals = (dbDeals || []).map((d: any) => ({
+      id: d.id,
+      startup_name: d.startup_name,
+      industry: d.industry,
+      sector_type: d.sector_type,
+      country: d.country,
+      website_url: d.website_url || undefined,
+      stage: d.stage,
+      short_description: d.short_description,
+      long_description: d.long_description,
+      highlights: d.highlights || [],
+      risks: d.risks || [],
+      valuation_pre_money: Number(d.valuation_pre_money),
+      offer_target_eur: Number(d.offer_target_eur),
+      offer_equity_percent: Number(d.offer_equity_percent),
+      min_ticket_eur: Number(d.min_ticket_eur),
+      docs: d.docs || { pitch_deck_url: '', data_room_url: '' },
+      status: d.status,
+      logo_url: d.logo_url || undefined,
+      founders: d.founders || [],
+      accelerator: d.accelerator || undefined,
+      last_valuation_date: d.last_valuation_date || undefined,
+      last_valuation_note: d.last_valuation_note || undefined,
+      company_updates: d.company_updates || [],
+      exit_objectives: d.exit_objectives || [],
+    }));
+
+    const mappedPools = (dbPools || []).map((p: any) => ({
+      id: p.id,
+      deal_id: p.deal_id,
+      target_eur: Number(p.target_eur),
+      raised_eur: Number(p.raised_eur),
+      start_datetime: p.start_datetime,
+      end_datetime: p.end_datetime,
+      investors_count: p.investors_count,
+      fee_entry_percent: Number(p.fee_entry_percent),
+      fee_carry_percent: Number(p.fee_carry_percent),
+      pool_status: p.pool_status,
+    }));
+
     useAppStore.setState({
       isAuthenticated: true,
       isAdmin,
       demoMode: false,
-      // Clean slate: real users start with no mock data at all
-      deals: [],
-      pools: [],
+      // Real users: vaults from DB, no mock user data
+      deals: mappedDeals,
+      pools: mappedPools,
       positions: [],
       listings: [],
       transactions: [],
