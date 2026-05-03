@@ -7,7 +7,8 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
-import { useAppStore } from '@/store/appStore';
+import { supabase } from '@/integrations/supabase/client';
+import { lovable } from '@/integrations/lovable';
 import { toast } from '@/hooks/use-toast';
 import { InvestorType } from '@/types';
 import { KNOWLEDGE_TEST_LS_KEY } from '@/components/common/KnowledgeTestModal';
@@ -64,7 +65,6 @@ const TOTAL_STEPS = 4;
 
 const SignupPage = () => {
   const navigate = useNavigate();
-  const { signup, updateUserProfile } = useAppStore();
 
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
@@ -152,24 +152,60 @@ const SignupPage = () => {
 
   const handleSubmit = async () => {
     setIsLoading(true);
-    await new Promise(r => setTimeout(r, 400));
-    const success = signup(name, email, password);
-    if (success) {
-      updateUserProfile({
-        investor_type: investorType,
-        ...(investorType === 'non_sophisticated' && netWorth
-          ? { net_worth: parseFloat(netWorth) }
-          : {}),
-      });
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/dashboard`,
+        data: { name },
+      },
+    });
+    if (error || !data.user) {
+      setIsLoading(false);
       toast({
-        title: 'Account Created',
-        description: 'Welcome to VaultCapital. Start exploring opportunities.',
+        title: 'Signup Failed',
+        description: error?.message || 'Something went wrong.',
+        variant: 'destructive',
       });
-      navigate('/dashboard');
-    } else {
-      toast({ title: 'Signup Failed', description: 'Something went wrong.', variant: 'destructive' });
+      return;
     }
+
+    // Update profile with investor info (trigger already created the row)
+    if (data.user) {
+      await supabase
+        .from('profiles')
+        .update({
+          investor_type: investorType,
+          ...(investorType === 'non_sophisticated' && netWorth
+            ? { net_worth: parseFloat(netWorth) }
+            : {}),
+        })
+        .eq('user_id', data.user.id);
+    }
+
     setIsLoading(false);
+
+    if (!data.session) {
+      toast({
+        title: 'Check your email',
+        description: 'We sent you a confirmation link to activate your account.',
+      });
+      navigate('/login');
+    } else {
+      toast({ title: 'Account Created', description: 'Welcome to VaultCapital.' });
+      navigate('/dashboard');
+    }
+  };
+
+  const handleGoogle = async () => {
+    setIsLoading(true);
+    const result = await lovable.auth.signInWithOAuth('google', {
+      redirect_uri: window.location.origin + '/dashboard',
+    });
+    if (result.error) {
+      setIsLoading(false);
+      toast({ title: 'Google sign-up failed', description: String(result.error), variant: 'destructive' });
+    }
   };
 
   const stepTitles: Record<number, { title: string; subtitle?: string }> = {
