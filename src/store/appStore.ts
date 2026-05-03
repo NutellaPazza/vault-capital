@@ -216,6 +216,19 @@ export const useAppStore = create<AppState>()(
         set(state => {
           if (!state.currentUser) return state;
           const updatedUser = { ...state.currentUser, ...updates };
+          // Persist relevant profile fields to Supabase (best effort, async)
+          const dbUpdates: Record<string, any> = {};
+          if (updates.name !== undefined) dbUpdates.name = updates.name;
+          if (updates.risk_profile !== undefined) dbUpdates.risk_profile = updates.risk_profile;
+          if (updates.kyc_status !== undefined) dbUpdates.kyc_status = updates.kyc_status;
+          if (updates.wallet_balance_eur !== undefined) dbUpdates.wallet_balance_eur = updates.wallet_balance_eur;
+          if (updates.investor_type !== undefined) dbUpdates.investor_type = updates.investor_type;
+          if (updates.net_worth !== undefined) dbUpdates.net_worth = updates.net_worth;
+          if (updates.notification_preferences !== undefined) dbUpdates.notification_preferences = updates.notification_preferences;
+          if (updates.pool_interests !== undefined) dbUpdates.pool_interests = updates.pool_interests;
+          if (Object.keys(dbUpdates).length > 0) {
+            supabase.from('profiles').update(dbUpdates).eq('user_id', updatedUser.id).then(() => {});
+          }
           return {
             currentUser: updatedUser,
             allUsers: state.allUsers.map(u => u.id === updatedUser.id ? updatedUser : u),
@@ -228,6 +241,7 @@ export const useAppStore = create<AppState>()(
         const timestamp = new Date().toISOString();
         set(state => {
           if (!state.currentUser) return state;
+          const newBalance = state.currentUser.wallet_balance_eur + amount;
           const newTransaction: Transaction = {
             id: generateId(),
             user_id: state.currentUser.id,
@@ -236,11 +250,10 @@ export const useAppStore = create<AppState>()(
             timestamp,
             meta: { notes: 'Deposit' },
           };
+          // Persist to Supabase
+          supabase.from('profiles').update({ wallet_balance_eur: newBalance }).eq('user_id', state.currentUser.id).then(() => {});
           return {
-            currentUser: {
-              ...state.currentUser,
-              wallet_balance_eur: state.currentUser.wallet_balance_eur + amount,
-            },
+            currentUser: { ...state.currentUser, wallet_balance_eur: newBalance },
             transactions: [newTransaction, ...state.transactions],
           };
         });
@@ -254,6 +267,7 @@ export const useAppStore = create<AppState>()(
         const timestamp = new Date().toISOString();
         set(state => {
           if (!state.currentUser) return state;
+          const newBalance = state.currentUser.wallet_balance_eur - amount;
           const newTransaction: Transaction = {
             id: generateId(),
             user_id: state.currentUser.id,
@@ -262,11 +276,9 @@ export const useAppStore = create<AppState>()(
             timestamp,
             meta: { notes: 'Withdrawal' },
           };
+          supabase.from('profiles').update({ wallet_balance_eur: newBalance }).eq('user_id', state.currentUser.id).then(() => {});
           return {
-            currentUser: {
-              ...state.currentUser,
-              wallet_balance_eur: state.currentUser.wallet_balance_eur - amount,
-            },
+            currentUser: { ...state.currentUser, wallet_balance_eur: newBalance },
             transactions: [newTransaction, ...state.transactions],
           };
         });
