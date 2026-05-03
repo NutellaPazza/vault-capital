@@ -27,7 +27,7 @@ export const FormStepMaterials = ({ data, updateData, errors }: Props) => {
           />
           {errors.deck_url && <p className="text-sm text-destructive">{errors.deck_url}</p>}
           <p className="text-xs text-muted-foreground">
-            Link to your pitch deck (DocSend, Google Slides, Notion, etc.)
+            Accepted: Notion, Docsend, Google Drive, Dropbox links
           </p>
         </div>
 
