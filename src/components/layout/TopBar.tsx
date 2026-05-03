@@ -20,7 +20,8 @@ export const TopBar = () => {
     markNotificationRead,
     markAllNotificationsRead,
     isAdmin,
-    toggleAdmin
+    toggleAdmin,
+    demoMode
   } = useAppStore();
 
   const userNotifications = currentUser ?
