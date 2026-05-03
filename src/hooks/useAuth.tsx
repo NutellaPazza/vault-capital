@@ -51,11 +51,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const loadProfile = async (userId: string) => {
-    const [{ data: profile }, { data: roles }, { data: dbDeals }, { data: dbPools }] = await Promise.all([
+    const [
+      { data: profile },
+      { data: roles },
+      { data: dbDeals },
+      { data: dbPools },
+      { data: dbPositions },
+      { data: dbTx },
+      { data: dbNotifs },
+    ] = await Promise.all([
       supabase.from('profiles').select('*').eq('user_id', userId).maybeSingle(),
       supabase.from('user_roles').select('role').eq('user_id', userId),
       supabase.from('deals').select('*'),
       supabase.from('pools').select('*'),
+      supabase.from('positions').select('*').eq('user_id', userId),
+      supabase.from('transactions').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
+      supabase.from('notifications').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
     ]);
 
     if (!profile) return;
