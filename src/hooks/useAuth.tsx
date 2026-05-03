@@ -64,12 +64,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       isAuthenticated: true,
       isAdmin,
       demoMode: false,
-      // Clean slate: real users start with no mock positions/listings/transactions/notifications
+      // Clean slate: real users start with no mock data at all
+      deals: [],
+      pools: [],
       positions: [],
       listings: [],
       transactions: [],
       notifications: [],
       offers: [],
+      allUsers: [],
       toastedNotificationIds: [],
       currentUser: {
         id: profile.user_id,
