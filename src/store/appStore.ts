@@ -29,6 +29,7 @@ import {
   mockSellerUser3,
   initialOffers,
 } from '@/data/mockData';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AppState {
   // Auth
