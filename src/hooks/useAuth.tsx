@@ -63,6 +63,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     useAppStore.setState({
       isAuthenticated: true,
       isAdmin,
+      demoMode: false,
+      // Clean slate: real users start with no mock positions/listings/transactions/notifications
+      positions: [],
+      listings: [],
+      transactions: [],
+      notifications: [],
+      offers: [],
+      toastedNotificationIds: [],
       currentUser: {
         id: profile.user_id,
         name: profile.name,

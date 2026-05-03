@@ -36,6 +36,7 @@ interface AppState {
   isAuthenticated: boolean;
   isAdmin: boolean;
   currentUser: User | null;
+  demoMode: boolean;
   
   // Data
   deals: StartupDeal[];
@@ -55,6 +56,9 @@ interface AppState {
   logout: () => void;
   toggleAdmin: () => void;
   updateUserProfile: (updates: Partial<User>) => void;
+  enterDemoMode: () => void;
+  exitDemoMode: () => void;
+  clearUserData: () => void;
   
   // Actions - Wallet
   deposit: (amount: number) => void;
@@ -111,6 +115,7 @@ export const useAppStore = create<AppState>()(
       isAuthenticated: false,
       isAdmin: false,
       currentUser: null,
+      demoMode: false,
       deals: initialDeals,
       pools: initialPools,
       positions: initialPositions,
@@ -1092,6 +1097,7 @@ export const useAppStore = create<AppState>()(
           isAuthenticated: false,
           isAdmin: false,
           currentUser: null,
+          demoMode: false,
           deals: initialDeals,
           pools: initialPools,
           positions: initialPositions,
@@ -1101,6 +1107,60 @@ export const useAppStore = create<AppState>()(
           allUsers: [initialUser, mockSellerUser],
           applications: [],
           offers: initialOffers,
+          toastedNotificationIds: [],
+        });
+      },
+
+      enterDemoMode: () => {
+        const demoUser: User = {
+          ...initialUser,
+          id: 'demo-user',
+          name: 'Demo Investor',
+          email: 'demo@vaultcapital.app',
+        };
+        set({
+          isAuthenticated: true,
+          isAdmin: false,
+          demoMode: true,
+          currentUser: demoUser,
+          deals: initialDeals,
+          pools: initialPools,
+          positions: initialPositions.map(p => ({ ...p, user_id: p.user_id === initialUser.id ? demoUser.id : p.user_id })),
+          listings: initialListings,
+          transactions: initialTransactions.map(t => ({ ...t, user_id: t.user_id === initialUser.id ? demoUser.id : t.user_id })),
+          notifications: initialNotifications.map(n => ({ ...n, user_id: n.user_id === initialUser.id ? demoUser.id : n.user_id })),
+          allUsers: [demoUser, mockSellerUser, mockSellerUser3],
+          offers: initialOffers,
+          toastedNotificationIds: [],
+        });
+      },
+
+      exitDemoMode: () => {
+        set({
+          isAuthenticated: false,
+          isAdmin: false,
+          demoMode: false,
+          currentUser: null,
+          deals: initialDeals,
+          pools: initialPools,
+          positions: [],
+          listings: [],
+          transactions: [],
+          notifications: [],
+          allUsers: [],
+          offers: [],
+          toastedNotificationIds: [],
+        });
+      },
+
+      clearUserData: () => {
+        // Used after real login: wipe mock user-bound data so the new user has a clean slate
+        set({
+          positions: [],
+          listings: [],
+          transactions: [],
+          notifications: [],
+          offers: [],
           toastedNotificationIds: [],
         });
       },
@@ -1165,7 +1225,7 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: 'vaultcapital-storage',
-      version: 3,
+      version: 4,
       migrate: () => ({} as any),
     }
   )

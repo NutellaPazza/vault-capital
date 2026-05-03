@@ -52,12 +52,12 @@ from €100</span>
         {/* CTAs */}
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-center md:justify-start">
           <Button size="lg" asChild>
-            <Link to="/explore">
-              Explore Vaults <ArrowRight className="ml-2 h-4 w-4" />
+            <Link to="/signup">
+              Get Started <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
           <Button size="lg" variant="outline" asChild>
-            <Link to="/how-it-works">How It Works</Link>
+            <Link to="/try-demo">Try the Demo</Link>
           </Button>
         </div>
 
