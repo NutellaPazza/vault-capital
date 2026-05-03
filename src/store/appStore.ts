@@ -36,6 +36,7 @@ interface AppState {
   isAuthenticated: boolean;
   isAdmin: boolean;
   currentUser: User | null;
+  demoMode: boolean;
   
   // Data
   deals: StartupDeal[];
