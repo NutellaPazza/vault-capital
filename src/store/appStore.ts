@@ -227,7 +227,7 @@ export const useAppStore = create<AppState>()(
           if (updates.notification_preferences !== undefined) dbUpdates.notification_preferences = updates.notification_preferences;
           if (updates.pool_interests !== undefined) dbUpdates.pool_interests = updates.pool_interests;
           if (Object.keys(dbUpdates).length > 0) {
-            supabase.from('profiles').update(dbUpdates).eq('user_id', updatedUser.id).then(() => {});
+            (supabase.from('profiles') as any).update(dbUpdates).eq('user_id', updatedUser.id).then(() => {});
           }
           return {
             currentUser: updatedUser,
