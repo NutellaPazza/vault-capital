@@ -62,7 +62,7 @@ export const TopBar = () => {
             <span className="text-sm font-bold text-primary-foreground">VC</span>
           </div>
             <span className="text-lg font-semibold">VaultCapital</span>
-            <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0">Demo</Badge>
+            {demoMode && <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0">Demo</Badge>}
           </Link>
           
           <div className="flex items-center gap-1">
