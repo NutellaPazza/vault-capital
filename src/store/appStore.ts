@@ -1225,7 +1225,7 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: 'vaultcapital-storage',
-      version: 3,
+      version: 4,
       migrate: () => ({} as any),
     }
   )
