@@ -56,6 +56,9 @@ interface AppState {
   logout: () => void;
   toggleAdmin: () => void;
   updateUserProfile: (updates: Partial<User>) => void;
+  enterDemoMode: () => void;
+  exitDemoMode: () => void;
+  clearUserData: () => void;
   
   // Actions - Wallet
   deposit: (amount: number) => void;
