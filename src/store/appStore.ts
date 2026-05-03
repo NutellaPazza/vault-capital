@@ -115,6 +115,7 @@ export const useAppStore = create<AppState>()(
       isAuthenticated: false,
       isAdmin: false,
       currentUser: null,
+      demoMode: false,
       deals: initialDeals,
       pools: initialPools,
       positions: initialPositions,
