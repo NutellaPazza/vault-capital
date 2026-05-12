@@ -231,6 +231,7 @@ export const useAppStore = create<AppState>()(
           if (updates.net_worth !== undefined) dbUpdates.net_worth = updates.net_worth;
           if (updates.notification_preferences !== undefined) dbUpdates.notification_preferences = updates.notification_preferences;
           if (updates.pool_interests !== undefined) dbUpdates.pool_interests = updates.pool_interests;
+          if ((updates as any).onboarding_completed !== undefined) dbUpdates.onboarding_completed = (updates as any).onboarding_completed;
           if (Object.keys(dbUpdates).length > 0) {
             (supabase.from('profiles') as any).update(dbUpdates).eq('user_id', updatedUser.id).then(() => {});
           }

@@ -24,6 +24,7 @@ import FaqPage from "./pages/FaqPage";
 import NotFound from "./pages/NotFound";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import TryDemoPage from "./pages/TryDemoPage";
+import OnboardingPage from "./pages/OnboardingPage";
 import { AuthProvider } from "@/hooks/useAuth";
 
 const queryClient = new QueryClient();
@@ -39,6 +40,7 @@ const App = () => (
           <Route path="/apply" element={<ApplyPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/try-demo" element={<TryDemoPage />} />
+          <Route path="/onboarding" element={<OnboardingPage />} />
           <Route element={<AppLayout />}>
             <Route path="/" element={<LandingPage />} />
             <Route path="/about" element={<AboutPage />} />

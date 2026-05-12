@@ -170,6 +170,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         pool_interests: profile.pool_interests as any,
         investor_type: profile.investor_type as any,
         net_worth: profile.net_worth ? Number(profile.net_worth) : undefined,
+        onboarding_completed: (profile as any).onboarding_completed ?? false,
       },
     });
   };

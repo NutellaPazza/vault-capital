@@ -28,6 +28,7 @@ export interface User {
   };
   investor_type?: InvestorType;
   net_worth?: number;
+  onboarding_completed?: boolean;
 }
 
 export interface DealFounder {
