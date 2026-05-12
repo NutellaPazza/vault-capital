@@ -28,6 +28,18 @@ export const AppLayout = () => {
     return <Navigate to="/login" replace />;
   }
 
+  // Force onboarding for newly signed-up users (skip in demo mode)
+  if (
+    isAuthenticated &&
+    !demoMode &&
+    currentUser &&
+    !currentUser.onboarding_completed &&
+    !isPublicPage &&
+    location.pathname !== '/onboarding'
+  ) {
+    return <Navigate to="/onboarding" replace />;
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {demoMode && (
