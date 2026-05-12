@@ -9,7 +9,7 @@ import { FlaskConical, X } from 'lucide-react';
 
 export const AppLayout = () => {
   const location = useLocation();
-  const { isAuthenticated, demoMode, exitDemoMode } = useAppStore();
+  const { isAuthenticated, demoMode, exitDemoMode, currentUser } = useAppStore();
   const { loading } = useAuth();
   useNotificationToasts();
 
