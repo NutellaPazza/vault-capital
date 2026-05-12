@@ -339,6 +339,7 @@ export type Database = {
           name: string
           net_worth: number | null
           notification_preferences: Json
+          onboarding_completed: boolean
           pool_interests: Json
           risk_profile: Database["public"]["Enums"]["risk_profile_t"]
           updated_at: string
@@ -354,6 +355,7 @@ export type Database = {
           name?: string
           net_worth?: number | null
           notification_preferences?: Json
+          onboarding_completed?: boolean
           pool_interests?: Json
           risk_profile?: Database["public"]["Enums"]["risk_profile_t"]
           updated_at?: string
@@ -369,6 +371,7 @@ export type Database = {
           name?: string
           net_worth?: number | null
           notification_preferences?: Json
+          onboarding_completed?: boolean
           pool_interests?: Json
           risk_profile?: Database["public"]["Enums"]["risk_profile_t"]
           updated_at?: string
